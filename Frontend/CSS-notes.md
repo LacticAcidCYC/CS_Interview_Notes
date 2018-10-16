@@ -70,6 +70,83 @@ CSS:
 
 
 
+### 2. Loader Practice
+
+HTML:
+
+```html
+<div class="loader">
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+</div>
+```
+
+CSS:
+
+```css
+@keyframes loader {
+    from {
+        opacity: 1;
+        transform: scale(1, 1);
+    }
+
+    to {
+        opacity: 0.2;
+        transform: scale(0);
+    }
+}
+
+.loader {
+    display: flex;
+    justify-content: center;
+}
+
+.loader > div {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin: 3rem 0.2rem;
+    background: #8385aa;
+    border-radius: 50%;
+    animation: loader 0.6s ease-in-out infinite alternate;
+}
+
+.loader > div:nth-child(2) {
+    animation-delay: .15s;
+}
+
+.loader > div:nth-child(3) {
+    animation-delay: .3s;
+}
+
+.loader > div:nth-child(4) {
+    animation-delay: .45s;
+}
+```
+
+[jsfiddle](http://jsfiddle.net/LacticAcidCYC/dbcz0gxL)
+
+
+
+### 3. 
+
+HTML:
+
+```html
+
+```
+
+CSS:
+
+```css
+
+```
+
+
+
+
+
 ## Other Notes
 
 ## 1. repeat()

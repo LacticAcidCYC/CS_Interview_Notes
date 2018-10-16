@@ -1,12 +1,15 @@
 ## Linkedin OA
 
-### 1. Friend Circles
+### 1. Friend Circles (LeetCode 547)
 
 DFS/Union-Find
 
 (1) DFS
 
 ```c++
+// Time complexity: O(n^2)
+// Space complexity: O(n)
+
 // friend circles (DFS)
 int findCircleNum2(vector<vector<int>>& M) {
     if (M.empty()) return 0;
@@ -33,15 +36,14 @@ void dfs(int i,vector<vector<int>>& M, vector<bool> & visited) {
 }
 ```
 
-Time complexity: O(n^2)
-
-Space complexity: O(n)
-
 
 
 (2) Union-Find:
 
 ```c++
+// Time complexity: O(n^3)
+// Space complexity: O(n)
+
 // friend circles (UnionFind)
 // union by rank
 int findCircleNum(vector<vector<int>>& M) {
@@ -84,10 +86,6 @@ int find(int x, vector<int> &parent) {
 }
 ```
 
-Time complexity: O(n^3)
-
-Space complexity: O(n)
-
 
 
 ### 2. simple queries(binary search)
@@ -95,6 +93,9 @@ Space complexity: O(n)
 (1) binary search
 
 ```c++
+//Time Complexity: O(nlogn)
+// Space Complexity: O(1)
+
 // simple queries(binary search)
 // Return an array containing how many integers in nums1 are smaller than or equal to each integer in nums2
 vector<int> simpleQueries(vector<int> nums1, vector<int> nums2);
@@ -126,10 +127,6 @@ int bs(vector<int> v, int n) {
 }
 ```
 
-Time Complexity: O(nlogn)
-
-Space Complexity: O(1)
-
 
 
 ### 3. monsoon umbrella (coin change)
@@ -137,6 +134,9 @@ Space Complexity: O(1)
 (1) backtracking (early pruning(termination))
 
 ```c++
+// Time Complexity: O(len(coins)*amount) 
+// Space Complexity: O(amount)
+
 // backtrack
 int coinChange(vector<int>& coins, int amount) {
     if (amount == 0) return 0;
@@ -162,15 +162,14 @@ void backtrack(const vector<int>& coins, int amount, int index, int &min_cnt, in
 }
 ```
 
-Time Complexity: O(len(coins)*amount) 
-
-Space Complexity: O(amount)
-
 
 
 (2) dp
 
 ```c++
+// Time Complexity: O(MN) (M:amount, N:number of coins);
+// Space Complexity: O(M)
+
 // dp
 int coinChange2(vector<int>& coins, int amount) {
     int n = (int) coins.size();
@@ -187,10 +186,6 @@ int coinChange2(vector<int>& coins, int amount) {
 }
 ```
 
-Time Complexity: O(MN) (M:amount, N:number of coins);
-
-Space Complexity: O(M)
-
 
 
 Follow up:
@@ -204,6 +199,9 @@ Backtrack? Dp?
 Just like recursive Fibonacci
 
 ```c++
+// Time Complexity: 
+// Space Complexity: 
+
 int change(int amount, vector<int>& coins) {
     int n = coins.size();
     int cnt = 0;
@@ -224,13 +222,14 @@ void backtrack(int amount, vector<int> &coins, int index, int &cnt) {
 }
 ```
 
-Time Complexity: 
-
 
 
 (2) DP (bottom-up)
 
 ```c++
+// Time Complexity: O(MN) (M:amount, N:number of coins);
+// Space Complexity: O(M)
+
 int change(int amount, vector<int>& coins) {
     int n = coins.size();
     vector<int> dp(amount+1, 0);
@@ -244,13 +243,11 @@ int change(int amount, vector<int>& coins) {
 }
 ```
 
-Time Complexity: O(MN) (M:amount, N:number of coins);
-
-Space Complexity: O(M)
-
 
 
 ### LeetCode 279 Perfect Squares
+
+[reference](https://leetcode.com/problems/perfect-squares/discuss/71488/Summary-of-4-different-solutions-(BFS-DP-static-DP-and-mathematics))
 
 (1) backtrack
 
@@ -279,6 +276,7 @@ void backtrack(int &min_cnt, int number, int square, int cur_cnt) {
 (2) dp 
 
 ```c++
+// 1
 int numSquares(int n) {
     int s = (int) sqrt(n);
     vector<int> dp(n+1, n);
@@ -291,6 +289,40 @@ int numSquares(int n) {
     }
     return dp[n];
 }
+
+
+// 2
+class Solution {
+public:
+    int numSquares(int n) {
+        static vector<int> dp{0};
+        while(dp.size() <= n) {
+            int m = dp.size();
+            int cnt = INT_MAX;
+            for(int i=1; i*i<=m; i++) {
+                cnt = min(cnt, dp[m-i*i] + 1);
+            }
+            dp.push_back(cnt);
+        }
+        return dp[n];
+    }
+};
+
+// 3 using static to store the former results
+class Solution {
+public:
+    int numSquares(int n) {
+        static vector<int> dp{0};
+        int m = dp.size();
+        dp.resize(max(m,n+1), INT_MAX);
+        for(int i=1,j; (j=i*i)<=n; i++) {
+            for(int k = max(m,j); k<=n; k++) {
+                dp[k] = min(dp[k], dp[k-j] + 1);
+            }
+        }
+        return dp[n];
+    }
+};
 ```
 
 
@@ -298,12 +330,36 @@ int numSquares(int n) {
 (3) math
 
 ```c++
+// 1
+class Solution {
+public:
+    int numSquares(int n) {
+        for(int i=0; i*i<=n; ++i) {
+            for(int j=0; j*j<=n; ++j) {
+                int k = sqrt(n - i*i - j*j);
+                if(i*i + j*j + k*k == n)
+                    return !!i + !!j + !!k;
+            }
+        }
+        return 4;
+    }
+};
 
+// 2
+class Solution {
+public:
+    int numSquares(int n) {
+        while(n % 4 == 0) n /= 4;
+        if(n % 8 == 7) return 4;
+        for(int i=0; i*i<=n; ++i) {
+            int j = sqrt(n - i*i);
+            if(i*i + j*j == n)
+                return !!i + !!j;
+        }
+        return 3;
+    }
+};
 ```
-
-
-
-
 
 
 
