@@ -775,7 +775,7 @@ public:
 
 
 
-### 13. LeetCode 222 [Count Complete Tree Nodes](https://leetcode.com/problems/count-complete-tree-nodes/)
+## 13. LeetCode 222 [Count Complete Tree Nodes](https://leetcode.com/problems/count-complete-tree-nodes/)
 
 ```c++
 // Time Complexity: O((logn)^2)
