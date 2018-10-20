@@ -16,37 +16,37 @@ Cross-Site Request Forgery (CSRF) is an attack outlined in the [OWASP Top 10](ht
 
 ## 3. CSRF Attack Example
 
-(1) A user logged in the WebA and visit the pages on it. Simultaneously, WebA passed user's authentication and generate cookies in user's browser.
+### (1) A user logged in the WebA and visit the pages on it. Simultaneously, WebA passed user's authentication and generate cookies in user's browser.
 
-[pic1]: http://ww1.sinaimg.cn/large/691e2a69ly1fi5hfhg98qj20dh04ea9x.jpg
-
-
-
-(2) Now let’s say he happens to visit WebB.
-
-[pic2]: https://ws1.sinaimg.cn/large/691e2a69ly1fi5hiszzjij20ob04s0sp.jpg
+![pic1](http://ww1.sinaimg.cn/large/691e2a69ly1fi5hfhg98qj20dh04ea9x.jpg)
 
 
 
-(3)  It just so happens that this site is trying to attack people who uses WebA and has set up a CSRF attack on its site. For example, the attack will transfer $1,500.00 to account number 123456789. Somewhere on somemalicioussite.com, attackers have added this line of code:
+### (2) Now let’s say he happens to visit WebB.
+
+![pic2](https://ws1.sinaimg.cn/large/691e2a69ly1fi5hiszzjij20ob04s0sp.jpg)
+
+
+
+### (3)  It just so happens that this site is trying to attack people who uses WebA and has set up a CSRF attack on its site. For example, the attack will transfer $1,500.00 to account number 123456789. Somewhere on somemalicioussite.com, attackers have added this line of code:
 
 ```html
 <iframe src="//www.veracode.com/%3Ca%20href%3D"http://examplebank.com/app/transferFunds?amount=1500&destinationAccount=123456789">http://examplebank.com/app/transferFunds?amount=1500&destinationAccount=..." >
 ```
 
-[pic3]: https://ws1.sinaimg.cn/large/691e2a69ly1fi5hoctu0yj20oh06saa3.jpg
+![pic3](https://ws1.sinaimg.cn/large/691e2a69ly1fi5hoctu0yj20oh06saa3.jpg)
 
 
 
-(4) Upon loading that iframe, browser will send that request to WebA with the cookies generated in #1
+### (4) Upon loading that iframe, browser will send that request to WebA with the cookies generated in #1
 
-[pic 4]: https://ws1.sinaimg.cn/large/691e2a69ly1fi5iea3blrj20op08mmxb.jpg
+![pic4](https://ws1.sinaimg.cn/large/691e2a69ly1fi5iea3blrj20op08mmxb.jpg)
 
 
 
-(5) WebA now cannot figure out the where this request came from. Because the browser visited it with the cookie message for authentication the request will be processed and send $1,500.00 to account 123456789.
+### (5) WebA now cannot figure out the where this request came from. Because the browser visited it with the cookie message for authentication the request will be processed and send $1,500.00 to account 123456789.
 
-[pic 5]: https://ws1.sinaimg.cn/large/691e2a69ly1fi5ik7sfgzj20pr0ctt8z.jpg
+![pic5](https://ws1.sinaimg.cn/large/691e2a69ly1fi5ik7sfgzj20pr0ctt8z.jpg)
 
 
 
