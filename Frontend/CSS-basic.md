@@ -6,11 +6,11 @@
 
 Three things that control which css rule applies to a given html element:
 
-- *Specificity Calculations*
-- *Inheritance*
-- *The Cascade*
+- [*Specificity Calculations*](#specificity-calculations)
+- [*Inheritance*](#inheritance)
+- [*The Cascade*](#cascade)
 
-### Specificity Calculations
+### <span id="specificity-calculations">Specificity Calculations</span>
 
 Specificity is calculated by counting various components of your css and expressing them in a form (a,b,c,d):
 
@@ -32,7 +32,7 @@ More examples:
 - div#sidebar p: 2 elements, 1 id – (0,1,0,2)
 - div#sidebar p.bio: 2 elements, 1 class, 1 id – (0,1,1,2)
 
-### Inheritance
+### <span id="inheritance">Inheritance</span>
 
 Elements inherit styles from their parent container. If you set the body tag to use color: red then the text for all elements inside the body will also be red unless otherwise specified.
 
@@ -49,7 +49,7 @@ p {
 
 and your paragraph would then inherit both from it’s containing element.
 
-### The Cascade
+### <span id="cascade">The Cascade</span>
 
 At the highest level the cascade is what controls all css precedence and works as follows.
 
