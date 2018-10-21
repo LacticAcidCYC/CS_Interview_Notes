@@ -259,3 +259,287 @@ int roverMove(int size, vector<string> cmds) {
 }
 ```
 
+
+
+## 5. Simple Text Queries
+
+```c++
+// SimpleTextQueries
+vector<string> textQueries(vector<string> &sentences, vector<string> &phrases);
+vector<string> split(string &s);
+
+vector<string> split(string &s) {
+    vector<string> splited;
+    istringstream iss(s);
+    while (!iss.eof()) {
+        string x;
+        getline(iss, x, ' ');
+        splited.push_back(x);
+    }
+    return splited;
+}
+
+vector<string> textQueries(vector<string> &sentences, vector<string> &phrases) {
+    vector<string> ans;
+    vector<unordered_map<string, int>> maps;
+    
+    for (auto sentence : sentences) {
+        vector<string> splited = split(sentence);
+        unordered_map<string, int> wordcnts;
+        for (auto s : splited) {
+            wordcnts[s]++;
+        }
+        maps.push_back(wordcnts);
+    }
+    
+    for (auto p : phrases) {
+        int index = 0;
+        vector<string> words = split(p);
+        string output =  "";
+        for (auto m : maps) {
+            int min_cnt = INT_MAX;
+            for (auto word : words) {
+                if (m[word] == 0) {
+                    min_cnt = INT_MAX;
+                    break;
+                }
+                min_cnt = min(min_cnt, m[word]);
+            }
+            if (min_cnt != INT_MAX && min_cnt > 0) {
+                output += to_string(index) + " ";
+            }
+            index++;
+        }
+        if (output.length() == 0) {
+            ans.push_back("-1");
+        } else {
+            output.pop_back();
+            ans.push_back(output);
+        }
+    }
+    
+    return ans;
+}
+```
+
+
+
+## 6. Who's the closest
+
+```c++
+// who's the closest (map + binary search)
+vector<int> closest(string s, vector<int> indexes);
+
+vector<int> closest(string s, vector<int> indexes) {
+    vector<int> ans;
+    unordered_map<char, vector<int>> map;
+    
+    for (int i=0; i<s.length(); i++) {
+        map[s[i]].push_back(i);
+    }
+    
+    for (auto index : indexes) {
+        if (map[s[index]].size() == 1) {
+            ans.push_back(-1);
+        } else {
+            vector<int> v(map[s[index]].begin(), map[s[index]].end());
+            int left = 0, right = (int) v.size() - 1;
+            if (index == v[left]) {
+                ans.push_back(v[left+1]);
+                continue;
+            } else if (index == v[right]) {
+                ans.push_back(v[right-1]);
+                continue;
+            }
+            while (left <= right) {
+                int mid = left + (right - left) / 2;
+                if (v[mid] == index) {
+                    ans.push_back((v[mid] - v[mid-1]) <= (v[mid+1] - v[mid]) ? v[mid-1] : v[mid+1]);
+                    break;
+                } else if (v[mid] > index) {
+                    right = mid - 1;
+                } else {
+                    left = mid + 1;
+                }
+            }
+        }
+    }
+    
+    return ans;
+}
+```
+
+
+
+## 7. Image Matching
+
+LeetCode 694 Number of Distinct Island
+
+```c++
+// Image Matching (bfs/dfs)
+int countMatches(vector<vector<int>> &grid1, vector<vector<int>> &grid2);
+vector<pair<int, int>> getImage(int row, int col, vector<vector<int>> &grid);
+bool isMatch(vector<pair<int, int>> &image1, vector<pair<int, int>> &image2);
+
+int countMatches(vector<vector<int>> &grid1, vector<vector<int>> &grid2) {
+    int ans = 0;
+    
+    int r = (int) grid1.size();
+    int c = (int) grid1[0].size();
+    for (int i=0; i<r; i++) {
+        for (int j=0; j<c; j++) {
+            vector<pair<int, int>> image1 = getImage(i, j, grid1);
+            // cout << "size: " << image1.size() << endl;
+            vector<pair<int, int>> image2 = getImage(i, j, grid2);
+            
+            if (!image1.empty() && !image2.empty() && isMatch(image1, image2)) {
+                ans++;
+            }
+        }
+    }
+    return ans;
+}
+
+// bfs
+vector<pair<int, int>> getImage(int row, int col, vector<vector<int>> &grid) {
+    vector<pair<int, int>> image;
+    const vector<vector<int>> dirs{{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
+    
+    if (grid[row][col] == 1) {
+        queue<pair<int, int>> q;
+        q.push({row, col});
+        while (!q.empty()) {
+            pair<int, int> cur = q.front();
+            image.push_back(cur);
+            q.pop();
+            int i = cur.first;
+            int j = cur.second;
+            grid[i][j] = 0;
+            for (int k=0; k<4; k++) {
+                int ni = i + dirs[k][0];
+                int nj = j + dirs[k][1];
+                if (ni >=0 && ni < grid.size() && nj >= 0 && nj < grid[0].size() && grid[ni][nj] == 1) {
+                    q.push({ni, nj});
+                }
+            }
+        }
+    }
+    
+    return image;
+}
+
+// match two images
+bool isMatch(vector<pair<int, int>> &image1, vector<pair<int, int>> &image2) {
+    set<vector<pair<int, int>>> us;
+    sort(image1.begin(), image1.end());
+    sort(image2.begin(), image2.end());
+    us.insert(image1);
+    us.insert(image2);
+    return us.size() == 1;
+}
+```
+
+
+
+## 8. No pairs Allowed
+
+```c++
+vector<int> minimalOperations(vector<string> input);
+
+vector<int> minimalOperations(vector<string> input) {
+    vector<int> ans;
+    
+    for (auto s : input) {
+        int cnt = 0;
+        for (int i=0; i<s.length()-1;) {
+            if (s[i] == s[i+1]) {
+                int cur_dup = 2;
+                i++;
+                while (i < s.length()-1 && s[i+1] == s[i]) {
+                    i++;
+                    cur_dup++;
+                }
+                cnt += cur_dup / 2;
+            }
+            i++;
+        }
+        ans.push_back(cnt);
+    }
+    
+    return ans;
+}
+```
+
+
+
+## 9. Parenthesis
+
+LeetCode 20
+
+```c++
+bool isValid(string s) {
+    stack<char> st;
+    for (auto c : s) {
+        if (st.empty() || c == '(' || c == '[' || c == '{') {
+            st.push(c);
+        } else {
+            if (isMatch(st.top(), c)) {
+                st.pop();
+            } else {
+                return false;
+            } 
+        }
+    }
+    return st.empty();
+}
+
+bool isMatch(char a, char b) {
+    if (a == '(') {
+        return b == ')';
+    } else if (a == '[') {
+        return b == ']';
+    } else if (a == '{') {
+        return b == '}';
+    }
+    return false;
+}
+```
+
+
+
+## 10. Primes in Subtree
+
+```c++
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
