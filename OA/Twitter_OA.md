@@ -510,7 +510,146 @@ bool isMatch(char a, char b) {
 ## 10. Primes in Subtree
 
 ```c++
+// Primes in Subtree
+vector<int> primeQueries(int n, vector<int> starts, vector<int> ends, vector<int> values, vector<int> queries);
+bool isPrime(int x);
 
+vector<int> primeQueries(int n, vector<int> starts, vector<int> ends, vector<int> values, vector<int> queries) {
+    vector<int> ans;
+    vector<int> indexes(n);
+    vector<int> cnts(n);
+    
+    // initialize cnts
+    for (int i=0; i<values.size(); i++) {
+        cnts[i] = isPrime(values[i]) ? 1 : 0;
+    }
+    
+    // initialize indexes
+    for (int i=0; i<indexes.size(); i++) {
+        indexes[i] = i;
+    }
+    for (int i=0; i<starts.size(); i++) {
+        indexes[ends[i]-1] = starts[i]-1;
+    }
+    
+    // calculate primes in subtree
+    for (int i=0; i<cnts.size(); i++) {
+        int temp = i;
+        while (temp != indexes[temp]) {
+            temp = indexes[temp]; // get the parent of node[temp]
+            cnts[temp] += cnts[i];
+        }
+    }
+    
+    // queries
+    for (int i=0; i<queries.size(); i++) {
+        ans.push_back(cnts[queries[i]-1]);
+    }
+    
+    return ans;
+}
+
+bool isPrime(int x) {
+    if (x <= 3) return true;
+    if (x % 2 == 0) return false;
+    
+    for (int i=3; i*i<=x; i++) {
+        if (x % i == 0) return false;
+    }
+    
+    return true;
+}
+```
+
+
+
+```c++
+/*
+ * Complete the 'primeQuery' function below.
+ *
+ * The function is expected to return an INTEGER_ARRAY.
+ * The function accepts following parameters:
+ *  1. INTEGER n
+ *  2. INTEGER_ARRAY first
+ *  3. INTEGER_ARRAY second
+ *  4. INTEGER_ARRAY values
+ *  5. INTEGER_ARRAY queries
+ */
+
+// 3 test cases TLE
+bool isPrime(int x) {
+    if (x == 1) return false;
+    if (x <= 3) return true;
+    if (x % 2 == 0) return false;
+    for (int i=3; i*i<=x; i++) {
+        if (x % i == 0) return false;
+    }
+    return true;
+}
+
+vector<int> primeQuery(int n, vector<int> first, vector<int> second, vector<int> values, vector<int> queries) {
+    vector<int> ans;
+    vector<int> indexes(n);
+    unordered_map<int, set<int>> map;
+    vector<int> parents(n);
+    
+    for (int i=0; i<first.size(); i++) {
+        map[first[i]].insert(second[i]);
+        //map[second[i]].insert(first[i]);
+    }
+    
+    for (int i=0; i<n; i++) {
+        parents[i] = i;
+    }
+    
+    queue<int> q;
+    q.push(1);
+    while (!q.empty()) {
+        int parent = q.front();
+        q.pop();
+        
+        for (auto& pair : map) {
+            if (pair.first == parent) {
+                for (auto child : pair.second) {
+                    q.push(child);
+                    parents[child-1] = parent-1;
+                }
+            } else {
+                int isChild = false;
+                for (auto cand : pair.second) {
+                    if (cand == parent && (pair.first-1) != parents[cand-1]) {
+                        q.push(pair.first);
+                        parents[pair.first-1] = parent-1;
+                        isChild = true;
+                        break;
+                    }
+                }
+                if (isChild) {
+                    pair.second.erase(parent);
+                }
+            }
+        }
+    }    
+    
+    vector<int> cnts(n);
+    for (int i=0; i<n; i++) {
+        cnts[i] = isPrime(values[i]) ? 1 : 0; 
+    }
+    
+    for (int i=0; i<n; i++) {
+        int temp = i;
+        while (temp != parents[temp]) {
+            temp = parents[temp];
+            cnts[temp] += isPrime(values[i]) ? 1 : 0;
+        }
+    }
+    
+    for (auto i : queries) {
+        ans.push_back(cnts[i-1]);
+    }
+    
+    return ans;
+}
 ```
 
 
