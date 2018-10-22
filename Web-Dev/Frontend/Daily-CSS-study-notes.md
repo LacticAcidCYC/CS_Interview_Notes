@@ -1,6 +1,8 @@
 # Daily CSS Study Notes
 
-## Useful CSS Snippets
+## -Useful CSS Snippets
+
+[Learning Website](https://30-seconds.github.io/30-seconds-of-css/)
 
 ### 1. Bouncing loader
 
@@ -68,6 +70,24 @@ CSS:
 
 [jsfiddle](http://jsfiddle.net/LacticAcidCYC/ab8g3o2d/)
 
+#### Explanation
+
+**Note: `1rem` is usually `16px`.**
+
+(1) `@keyframes` defines an animation that has two states, where the element changes `opacity` and is translated up on the 2D plane using `transform: translateY()`.
+
+(2) `.bouncing-loader` is the parent container of the bouncing circles and uses `display: flex` and `justify-content: center` to position them in the center.
+
+(3) `.bouncing-loader > div`, targets the three child `div`s of the parent to be styled. The `div`s are given a width and height of `1rem`, using `border-radius: 50%` to turn them from squares to circles.
+
+(4) `margin: 3rem 0.2rem` specifies that each circle has a top/bottom margin of `3rem` and left/right margin of `0.2rem` so that they do not directly touch each other, giving them some breathing room.
+
+(5) `animation` is a shorthand property for the various animation properties: `animation-name`, `animation-duration`, `animation-iteration-count`, `animation-direction` are used.
+
+(6) `nth-child(n)` targets the element which is the nth child of its parent.
+
+(7) `animation-delay` is used on the second and third `div` respectively, so that each element does not start the animation at the same time.
+
 
 
 ### 2. Loader Practice
@@ -129,109 +149,131 @@ CSS:
 
 
 
-### 3. 
+### 3. Box-sizing reset
+
+Usage: Resets the box-model so that `width`s and `height`s are not affected by their `border` or `padding`.
 
 HTML:
 
 ```html
-
+<div class="box">border-box</div>
+<div class="box content-box">content-box</div>
 ```
 
 CSS:
 
 ```css
-
-```
-
-
-
-
-
-## Other Notes
-
-## 1. repeat()
-
-### *(1) Definition from MDN:*
-
-The `**repeat()**` [CSS](https://developer.mozilla.org/en-US/docs/Web/CSS) function represents a repeated fragment of the track list, allowing a large number of columns or rows that exhibit a recurring pattern to be written in a more compact form.
-
-This function can be used in the CSS Grid properties [`grid-template-columns`](https://developer.mozilla.org/en-US/docs/Web/CSS/grid-template-columns) and [`grid-template-rows`](https://developer.mozilla.org/en-US/docs/Web/CSS/grid-template-rows).
-
-### 
-
-### (2) Usage
-
-```css
-/*example*/
-ul {
-  display: grid;
-  /*grid-template-columns: 1fr 1fr 1fr 1fr;*/
-  grid-template-columns: repeat(4, 1fr);
-  grid-gap: 1rem;
+html {
+  box-sizing: border-box;
+}
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
 }
 
-/*others*/
-/* <track-repeat> values */
-repeat(4, 1fr)
-repeat(4, [col-start] 250px [col-end])
-repeat(4, [col-start] 60% [col-end])
-repeat(4, [col-start] 1fr [col-end])
-repeat(4, [col-start] min-content [col-end])
-repeat(4, [col-start] max-content [col-end])
-repeat(4, [col-start] auto [col-end])
-repeat(4, [col-start] minmax(100px, 1fr) [col-end])
-repeat(4, [col-start] fit-content(200px) [col-end])
-repeat(4, 10px [col-start] 30% [col-middle] auto [col-end])
-repeat(4, [col-start] min-content [col-middle] max-content [col-end])
+.box {
+  display: inline-block;
+  width: 150px;
+  height: 150px;
+  padding: 10px;
+  background: tomato;
+  color: white;
+  border: 10px solid red;
+}
 
-/* <auto-repeat> values */
-repeat(auto-fill, 250px)
-repeat(auto-fit, 250px)
-repeat(auto-fill, [col-start] 250px [col-end])
-repeat(auto-fit, [col-start] 250px [col-end])
-repeat(auto-fill, [col-start] minmax(100px, 1fr) [col-end])
-repeat(auto-fill, 10px [col-start] 30% [col-middle] 400px [col-end])
-
-/* <fixed-repeat> values */
-repeat(4, 250px)
-repeat(4, [col-start] 250px [col-end])
-repeat(4, [col-start] 60% [col-end])
-repeat(4, [col-start] minmax(100px, 1fr) [col-end])
-repeat(4, [col-start] fit-content(200px) [col-end])
-repeat(4, 10px [col-start] 30% [col-middle] 400px [col-end])
+.content-box {
+  box-sizing: content-box;
+}
 ```
 
+[codepen](https://codepen.io/lacticacidcyc/pen/JmBrpz)
+
+#### Explanation
+
+(1) `box-sizing: border-box` makes the addition of `padding` or `border`s not affect an element's `width` or `height`.
+
+(2) `box-sizing: inherit` makes an element respect its parent's `box-sizing` rule.
 
 
 
+### 4. Circle
 
-## 2. CSS grid
+Creates a circle shape with pure CSS.
 
-### (1) grid-template-columns & grid-template-rows
+HTML:
+
+```html
+<div class="circle"></div>
+```
+
+CSS:
 
 ```css
-grid-template-columns: none | <track-list> | <auto-track-list>
-grid-template-rows: none | <track-list> | <auto-track-list>
-
-I. <track-list>: [<line-names>? [ <track-size> | <track-repeat>]] + <line-names>?
-
-II. <track-size>:
-(1) <track-breadth>: CSS length | CSS percentage | fr | min-content | max-content | auto
-(2) minmax( <inflexible-breadth> , <track-breadth> )
-(3) fit-content ( <length-percentage> )
-
-III. <track-repeat>: repeat([ <positive-integer> ] , [ <line-name>? <track-size> ] + <line-names>?)
-
-IV. <line-names>: name the grid lines to make the grid code easier to understand.
-repeat(4, [col-start] min-content [col-middle] max-content [col-end])
-
-V. <auto-track-list>
-
+.circle {
+  background: tomato;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+}
 ```
 
+[codepen](https://codepen.io/lacticacidcyc/pen/NOBaJa)
+
+#### Explanation
+
+`border-radius: 50%` curves the borders of an element to create a circle.
+
+Since a circle has the same radius at any given point, the `width` and `height` must be the same. Differing values will create an ellipse.
 
 
 
+### 5. Clearfix
+
+Ensures that an element self-clears its children.
+
+**Especially when using Float to set a picture on the left or right side. If the text next to it is shorter than the picture, without clearfix would cause the problem that the elements below are also next to the floated picture in the same block context.**
+
+*Note: This is only useful if you are still using float to build layouts. Please consider using a modern approach with flexbox layout or grid layout.*
+
+HTML:
+
+```html
+<div class="clearfix">
+  <div class="floated">float a</div>
+  <div class="floated">float b</div>
+  <div class="floated">float c</div>
+</div>
+<div class="floated">float d</div>
+<div class="floated">float e</div>
+<div class="floated">float f</div>
+```
+
+CSS:
+
+```css
+.clearfix::after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
+.floated {
+  float: left;
+}
+```
+
+[codepen](https://codepen.io/lacticacidcyc/pen/mzjBNO)
+
+#### Explanation
+
+(1) `.clearfix::after` defines a pseudo-element.
+
+(2) `content: ''` allows the pseudo-element to affect layout.
+
+(3) `clear: both` indicates that the left, right or both sides of the element cannot be adjacent to earlier floated elements within the same block formatting context.
+
+####  
 
 
 
