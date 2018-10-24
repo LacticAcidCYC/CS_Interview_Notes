@@ -39,7 +39,7 @@ string minWindow(string s, string t) {
 
 
 
-## 2. LeetCode [Substring with Concatenation of All Words](https://leetcode.com/problems/substring-with-concatenation-of-all-words/)
+## 2. LeetCode 30 [Substring with Concatenation of All Words](https://leetcode.com/problems/substring-with-concatenation-of-all-words/)
 
 (1) two-map solution
 
@@ -225,9 +225,116 @@ public:
 
 
 
+## 5. LeetCode 683 [K Empty Slots](https://leetcode.com/problems/k-empty-slots/)
+
+```c++
+class Solution {
+public:
+    int kEmptySlots(vector<int>& flowers, int k) {
+        int len = flowers.size();
+        if (k > len-2) return -1;
+        vector<int> days(len);
+        for (int i=0; i<len; i++) {
+            days[flowers[i]-1] = i+1;
+        }
+        
+        int left = 0, right = k+1, i = 0, ans = INT_MAX;
+        while (right < len) {
+            if (days[i] < days[left] || days[i] <= days[right]) {
+                if (i == right) {
+                    ans = min(ans, max(days[left], days[right]));
+                }
+                left = i;
+                right = i + k + 1;
+            }
+            i++;
+        }
+        
+        return ans == INT_MAX ? -1 : ans;
+    }
+};
+```
 
 
-## 5. LeetCode 
+
+## 6. LeetCode 424
+
+### Explanation:
+
+`right-start+1` = size of the current window
+`maxChar` = largest count of a single, unique character in the current window
+
+The main equation is: `right-start+1-maxChar`
+
+When `right-start+1-maxChar` == 0, then then the window is filled with only one character
+When `right-start+1-maxChar` > 0, then we have characters in the window that are NOT the character that occurs the most.  `right-start+1-maxChar`is equal to exactly the # of characters that are NOT the character that occurs the most in that window. Example: For a window "xxxyz",  `right-start+1-maxChar` would equal 2. (maxChar is 3 and there are 2 characters here, "y" and "z" that are not "x" in the window.)
+
+We are allowed to have at most k replacements in the window, so when  `right-start+1-maxChar > k`, then there are more characters in the window than we can replace, and we need to shrink the window.
+
+If we have window with "xxxy" and k = 1, that's fine because  `right-start+1-maxChar` = 1, which is not > k. maxLength gets updated to 4.
+
+But if we then find a "z" after, like "xxxyz", then we need to shrink the window because now `right-start+1-maxChar`= 2, and 2 > 1. The window becomes "xxyz".
+
+**maxCount may be invalid at some points, but this doesn't matter, because it was valid earlier in the string, and all that matters is finding the max window that occurred anywhere in the string**. Additionally, it will expand **if and only if** enough repeating characters appear in the window to make it expand. So whenever it expands, it's a valid expansion.
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(1)
+class Solution {
+public:
+    int characterReplacement(string s, int k) {
+        int len = s.length();
+        if (len < 2 || len < k) return len;
+        vector<int> map(26);
+        int left = 0, right = 0, maxChar = 0;
+        while (right < len) {
+            if (map[s[right++]-'A']++ == maxChar) {
+                maxChar = map[s[right-1]-'A'];
+            }
+            if (right - left - maxChar > k) {
+                map[s[left++]-'A']--;
+            }
+        }
+        return right - left;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/longest-repeating-character-replacement/discuss/91271/Java-12-lines-O(n)-sliding-window-solution-with-explanation)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
