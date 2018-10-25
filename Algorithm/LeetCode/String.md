@@ -4,6 +4,22 @@
 
 ## 1. LeetCode 76 [Minimum Window Substring](https://leetcode.com/problems/minimum-window-substring/)
 
+### Explanation
+
+(1) Use two pointers to create a window of letters in **S**, which would have all the characters from **T**.
+
+(2) Since you have to find the minimum window in S which has all the characters from T, you need to expand and contract the window using the two pointers and keep checking the window for all the characters. This approach is also called Sliding Window Approach. 
+
+```latex
+L ------------------------ R , Suppose this is the window that contains all characters of T 
+                          
+        L----------------- R , this is the contracted window. We found a smaller window that still contains all the characters in T When the window is no longer valid, start expanding again using the right pointer.
+```
+
+
+
+### Solution
+
 ```c++
 // Time Complexity: O(n)
 // Space Complexity: O(1)
@@ -227,7 +243,14 @@ public:
 
 ## 5. LeetCode 683 [K Empty Slots](https://leetcode.com/problems/k-empty-slots/)
 
+### Explanation
+
+Use a window of length `k+2` to contain `k+2` slots.  Initially, set window's start position to 0, end position to k+1. Then, we check the slots from position 0, one by one. What we want is to check whether the flowers in the slots inside the window blossom later than the start slot and the end slot. If not, we need to move the window forward to i->i+k+1 (i is current visited position) because all flowers between start and i blossom later than start or end, while flower in position i blossom earlier than start or end, which means the window cannot be set between start and i. If i == end, it means the current window matches the requirement of there exists 2 flowers (start & end) in the status of blooming and the number of  flowers between them is k and they are not blooming. We update the ans now. Again, we reset the window in i->i+k+1.
+
 ```c++
+// Time Complexity: O(n)
+// Space Complexity: O(n)
+
 class Solution {
 public:
     int kEmptySlots(vector<int>& flowers, int k) {
@@ -259,7 +282,7 @@ public:
 
 ## 6. LeetCode 424
 
-### Explanation:
+### Explanation
 
 `right-start+1` = size of the current window
 `maxChar` = largest count of a single, unique character in the current window
@@ -303,6 +326,151 @@ public:
 [solution](https://leetcode.com/problems/longest-repeating-character-replacement/discuss/91271/Java-12-lines-O(n)-sliding-window-solution-with-explanation)
 
 
+
+## 7. LeetCode 340 [Longest Substring with At Most K Distinct Characters](https://leetcode.com/problems/longest-substring-with-at-most-k-distinct-characters/)
+
+-General version of LeetCode 159
+
+```c++
+class Solution {
+public:
+    int lengthOfLongestSubstringKDistinct(string s, int k) {
+        int len = s.length();
+        if (k >= len) return len;
+        unordered_map<char, int> map;
+        int left = 0, right = 0, maxLen = 0, cnt = 0;
+        while (right < len) {
+            if (map[s[right++]]++ == 0) {
+                cnt++;
+            }
+            while (cnt > k) {
+                if (map[s[left++]]-- == 1) {
+                    cnt--;
+                }
+            }
+            maxLen = max(maxLen, right-left);
+        }
+        return maxLen;
+    }
+};
+```
+
+
+
+## 8. LeetCode 727 
+
+### (1) Sliding Window
+
+```c++
+class Solution {
+public:
+    string minWindow(string S, string T) {
+        int len_S = S.length();
+        int len_T = T.length();
+        if (len_T > len_S) return "";
+        if (len_T == len_S) return S == T ? S : "";
+        
+        int ps = 0, pt = 0, begin = 0, minL = INT_MAX;
+        while (ps < len_S) {
+            if (S[ps++] == T[pt]) {
+                pt++;
+            }
+            if (pt == len_T) {
+                int left = ps - 1;
+                while (--pt >= 0) {
+                    while (S[left--] != T[pt]) {}
+                }
+                if (ps - left - 1 < minL) {
+                    minL = ps - left - 1;
+                    begin = left + 1;
+                }
+                pt = 0;
+                ps = left + 2;
+            }
+        }
+        return minL == INT_MAX ? "" : S.substr(begin, minL);
+    }
+};
+```
+
+[java-solution](https://leetcode.com/problems/minimum-window-subsequence/discuss/109356/JAVA-two-pointer-solution-(12ms-beat-100)-with-explaination)
+
+[solution-explanation-in-comment](https://leetcode.com/problems/minimum-window-subsequence/discuss/109355/C%2B%2B-AC-16ms-O(1)-space-not-DP)
+
+
+
+### (2) DP
+
+#### Explanation
+
+dp(i, j) stores the "largest" starting index (make the length smallest) of the valid substring W of S[0, i] such that T[0, j] is a subsequence of W. Otherwise, dp(i, j) = -1; So dp(i, j) would be: 
+
+if S[i] == T[j], this means we could borrow the start index from dp(i-1, j-1) to make the current substring valid;
+else, we only need to borrow the start index from dp(i-1, j) which could either exist or not.
+
+Finally, go through the last row to find the substring with min length and appears first.
+
+```c++
+class Solution {
+public:
+    string minWindow(string S, string T) {
+        int len_S = S.length();
+        int len_T = T.length();
+        
+        // initialize all value to -1
+        vector<vector<int>> dp(len_S, vector<int>(len_T, -1));
+        
+        // initialize the first col
+        for (int i=0; i<len_S; i++) {
+            if (S[i] == T[0]) {
+                dp[i][0] = i;
+            } else {
+                if (i != 0) {
+                    dp[i][0] = dp[i-1][0];
+                }
+            }
+        }
+        
+        // calculate dp[][]
+        for (int i=1; i<len_S; i++) {
+            for (int j=1; j<len_T; j++) {
+                if (S[i] == T[j]) {
+                    dp[i][j] = dp[i-1][j-1];
+                } else {
+                    dp[i][j] = dp[i-1][j];
+                }
+            }
+        }
+        
+        // Finally, go through the last col to find the substring with min length and appears first.
+        int begin = -1, min_len = INT_MAX;
+        for (int i=0; i<len_S; i++) {
+            int index = dp[i][len_T-1];
+            if (index != -1) {
+                if (i + 1 - index < min_len) {
+                    begin = index;
+                    min_len = i + 1 - index;
+                }
+            }
+        }
+        return begin == -1 ? "" : S.substr(begin, min_len);
+    }
+};
+```
+
+[dp-solution](https://leetcode.com/problems/minimum-window-subsequence/discuss/109362/Java-Super-Easy-DP-Solution-(O(mn))
+
+[dp-solution-2](https://leetcode.com/problems/minimum-window-subsequence/discuss/109358/C%2B%2B-DP-with-explanation-O(ST)-53ms)
+
+[mypost](https://leetcode.com/problems/minimum-window-subsequence/discuss/185659/Easy-to-understand-C%2B%2B-DP-Solution-O(mn))
+
+
+
+## 9. LeetCode 567
+
+```c++
+
+```
 
 
 

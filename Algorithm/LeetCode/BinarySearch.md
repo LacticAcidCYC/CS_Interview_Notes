@@ -492,7 +492,7 @@ int kthSmallest(vector<vector<int>>& matrix, int k) {
 ```c++
 // min-heap
 // Time Complexity: O(klogn) (n: row of the matrix)
-// Space Complexity: O(1)
+// Space Complexity: O(n)
 
 struct compare {
     bool operator()(const pair<int, pair<int, int>> &A, const pair<int, pair<int, int>> &B) {
