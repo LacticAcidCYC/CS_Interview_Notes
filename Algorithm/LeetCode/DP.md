@@ -1,7 +1,50 @@
 ## 1. LeetCode 338 [Counting Bits](https://leetcode.com/problems/counting-bits/)
 
-```c++
+```latex
+Explanation:
+000|0
+-----
+000|1
+-----
+00|10
+00|11
+-----
+0|100
+0|101
+0|110
+0|111
+-----
+|1000
+|1001
+|1010
+|1011
+|1100
+|1101
+|1110
+|1111
+-----
+```
 
+
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    vector<int> countBits(int num) {
+        vector<int> dp(num+1, 0);
+        int offset = 1;
+        for (int i=1; i<=num; i++) {
+            if (i == offset * 2) {
+                offset *= 2;
+            }
+            dp[i] = dp[i-offset] + 1;
+        }
+        return dp;
+    }
+};
 ```
 
 [solution](https://leetcode.com/problems/counting-bits/discuss/79557/How-we-handle-this-question-on-interview-Thinking-process-%2B-DP-solution)
@@ -13,6 +56,9 @@
 ## (1) DP
 
 ```c++
+// Time Complexity: O(n*n^0.5) ?
+// Space Complexity: O(n)
+
 class Solution {
 public:
     int numSquares(int n) {
@@ -50,6 +96,9 @@ public:
 ### (2) DFS
 
 ```c++
+// Time Complexity: O(n*n^0.5) ?
+// Space Complexity: O(1) ?
+
 class Solution {
 public:
     int numSquares(int n) {
@@ -77,6 +126,9 @@ public:
 ### (3) Math
 
 ```c++
+// Time Complexity: O(n)
+// Space Complexity: O(1)
+
 class Solution {
 public:
     int numSquares(int n) {
@@ -111,6 +163,9 @@ public:
 ## 3. LeetCode 120 [Triangle](https://leetcode.com/problems/triangle/)
 
 ```c++
+// Time Complexity: O(nm)
+// Space Complexity: O(nm)
+
 class Solution {
 public:
     int minimumTotal(vector<vector<int>>& triangle) {
@@ -143,6 +198,9 @@ public:
 ## 4. LeetCode 62 [Unique Paths](https://leetcode.com/problems/unique-paths/)
 
 ```c++
+// Time Complexity: O(mn)
+// Space Complexity: O(mn)
+
 class Solution {
 public:
     int uniquePaths(int m, int n) {
@@ -168,6 +226,9 @@ public:
 ## 5. 平分背包
 
 ```c++
+// Time Complexity: O(nM) (M=sum(nums)/2)
+// Space Complexity: O(nM)
+
 // 平分数组（0-1背包）
 int backpack(vector<int> nums) {
     int sum = 0;
@@ -197,7 +258,39 @@ int backpack(vector<int> nums) {
 ## 6. LeetCode 63 [Unique Paths II](https://leetcode.com/problems/unique-paths-ii/)
 
 ```c++
+// Time Complexity: O(mn)
+// Space Complexity: O(mn)
 
+class Solution {
+public:
+    int uniquePathsWithObstacles(vector<vector<int>>& obstacleGrid) {
+        int m = obstacleGrid.size();
+        int n = obstacleGrid[0].size();
+        if (m == 0 || n == 0) return 0;
+        if (obstacleGrid[0][0] == 1 || obstacleGrid[m-1][n-1] == 1) return 0;
+        
+        // initialize the first col and the first row
+        vector<vector<int>> paths(m, vector<int>(n, 0));
+        paths[0][0] = 1;
+        for (int j=1; j<n; j++) {
+            paths[0][j] = obstacleGrid[0][j] == 1 ? 0 : paths[0][j-1];
+        }
+        for (int i=1; i<m; i++) {
+            paths[i][0] = obstacleGrid[i][0] == 1 ? 0 : paths[i-1][0];
+        }
+        
+        for (int i=1; i<m; i++) {
+            for (int j=1; j<n; j++) {
+                if (obstacleGrid[i][j] != 1) {
+                    paths[i][j] = paths[i-1][j] + paths[i][j-1];
+                } else {
+                    paths[i][j] = 0;
+                }
+            }
+        }
+        return paths[m-1][n-1];
+    }
+};
 ```
 
 
@@ -237,7 +330,72 @@ public:
 ### (1) Stack
 
 ```c++
+// Time Complexity: O(n)
+// Space Complexity: O(n)
 
+class Solution {
+public:
+    int longestValidParentheses(string s) {
+        int n = s.length();
+        stack<int> st; // store the index
+        
+        for (int i=0; i<n; i++) {
+            if (s[i] == '(') {
+                st.push(i);
+            } else {
+                if (st.empty() || s[st.top()] == ')') {
+                    st.push(i);
+                } else {
+                    st.pop();
+                }
+            }
+        }
+        // now the stack only contains the unmatched chars' indexes
+        if (st.empty()) {
+            // all characters are matched
+            return n;
+        }
+        
+        int r = n, l = 0, max_len = -1;
+        while (!st.empty()) {
+            l = st.top();
+            st.pop();
+            max_len = max(max_len, r-l-1);
+            r = l;
+        }
+        // make sure not missing the front
+        max_len = max(max_len, r);
+        return max_len;
+    }
+};
+
+// calculate when building the stack
+class Solution {
+public:
+    int longestValidParentheses(string s) {
+        stack<int> stk; // idx
+        
+        int res =0, max_len = 0;
+        int left_most = -1;
+        for (int i=0; i < s.size(); i++) {
+            if (s[i] == '(') {
+                stk.push(i);
+            } else {
+                if (stk.empty()) {
+                    left_most = i;
+                } else {
+                    stk.pop();
+                    if (stk.empty()) {
+                        max_len = max(max_len, i - left_most);
+                    } else {
+                        max_len = max(max_len, i - stk.top());
+                    }
+                }
+            }
+        }
+        return max_len;
+    }
+};
 ```
 
 [stack-solution](https://leetcode.com/problems/longest-valid-parentheses/discuss/14126/My-O(n)-solution-using-a-stack)
@@ -247,10 +405,13 @@ public:
 ### (2) DP
 
 ```c++
+// Time Complexity: O(n)
+// Space Complexity: O(n)
+
 class Solution {
 public:
    int longestValidParentheses(string s) {
-        if(s.length() <= 1) return 0;
+        if (s.length() <= 1) return 0;
         int curMax = 0;
         vector<int> longest(s.size(),0);
         for(int i=1; i < s.length(); i++){
@@ -277,11 +438,73 @@ public:
 
 
 
+## 9. LeetCode 727 [Minimum Window Subsequence](https://leetcode.com/problems/minimum-window-subsequence/)
 
+### Explanation
 
+dp(i, j) stores the "largest" starting index (make the length smallest) of the valid substring W of S[0, i] such that T[0, j] is a subsequence of W. Otherwise, dp(i, j) = -1; So dp(i, j) would be: 
 
+if S[i] == T[j], this means we could borrow the start index from dp(i-1, j-1) to make the current substring valid;
+else, we only need to borrow the start index from dp(i-1, j) which could either exist or not.
 
+Finally, go through the last row to find the substring with min length and appears first.
 
+```c++
+// Time Complexity: O(mn) (len_S * len_T)
+// Space Complexity: O(mn) (len_S * len_T)
+
+class Solution {
+public:
+    string minWindow(string S, string T) {
+        int len_S = S.length();
+        int len_T = T.length();
+        
+        // initialize all value to -1
+        vector<vector<int>> dp(len_S, vector<int>(len_T, -1));
+        
+        // initialize the first col
+        for (int i=0; i<len_S; i++) {
+            if (S[i] == T[0]) {
+                dp[i][0] = i;
+            } else {
+                if (i != 0) {
+                    dp[i][0] = dp[i-1][0];
+                }
+            }
+        }
+        
+        // calculate dp[][]
+        for (int i=1; i<len_S; i++) {
+            for (int j=1; j<len_T; j++) {
+                if (S[i] == T[j]) {
+                    dp[i][j] = dp[i-1][j-1];
+                } else {
+                    dp[i][j] = dp[i-1][j];
+                }
+            }
+        }
+        
+        // Finally, go through the last col to find the substring with min length and appears first.
+        int begin = -1, min_len = INT_MAX;
+        for (int i=0; i<len_S; i++) {
+            int index = dp[i][len_T-1];
+            if (index != -1) {
+                if (i + 1 - index < min_len) {
+                    begin = index;
+                    min_len = i + 1 - index;
+                }
+            }
+        }
+        return begin == -1 ? "" : S.substr(begin, min_len);
+    }
+};
+```
+
+[dp-solution](https://leetcode.com/problems/minimum-window-subsequence/discuss/109362/Java-Super-Easy-DP-Solution-(O(mn))
+
+[dp-solution-2](https://leetcode.com/problems/minimum-window-subsequence/discuss/109358/C%2B%2B-DP-with-explanation-O(ST)-53ms)
+
+[mypost](https://leetcode.com/problems/minimum-window-subsequence/discuss/185659/Easy-to-understand-C%2B%2B-DP-Solution-O(mn))
 
 
 

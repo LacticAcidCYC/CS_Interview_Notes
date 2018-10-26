@@ -280,7 +280,7 @@ public:
 
 
 
-## 6. LeetCode 424
+## 6. LeetCode 424 [Longest Repeating Character Replacement](https://leetcode.com/problems/longest-repeating-character-replacement/)
 
 ### Explanation
 
@@ -332,6 +332,9 @@ public:
 -General version of LeetCode 159
 
 ```c++
+// Time Complexity: O(n)
+// Space Complexity: O(n)
+
 class Solution {
 public:
     int lengthOfLongestSubstringKDistinct(string s, int k) {
@@ -357,11 +360,14 @@ public:
 
 
 
-## 8. LeetCode 727 
+## 8. LeetCode 727 [Minimum Window Subsequence](https://leetcode.com/problems/minimum-window-subsequence/)
 
 ### (1) Sliding Window
 
 ```c++
+// Time Complexity: O(2mn) (m: len_S, n: len_T)
+// Space Complexity: O(1)
+
 class Solution {
 public:
     string minWindow(string S, string T) {
@@ -411,6 +417,9 @@ else, we only need to borrow the start index from dp(i-1, j) which could either 
 Finally, go through the last row to find the substring with min length and appears first.
 
 ```c++
+// Time Complexity: O(mn)
+// Space Complexity: O(mn)
+
 class Solution {
 public:
     string minWindow(string S, string T) {
