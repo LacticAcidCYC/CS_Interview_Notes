@@ -15,6 +15,8 @@ II. A lambda-expression shall not appear in an unevaluated operand.
 [auto&&](https://stackoverflow.com/questions/13230480/what-does-auto-tell-us)
 
 ```c++
+// Time Complexity: O(nlogk)
+// Space Complexity: O(n)
 
 class Solution {
 private:
@@ -99,10 +101,53 @@ public:
 
 
 
-## 2. LeetCode 632
+## 2. LeetCode 632 [Smallest Range](https://leetcode.com/problems/smallest-range/)
 
 ```c++
+// Time Complexity: O(nlogk) (k = number of vectors)
+// Space Complexity: O(k)
 
+class Solution {
+public:
+    vector<int> smallestRange(vector<vector<int>>& nums) {
+        int n = nums.size();
+        int max_val = INT_MIN;
+        int range = INT_MAX;
+        vector<int> ans(2);
+        
+        auto compare = [](const pair<int, pair<int, int>> &A, const pair<int, pair<int, int>> &B) {
+            return A.first > B.first;
+        };
+        priority_queue<pair<int, pair<int, int>>, vector<pair<int,pair<int, int>>>, decltype(compare)> pq(compare);
+        
+        for (int i=0; i<n; i++) {
+            pq.push({nums[i][0], {i, 0}});
+            if (nums[i][0] > max_val) {
+                max_val = nums[i][0];
+            }
+        }
+        
+        while (true) {
+            auto top = pq.top();
+            if (max_val - top.first < range) {
+                range = max_val - top.first;
+                ans[0] = top.first;
+                ans[1] = max_val;
+            }
+            pq.pop();
+            if (top.second.second == nums[top.second.first].size() - 1) {
+                break;
+            }
+            int new_insert = nums[top.second.first][top.second.second+1];
+            pq.push({new_insert, {top.second.first, top.second.second+1}});
+            if (new_insert > max_val) {
+                max_val = new_insert;
+            }
+        }
+        
+        return ans;
+    }
+};
 ```
 
 [solution](https://leetcode.com/problems/smallest-range/discuss/104893/Java-Code-using-PriorityQueue.-similar-to-merge-k-array)
