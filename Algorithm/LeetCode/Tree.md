@@ -131,6 +131,59 @@ public:
 
 
 
+## 4. LeetCode 173 [Binary Search Tree Iterator](https://leetcode.com/problems/binary-search-tree-iterator/)
+
+```c++
+/**
+ * Definition for binary tree
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class BSTIterator {
+public:
+    BSTIterator(TreeNode *root) {
+        pushNodes(root);
+    }
+
+    /** @return whether we have a next smallest number */
+    bool hasNext() {
+        return !bstStack.empty();
+    }
+
+    /** @return the next smallest number */
+    int next() {
+        if (hasNext()) {
+            TreeNode* tmpNode = bstStack.top();
+            bstStack.pop();
+            pushNodes(tmpNode->right);
+            return tmpNode->val;
+        }
+    }
+    
+private:
+    stack<TreeNode*> bstStack;
+    
+    void pushNodes(TreeNode* node) {
+        while (node != NULL) {
+            bstStack.push(node);
+            node = node->left;
+        }
+    }
+
+};
+
+
+/**
+ * Your BSTIterator will be called like this:
+ * BSTIterator i = BSTIterator(root);
+ * while (i.hasNext()) cout << i.next();
+ */
+```
+
 
 
 

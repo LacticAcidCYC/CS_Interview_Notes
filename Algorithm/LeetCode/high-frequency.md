@@ -895,15 +895,177 @@ public:
 
 
 
+## 15. LeetCode 253 [Meeting Rooms II](https://leetcode.com/problems/meeting-rooms-ii/)
+
+### (1) min_heap
+
+Greedy Arrangment Strategy
+
+```c++
+// Time Complexity: O(NlogN)
+// Space Complexity: O(N)
+// using min_heap
+/**
+ * Definition for an interval.
+ * struct Interval {
+ *     int start;
+ *     int end;
+ *     Interval() : start(0), end(0) {}
+ *     Interval(int s, int e) : start(s), end(e) {}
+ * };
+ */
+class Solution {
+public:
+    int minMeetingRooms(vector<Interval>& intervals) {
+        sort(intervals.begin(), intervals.end(), [](Interval &a, Interval &b) {
+            return a.start < b.start;
+        });
+        priority_queue<int, vector<int>, greater<int>> pq; // store the end time
+        for (auto const &i : intervals) {
+            if (!pq.empty()) {
+                if (pq.top() <= i.start) {
+                    pq.pop();
+                }
+            }
+            pq.push(i.end);
+        }
+        return pq.size();
+    }
+};
+```
 
 
 
+### (2) Chronological Ordering
+
+**Intuition**
+
+The meeting timings given to us define a chronological order of events throughout the day. We are given the start and end timings for the meetings which can help us define this ordering.
+
+Arranging the meetings according to their start times helps us know the natural order of meetings throughout the day. However, simply knowing when a meeting starts doesn't tell us much about its duration.
+
+We also need the meetings sorted by their ending times because an ending event essentially tells us that there must have been a corresponding starting event and more importantly, an ending event tell us that a previously occupied room has now become free.
+
+A meeting is defined by its start and end times. However, for this specific algorithm, we need to treat the start and end times `individually`. This might not make sense right away because a meeting is defined by its start and end times. If we separate the two and treat them individually, then the identity of a meeting goes away. This is fine because:
+
+> When we encounter an ending event, that means that some meeting that started earlier has ended now. We are not really concerned with which meeting has ended. All we need is that **some** meeting ended thus making a room available.
+
+```c++
+// Time Complexity: O(NlogN)
+// Space Complexity: O(N)
+
+/**
+ * Definition for an interval.
+ * struct Interval {
+ *     int start;
+ *     int end;
+ *     Interval() : start(0), end(0) {}
+ *     Interval(int s, int e) : start(s), end(e) {}
+ * };
+ */
+class Solution {
+public:
+    int minMeetingRooms(vector<Interval>& intervals) {
+        vector<int> starts;
+        vector<int> ends;
+        
+        for (auto const &i : intervals) {
+            starts.push_back(i.start);
+            ends.push_back(i.end);
+        }
+        sort(starts.begin(), starts.end());
+        sort(ends.begin(), ends.end());
+        
+        int ps = 0, pe = 0; // ptr_start or ptr_end
+        //int minRooms = 0;
+        while (ps < intervals.size()) {
+            if (ends[pe] <= starts[ps]) {
+                pe++;
+                //minRooms--;
+            }
+            ps++;
+            //minRooms++;
+        }
+        return ps - pe;
+    }
+};
+```
+
+[solution](https://leetcode.com/articles/meeting-rooms-ii/)
 
 
 
+## 16. LeetCode 771
+
+```c++
+// Time Complexity: O(m+n) (m = length of S)
+// Space Complexity: O(n) (n = length of J)
+
+// use hashmap
+class Solution {
+public:
+    int numJewelsInStones(string J, string S) {
+        unordered_map<char, int> jewels;
+        int jCnt = 0;
+        
+        for (auto const &j : J) {
+            jewels[j]++;
+        }
+        for (auto const &s : S) {
+            if (jewels.count(s)) {
+                jCnt++;
+            }
+        }
+        return jCnt;
+    }
+};
+
+// use hashset
+class Solution {
+public:
+    int numJewelsInStones(string J, string S) {
+        unordered_set<char> jewels(J.begin(), J.end());
+        int jCnt = 0;
+        
+        for (auto const &s : S) {
+            if (jewels.count(s)) {
+                jCnt++;
+            }
+        }
+        return jCnt;
+    }
+};
+```
 
 
 
+## 17. LeetCode 336 [Palindrome Pairs](https://leetcode.com/problems/palindrome-pairs/)
+
+```c++
+
+```
+
+[solution](https://leetcode.com/problems/palindrome-pairs/discuss/79215/Easy-to-understand-AC-C%2B%2B-solution-O(n*k2)-using-map)
+
+
+
+## 18. LeetCode 564 [Find the Closest Palinfrome](https://leetcode.com/problems/find-the-closest-palindrome/)
+
+```c++
+
+```
+
+[solution](https://leetcode.com/problems/find-the-closest-palindrome/discuss/102391/Python-Simple-with-Explanation)
+
+
+
+## 19. LeetCode 460 [LFU Cache](https://leetcode.com/problems/lfu-cache/)
+
+```c++
+
+```
+
+[solution](https://leetcode.com/problems/lfu-cache/discuss/94516/Concise-C%2B%2B-O(1)-solution-using-3-hash-maps-with-explanation)
 
 
 

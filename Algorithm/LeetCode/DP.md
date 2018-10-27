@@ -508,6 +508,41 @@ public:
 
 
 
+## 10. LeetCode 91 [Decode Ways](https://leetcode.com/problems/decode-ways/)
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(n)
+
+// state transition equation
+// dp[i]:  decode ways of i-length messages
+// current char: s[i-1]
+// dp[i] = dp[i-1] (when s[i-1] is not '0')
+// dp[i] = dp[i-1] + dp[i-2] (when s[i-2]s[i-1] can become '10-26')
+
+class Solution {
+public:
+    int numDecodings(string s) {
+        if (s[0] == '0') return 0;
+        int n = s.length();
+        vector<int> dp(n+1, 0); // dp[i]: decode ways of i-length messages
+        dp[0] = 1; // init according to the state transition
+        dp[1] = 1; // obviously one
+        for (int i=2; i<=n; i++) {
+            if (s[i-1] != '0') {
+                dp[i] += dp[i-1]; // can split before s[i-1](current element)
+            }
+            int last_two_digits = stoi(s.substr(i-2, 2));
+            if (last_two_digits >= 10 && last_two_digits <= 26) {
+                dp[i] += dp[i-2]; // can split before s[i-2]
+            }
+        }
+        
+        return dp[n];
+    }
+};
+```
+
 
 
 

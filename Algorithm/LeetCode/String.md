@@ -1,6 +1,4 @@
-# String
-
-## *<1>Using window to get maximum or minimum substring*
+# <1> Sliding Window (two pointers)
 
 ## 1. LeetCode 76 [Minimum Window Substring](https://leetcode.com/problems/minimum-window-substring/)
 
@@ -482,6 +480,45 @@ public:
 ```
 
 
+
+# <2> General String Problem
+
+## 1. LeetCode 93 [Restore IP Addresses](https://leetcode.com/problems/restore-ip-addresses/)
+
+```c++
+class Solution {
+public:
+    vector<string> restoreIpAddresses(string s) {
+        int n = s.length();
+        if (n > 12 || n < 4) return vector<string>();
+        vector<string> ips;
+        
+        for (int i=0; i<3 && i<n-3; i++) {
+            for (int j=i+1; j<i+4 && j<n-2; j++) {
+                for (int k=j+1; k<j+4 && k<n-1; k++) {
+                    if (n-k-1 > 3) continue;
+                    string s1 = s.substr(0, i+1);
+                    string s2 = s.substr(i+1, j-i);
+                    string s3 = s.substr(j+1, k-j);
+                    string s4 = s.substr(k+1);
+                    if (isValid(s1) && isValid(s2) && isValid(s3) && isValid(s4)) {
+                        ips.push_back(s1+'.'+s2+'.'+s3+'.'+s4);
+                    }
+                }
+            }
+        }
+        
+        return ips;
+    }
+    
+    bool isValid(string s) {
+        if (stoi(s) > 255 || (s.length() > 1 && s[0] == '0')) {
+            return false;
+        }
+        return true;
+    }
+};
+```
 
 
 
