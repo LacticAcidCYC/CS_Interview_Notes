@@ -473,7 +473,32 @@ public:
 
 
 
-## 9. LeetCode 567
+## 9. LeetCode 713 [Subarray Product Less Than K](https://leetcode.com/problems/subarray-product-less-than-k/)
+
+```c++
+class Solution {
+public:
+    int numSubarrayProductLessThanK(vector<int>& nums, int k) {
+        int n = nums.size();
+        //if (k == 0) { return 0;}
+        int left = 0, right = 0, cur_product = 1, cnt = 0;
+        while (right < n) {
+            cur_product *= nums[right++];
+            while (left < right && cur_product >= k) {
+                // make sure left < right
+                cur_product /= nums[left++];
+            }
+            cnt += (right - left);
+        }
+        
+        return cnt;
+    }
+};
+```
+
+
+
+## 10. LeetCode 567
 
 ```c++
 

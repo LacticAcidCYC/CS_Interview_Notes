@@ -545,9 +545,119 @@ public:
 
 
 
+## 11. LeetCode 931 Minimum Falling Path Sum
+
+### Similar: LeetCode 120 Triangle
+
+Given a **square** array of integers `A`, we want the **minimum** sum of a *falling path* through `A`.
+
+A falling path starts at any element in the first row, and chooses one element from each row.  The next row's choice must be in a column that is different from the previous row's column by at most one.
+
+**Example 1:**
+
+```
+Input: [[1,2,3],[4,5,6],[7,8,9]]
+Output: 12
+Explanation: 
+The possible falling paths are:
+```
+
+- `[1,4,7], [1,4,8], [1,5,7], [1,5,8], [1,5,9]`
+- `[2,4,7], [2,4,8], [2,5,7], [2,5,8], [2,5,9], [2,6,8], [2,6,9]`
+- `[3,5,7], [3,5,8], [3,5,9], [3,6,8], [3,6,9]`
+
+The falling path with the smallest sum is `[1,4,7]`, so the answer is `12`.
+
+**Note:**
+
+1. `1 <= A.length == A[0].length <= 100`
+2. `-100 <= A[i][j] <= 100`
 
 
 
+### (1) DFS
+
+```c++
+// DFS TLE
+class Solution {
+public:
+    int minFallingPathSum(vector<vector<int>>& A) {
+        int minSum = INT_MAX;
+        int n = A.size();
+        int sum = 0, step = 0;
+        dfs(A, n, sum, step, minSum, 0);
+        
+        return minSum;
+    }
+    
+    void dfs(vector<vector<int>>& A, int n, int sum, int step, int& minSum, int col) {
+        if (step == n) {
+            if (sum < minSum) {
+                minSum = sum;
+            }
+            return;
+        }
+        
+        if (step == 0) {
+            for (int i=0; i<n; i++) {
+                dfs(A, n, sum+A[step][i], step+1, minSum, i);
+            }
+        } else {
+            for (int i=col-1; i<=col+1; i++) {
+                if (i >= 0 && i < n) {
+                    dfs(A, n, sum+A[step][i], step+1, minSum, i);
+                }
+            }
+        }
+    }
+};
+```
+
+
+
+### (2) DP
+
+```c++
+// Time Complexity: O(n^2)
+// Space Complexity: O(n^2)
+
+class Solution {
+public:
+    int minFallingPathSum(vector<vector<int>>& A) {
+        int n = A.size();
+        vector<vector<int>> dp(n, vector<int>(n, INT_MAX));
+        
+        // initialize the first row
+        for (int i=0; i<n; i++) {
+            dp[0][i] = A[0][i];
+        }
+        
+        for (int i=1; i<n; i++) {
+            for (int j=0; j<n; j++) {
+                if (j == 0) {
+                    dp[i][j] = A[i][j] + min(dp[i-1][j], dp[i-1][j+1]);
+                } else if (j == n-1) {
+                    dp[i][j] = A[i][j] + min(dp[i-1][j], dp[i-1][j-1]);
+                } else {
+                    dp[i][j] = A[i][j] + min(dp[i-1][j-1], min(dp[i-1][j], dp[i-1][j+1]));
+                }
+            }
+        }
+        
+        int minSum = INT_MAX;
+        // check the last row for minSum
+        for (int i=0; i<n; i++) {
+            if (dp[n-1][i] < minSum) {
+                minSum = dp[n-1][i];
+            }
+        }
+        
+        return minSum;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/minimum-falling-path-sum/discuss/186828/c%2B%2B-DP-12-ms)
 
 
 
