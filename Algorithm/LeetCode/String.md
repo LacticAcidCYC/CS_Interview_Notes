@@ -654,7 +654,75 @@ public:
 
 
 
-## 10. LeetCode 567
+## 10. LeetCode 904 [Fruit Into Baskets](https://leetcode.com/problems/fruit-into-baskets/)
+
+### Same as LeetCode 159
+
+### (1) Sliding Window
+
+```c++
+class Solution {
+public:
+    int totalFruit(vector<int>& tree) {
+        int n = (int) tree.size();
+        if (n < 3) return n;
+        unordered_map<int, int> fruits;
+        int left = 0, right = 0, cnt = 0, maxF = 0;
+        while (right < n) {
+            if (fruits[tree[right++]]++ == 0) {
+                cnt++;
+            }
+            while (cnt > 2) {
+                if (fruits[tree[left++]]-- == 1) {
+                    cnt--;
+                }
+            }
+            maxF = max(maxF, right - left);
+        }
+        return maxF;
+    }
+};
+```
+
+
+
+### (2) Other Solution
+
+```c++
+class Solution {
+public:
+    int totalFruit(vector<int>& tree) {
+        if (tree.size() <= 2) {
+            return tree.size();
+        }
+        
+        int first_type = -1, second_type = -1, cur_cnt = 0, total = 0, second_type_cnt = 0;
+        for (const auto &type : tree) {
+            if (type == first_type || type == second_type) {
+                cur_cnt++;
+                second_type_cnt = (type == second_type) ? second_type_cnt + 1 : 1;
+            }
+            else {
+                cur_cnt = second_type_cnt + 1;
+                second_type_cnt = 1;
+            }
+            
+            if (type != second_type) {
+                first_type = second_type;
+                second_type = type;
+            }
+            
+            total = max(total, cur_cnt);
+        }
+        
+        return total;
+    }
+};
+```
+
+
+
+## 11. LeetCode 567
 
 ```c++
 
