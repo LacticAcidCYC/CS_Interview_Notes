@@ -578,7 +578,7 @@ The falling path with the smallest sum is `[1,4,7]`, so the answer is `12`.
 ### (1) DFS
 
 ```c++
-// DFS TLE
+// DFS TLE O(3^n)
 class Solution {
 public:
     int minFallingPathSum(vector<vector<int>>& A) {
@@ -660,6 +660,91 @@ public:
 [solution](https://leetcode.com/problems/minimum-falling-path-sum/discuss/186828/c%2B%2B-DP-12-ms)
 
 
+
+## 12. LeetCode 322 [Coin Change](https://leetcode.com/problems/coin-change/)
+
+```c++
+// Time Complexity: O(nm) (n: number of coin value; m: amount)
+// Space Complexity: O(nm)
+
+class Solution {
+public:
+    int coinChange(vector<int>& coins, int amount) {
+        int n = (int) coins.size();
+        vector<int> dp(amount+1, INT_MAX);
+        dp[0] = 0; // base case
+        for (int i=0; i<n; i++) {
+            for (int j=coins[i]; j<=amount; j++) {
+                if (dp[j-coins[i]] != INT_MAX) {
+                    dp[j] = min(dp[j], dp[j-coins[i]]+1);
+                }
+            }
+        }
+        return dp[amount] == INT_MAX ? -1 : dp[amount];
+    }
+};
+```
+
+
+
+### Other Solution
+
+**DFS +  Pruning**
+
+```c++
+// Time Complexity: O(nm) (n: number of coin value; m: amount)
+// Space Complexity: O(nm)
+
+class Solution {
+public:
+    int coinChange(vector<int>& coins, int amount) {
+        if (amount == 0) return 0;
+        if (coins.empty()) return -1;
+        int min_count = INT_MAX;
+        sort(coins.begin(), coins.end(), greater<int>());
+        backtrack(coins, amount, 0, min_count, 0);
+
+        return min_count == INT_MAX ? -1 : min_count;
+    }
+
+    void backtrack(const vector<int>& coins, int amount, int index, int &min_cnt, int cur_cnt) {
+        if (amount == 0) {
+            min_cnt = min(min_cnt, cur_cnt);
+            return;
+        }
+        if (index == coins.size()) {
+            return;
+        }
+        for (int i=amount/coins[index]; i>=0 && cur_cnt + i < min_cnt; i--) {
+            backtrack(coins, amount-i*coins[index], index+1, min_cnt, cur_cnt+i);
+        }
+    }
+};
+```
+
+
+
+## 13. LeetCode 518 [Coin Change 2](https://leetcode.com/problems/coin-change-2/)
+
+```c++
+// Time Complexity: O(nm) (n: number of coin value; m: amount)
+// Space Complexity: O(m)
+
+class Solution {
+public:
+    int change(int amount, vector<int>& coins) {
+        int n = coins.size();
+        vector<int> dp(amount+1, 0);
+        dp[0] = 1; // base case
+        for (int i=0; i<n; i++) {
+            for (int j=coins[i]; j<=amount; j++) {
+                dp[j] = dp[j] + dp[j-coins[i]];
+            }
+        }
+        return dp[amount];
+    }
+};
+```
 
 
 

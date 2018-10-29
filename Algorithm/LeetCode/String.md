@@ -181,6 +181,8 @@ public:
 
 ## 3. LeetCode 209 [Minimum Size Subarray Sum](https://leetcode.com/problems/minimum-size-subarray-sum/)
 
+### (1) Sliding Window
+
 ```c++
 // Time Complexity: O(n) (n = length of nums)
 // Space Complexity: O(1)
@@ -203,6 +205,160 @@ public:
 ```
 
 
+
+### (2) Prefix Sum + hashmap + TreeSet (similar to (3))
+
+#### set::lower_bound
+
+->An iterator to the the first element in the container which **is not considered to go before *val***
+
+#### set::upper_bound
+
+->An iterator to the the first element in the container which is considered to go after *val*, or [set::end](http://www.cplusplus.com/set::end) if no elements are considered to go after *val*.
+
+```c++
+// Time Complexity: O(nlogn) (n = length of nums)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    int minSubArrayLen(int s, vector<int>& nums) {
+        unordered_map<int, int> map;
+        set<int> sum_set;
+        map[0] = -1;
+        sum_set.insert(0);
+        int minLen = INT_MAX;
+        int sum = 0, n = nums.size();
+        
+        for (int i=0; i<n; i++) {
+            sum += nums[i];
+            if (map.count(sum-s)) {
+                minLen = min(minLen, i-map[sum-s]);
+            } else if (sum > s) {
+                // lower_bound
+                minLen = min(minLen, i-map[*(--sum_set.upper_bound(sum-s))]);
+            }
+            map[sum] = i;
+            sum_set.insert(sum);
+        }
+        
+        return minLen == INT_MAX ? 0 : minLen;
+    }
+};
+
+// shorter
+class Solution {
+public:
+    int minSubArrayLen(int s, vector<int>& nums) {
+        unordered_map<int, int> map;
+        set<int> sum_set;
+        map[0] = -1;
+        sum_set.insert(0);
+        int minLen = INT_MAX;
+        int sum = 0, n = nums.size();
+        
+        for (int i=0; i<n; i++) {
+            sum += nums[i];
+            if (sum >= s) {
+                // equal or lower_bound
+                minLen = min(minLen, i-map[*(--sum_set.upper_bound(sum-s))]);
+            }
+            map[sum] = i;
+            sum_set.insert(sum);
+        }
+        
+        return minLen == INT_MAX ? 0 : minLen;
+    }
+};
+```
+
+
+
+### (3) Binary Search (O(nlogn))
+
+```c++
+// Time Complexity: O(nlogn) (n = length of nums)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    int minSubArrayLen(int s, vector<int>& nums) {
+        int minLen = INT_MAX;
+        int n= nums.size();
+        
+        vector<int> sums(n+1, 0);
+        for (int i=1; i<=n; i++) {
+            sums[i] = nums[i-1] + sums[i-1]; // subarray(with length i)'s sum
+        }
+        
+        for (int i=0; i<=n; i++) {
+            int end = bs(i+1, sums.size()-1, sums, sums[i]+s);
+            if (end == -1) break;
+            if (end - i < minLen) {
+                minLen = end - i;
+            }
+        }
+        
+        return minLen == INT_MAX ? 0 : minLen;
+    }
+    
+    // find the equal or higher element with smallest index
+    int bs(int low, int high, vector<int> &sums, int target) {
+        while (low < high) {
+            int mid = low + (high - low) / 2;
+            if (sums[mid] >= target) {
+                high = mid;
+            } else {
+                low = mid + 1;
+            }
+        }
+        
+        return sums[low] >= target ? low : -1;
+    }
+};
+
+// original
+class Solution {
+public:
+    int minSubArrayLen(int s, vector<int>& nums) {
+        int minLen = INT_MAX;
+        int n= nums.size();
+        
+        vector<int> sums(n+1, 0);
+        for (int i=1; i<=n; i++) {
+            sums[i] = nums[i-1] + sums[i-1]; // subarray(with length i)'s sum
+        }
+        
+        for (int i=0; i<=n; i++) {
+            int end = bs(i+1, sums.size()-1, sums, sums[i]+s);
+            if (end == sums.size()) break;
+            if (end - i < minLen) {
+                minLen = end - i;
+            }
+        }
+        
+        return minLen == INT_MAX ? 0 : minLen;
+    }
+    
+    // find the equal or higher element with smallest index
+    int bs(int low, int high, vector<int> &sums, int target) {
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (sums[mid] >= target) {
+                high = mid - 1;
+            } else {
+                low = mid + 1;
+            }
+        }
+        
+        return low;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/minimum-size-subarray-sum/discuss/59090/4ms-O(n)-8ms-O(nlogn)-C%2B%2B)
+
+[solution2](https://leetcode.com/problems/minimum-size-subarray-sum/discuss/59123/O(N)O(NLogN)-solutions-both-O(1)-space)
 
 
 
