@@ -771,6 +771,118 @@ public:
 
 
 
+## 2. LeetCode 482 [License Key Formatting](https://leetcode.com/problems/license-key-formatting/)
+
+### (1) Preprocess and Split
+
+```c++
+class Solution {
+public:
+    string licenseKeyFormatting(string S, int K) {
+        string ps = "";
+        
+        for (const auto &c : S) {
+            if (c != '-') {
+                ps += toupper(c);
+            }
+        }
+        
+        int n = ps.length();
+        int parts = n / K;
+        int remainder = n % K;
+        
+        string ans = "";
+        if (remainder != 0) {
+            ans += ps.substr(0, remainder);
+            ans += '-';
+        }
+        
+        for (int i=0; i<parts; i++) {
+            ans += ps.substr(remainder+i*K, K);
+            ans += '-';
+        }
+        
+        ans.pop_back();
+        
+        return ans;
+    }
+};
+```
+
+
+
+### (2) One pass processing
+
+```c++
+class Solution {
+public:
+    string licenseKeyFormatting(string S, int K) {
+        string ans = "";
+        string part = "";
+        
+        int i = S.length() - 1;
+        
+        while (i >= 0) {
+            part.clear();
+            
+            while (i >= 0 && part.length() < K) {
+                if (S[i] != '-') {
+                    part += toupper(S[i]);
+                }
+                i--;
+            }
+            // corner case: "--a-a-a-a--"
+            if (part.size()) {
+                if (ans.size()) {
+                    ans += '-';
+                }
+                ans += part;
+            }
+        }
+        reverse(ans.begin(), ans.end());
+        
+        return ans;
+    }
+};
+```
+
+
+
+## 3. LeetCode 214 [Shortest Palindrome](https://leetcode.com/problems/shortest-palindrome/)
+
+### (1) O(n^2)
+
+```c++
+class Solution {
+public:
+    string shortestPalindrome(string s) {
+        string r = s;
+        reverse(r.begin(), r.end());
+        int n = s.length();
+        
+        for (int i=0; i<n; i++) {
+            if (r.substr(i) == s.substr(0, n-i)) {
+                return r + s.substr(n-i);
+            }
+        }
+        
+        return r + s;
+    }
+};
+```
+
+
+
+### (2) KMP
+
+```c++
+
+```
+
+
+
+
+
 
 
 

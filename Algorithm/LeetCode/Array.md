@@ -570,9 +570,192 @@ public:
 
 
 
+## 11. LeetCode 56 [Merge Intervals](https://leetcode.com/problems/merge-intervals/)
+
+```c++
+// Time Complexity: O(nlogn)
+// Space Complexity: O(1)
+
+/**
+ * Definition for an interval.
+ * struct Interval {
+ *     int start;
+ *     int end;
+ *     Interval() : start(0), end(0) {}
+ *     Interval(int s, int e) : start(s), end(e) {}
+ * };
+ */
+class Solution {
+public:
+    vector<Interval> merge(vector<Interval>& intervals) {
+        int n = intervals.size();
+        if (n == 0) return {};
+        sort(intervals.begin(), intervals.end(), [](Interval &A, Interval &B) {
+            return A.start < B.start;
+        });
+        vector<Interval> ans;
+        ans.push_back(intervals[0]);
+        
+        for (int i=1; i<n; i++) {
+            if (intervals[i].start > ans.back().end) {
+                ans.push_back(intervals[i]);
+            } else {
+                // pay attention to the situation that: ans.back().end > intervals[i].end
+                ans.back().end = max(intervals[i].end, ans.back().end);
+            }
+        }
+        
+        return ans;
+    }
+};
+```
 
 
 
+## 12. LeetCode 57 [Insert Interval](https://leetcode.com/problems/insert-interval/)
+
+### (1) Binary Search + processing
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(1)
+
+/**
+ * Definition for an interval.
+ * struct Interval {
+ *     int start;
+ *     int end;
+ *     Interval() : start(0), end(0) {}
+ *     Interval(int s, int e) : start(s), end(e) {}
+ * };
+ */
+class Solution {
+public:
+    vector<Interval> insert(vector<Interval>& intervals, Interval newInterval) {
+        int n = intervals.size();
+        if (n == 0) {
+            return vector<Interval> {newInterval};
+        }
+        int left = 0, right = n - 1;
+        // find the upper_bound of newInterval.start
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (intervals[mid].start >= newInterval.start) {
+                right = mid;
+            } else {
+                left = mid + 1;
+            }
+        }
+        // if newInterval.start is the largest start time (not <= here!!!)
+        if (intervals[left].start < newInterval.start) {
+            if (intervals[left].end >= newInterval.start) {
+                intervals[left].end = max(intervals[left].end, newInterval.end);
+            } else {
+                intervals.push_back(newInterval);
+            }
+            return intervals;
+        }
+        
+        // range constructor: [begin, end)
+        vector<Interval> ans(intervals.begin(), intervals.begin()+left);
+        // pay attention to the situation that left = 0 here
+        if (ans.empty() || ans.back().end < newInterval.start) {
+            ans.push_back(newInterval);
+        } else {
+            ans.back().end = max(ans.back().end, newInterval.end);
+        }
+        
+        for (int i=left; i<n; i++) {
+            if (intervals[i].start > ans.back().end) {
+                ans.push_back(intervals[i]);
+            } else {
+                ans.back().end = max(intervals[i].end, ans.back().end);
+            }
+        }
+        
+        return ans;
+    }
+};
+```
+
+
+
+### (2) One pass
+
+```c++
+/**
+ * Definition for an interval.
+ * struct Interval {
+ *     int start;
+ *     int end;
+ *     Interval() : start(0), end(0) {}
+ *     Interval(int s, int e) : start(s), end(e) {}
+ * };
+ */
+class Solution {
+public:
+    vector<Interval> insert(vector<Interval>& intervals, Interval newInterval) {
+        int n = intervals.size();
+        vector<Interval> ans;
+        
+        for (int i=0; i<n; i++) {
+            if (intervals[i].end < newInterval.start) {
+                ans.push_back(intervals[i]);
+            } else if (intervals[i].start > newInterval.end) {
+                ans.push_back(newInterval);
+                for (int j=i; j<n; j++) {
+                    ans.push_back(intervals[j]);
+                }
+                return ans;
+            } else {
+                newInterval.start = min(intervals[i].start, newInterval.start);
+                newInterval.end = max(intervals[i].end, newInterval.end);
+            }
+        }
+        ans.push_back(newInterval);
+        
+        return ans;
+    }
+};
+```
+
+
+
+## 13. LeetCode 42 [Trapping Rain Water](https://leetcode.com/problems/trapping-rain-water/)
+
+### Two Pointer
+
+My idea is similiar to my idol(lol) [StefanPochmann](https://leetcode.com/problems/trapping-rain-water/discuss/17364/7-lines-C-C++), while this algorithm keeps track of the total water assuming that the intermediate space is empty. In each step, recalculate the total water.
+
+```c++
+class Solution {
+public:
+    int trap(vector<int>& height) {
+        int n = height.size();
+        if (n <= 2) return 0;
+        // two pointers and height of the container (lower height in two sides)
+        int left = 0, right = n - 1, level = min(height[left], height[right]);
+        int res = level * (right - left - 1); // initialize the beginning possible volume of watre
+        while (right - left > 1) { // when left == right - 1, exit the while loop
+            // move the lower side, because we use that side to count the height(level)
+            int lower = height[(height[left] <= height[right]) ? ++left : --right];
+            if (lower > level) { // if next height is higher than level, we need to update the level now and add more possible water inside
+                res -= level;
+                res += min(height[left]-level, height[right]-level) * (right - left - 1);
+                level = min(height[left], height[right]);
+            } else {// if next height is smaller than level, then height of container is still level
+                res -= lower;
+            }
+        }
+        
+        return res;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/trapping-rain-water/discuss/17364/7-lines-C-C++)
+
+[mypost](https://leetcode.com/problems/trapping-rain-water/discuss/151477/Share-my-c%2B%2B-code(8ms))
 
 
 
