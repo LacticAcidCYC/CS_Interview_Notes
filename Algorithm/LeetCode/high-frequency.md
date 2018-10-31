@@ -995,7 +995,7 @@ public:
 
 
 
-## 16. LeetCode 771
+## 16. LeetCode 771 [Jewels and Stones](https://leetcode.com/problems/jewels-and-stones/)
 
 ```c++
 // Time Complexity: O(m+n) (m = length of S)

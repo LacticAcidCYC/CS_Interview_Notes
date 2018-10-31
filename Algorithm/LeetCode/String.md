@@ -291,7 +291,7 @@ public:
             sums[i] = nums[i-1] + sums[i-1]; // subarray(with length i)'s sum
         }
         
-        for (int i=0; i<=n; i++) {
+        for (int i=0; i<n; i++) {
             int end = bs(i+1, sums.size()-1, sums, sums[i]+s);
             if (end == -1) break;
             if (end - i < minLen) {
@@ -853,6 +853,9 @@ public:
 ### (1) O(n^2)
 
 ```c++
+// Time Complexity: O(n^2)
+// Space Complexity: O(n)
+
 class Solution {
 public:
     string shortestPalindrome(string s) {
@@ -875,23 +878,217 @@ public:
 
 ### (2) KMP
 
-```c++
+[youtube](https://www.youtube.com/watch?v=GTJr8OvyEVQ&feature=youtu.be)
 
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    string shortestPalindrome(string s) {
+        string r = s;
+        reverse(r.begin(), r.end());
+        string t = s + '#' + r; // add "#" to force match begin at the first index of r
+        int len = t.length();
+        
+        vector<int> p(len, 0);
+        for (int i=1; i<len; i++) {
+            int j = p[i-1];
+            while (j > 0 && t[i] != t[j]) {
+                j = p[j-1];
+            }
+            p[i] = (j + (t[i] == t[j]));
+        }
+        
+        return r.substr(0, r.length() - p[len-1]) + s;
+    }
+};
+```
+
+[leetcode-solution](https://leetcode.com/problems/shortest-palindrome/discuss/60141/C%2B%2B-8-ms-KMP-based-O(n)-time-and-O(n)-memory-solution)
+
+[solution2](https://leetcode.com/problems/shortest-palindrome/discuss/60113/Clean-KMP-solution-with-super-detailed-explanation)
+
+[KMP](http://www.ruanyifeng.com/blog/2013/05/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm.html)
+
+
+
+## 4. LeetCode 5 [Longest Palindromic Substring](https://leetcode.com/problems/longest-palindromic-substring/)
+
+### (1) Expand the palindrome as possible
+
+#### Two-directions 
+
+#### [reference](https://leetcode.com/problems/longest-palindromic-substring/discuss/2928/Very-simple-clean-java-solution)
+
+[geeksforgeeks](https://www.geeksforgeeks.org/longest-palindromic-substring-set-2/)
+
+```c++
+// Time Complexity: O(n^2)
+// Space Complexity: O(1)
+// worse case: "aaaaaaaaaaaaaaaa"
+
+class Solution {
+public:
+    string longestPalindrome(string s) {
+        int n = s.length();
+        if (n < 2) return s;
+        int begin = 0;
+        int max_len = 1;
+        
+        for (int i=0; i<n; i++) {
+            expandPalindrome(s, i, i, begin, max_len);
+            expandPalindrome(s, i, i+1, begin, max_len);
+        }
+        
+        return s.substr(begin, max_len);
+    }
+    
+    void expandPalindrome(string &s, int l, int r, int &begin, int &max_len) {
+        while (l >= 0 && r < s.length() && s[l] == s[r]) {
+            l--;
+            r++;
+        }
+        
+        // the substring between r and l is palindrome
+        if (r - l - 1 > max_len) {
+            begin = l + 1;
+            max_len = r - l - 1;
+        }
+    }
+};
+```
+
+#### Left-Expansion
+
+```c++
+// Time Complexity: O(n^2)
+// Space Complexity: O(1)
+// worse case: "aaaaaaaaaaaaaaaa"
+
+class Solution {
+public:
+    string longestPalindrome(string s) {
+        int n = s.length();
+        if (n < 2) return s;
+        int begin = 0;
+        int max_len = 1;
+        
+        for (int i=0; i<n; i++) {
+            if (isPalindrome(s, i-max_len-1, i)) {
+                begin = i - max_len - 1;
+                max_len += 2;
+            } else if (isPalindrome(s, i-max_len, i)) {
+                begin = i - max_len;
+                max_len += 1;
+            }
+        }
+        
+        return s.substr(begin, max_len);
+    }
+    
+    bool isPalindrome(string &s, int l, int r) {
+        if (l < 0) return false;
+        while (l < r) {
+            if (s[l++] != s[r--]) {
+                return false;
+            }
+        }
+        return true;
+    }
+};
 ```
 
 
 
+### (2) DP
+
+`dp(i, j)` represents whether `s(i ... j)` can form a palindromic substring, `dp(i, j)` is true when `s(i)` equals to `s(j)` and `s(i+1 ... j-1)` is a palindromic substring. When we found a palindrome, check if it's the longest one. Time complexity O(n^2).
+
+```c++
+// Time Complexity: O(n^2)
+// Space Complexity: O(n^2)
+
+class Solution {
+public:
+    string longestPalindrome(string s) {
+        int n = s.length();
+        vector<vector<int>> dp(n, vector<int>(n, 0));
+        int begin = 0;
+        int max_len = 1;
+        
+        for (int j=0; j<n; j++) {
+            for (int i=j; i>=0; i--) {
+                // j - i < 3 means: "a" || "aa"
+                dp[i][j] = (s[i] == s[j]) && (j - i < 3 || dp[i+1][j-1]);
+                
+                if (dp[i][j] && j-i+1 > max_len) {
+                    begin = i;
+                    max_len = j - i + 1;
+                }
+            }
+        }
+        
+        return s.substr(begin, max_len);
+    }
+};
+```
+
+[geeksforgeeks](https://www.geeksforgeeks.org/longest-palindrome-substring-set-1/)
+
+[leetcode-solution](https://leetcode.com/problems/longest-palindromic-substring/discuss/2921/Share-my-Java-solution-using-dynamic-programming)
 
 
 
+### (3) Manacher (马拉车)
 
+[csdn](https://blog.csdn.net/hk2291976/article/details/51107886)
 
+[segmentfault](https://segmentfault.com/a/1190000008484167)
 
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(n)
 
-
-
-
-
+class Solution {
+public:
+    string longestPalindrome(string s) {
+        if (s.length() <= 1) { return s;}
+        int length = s.length();
+        
+        // build a new string T
+        int new_len = 2 * length + 1;
+        string new_str = string(new_len, '#');
+        for (int i=0; i<length; i++) {
+            new_str[2*i+1] = s[i];
+        }
+        // avoid overflow
+        new_str = '$' + new_str;
+        
+        // right_bound: the largest index among palindrome substring we already get
+        // pos: the center the substring above
+        // max_pos: record the longest palindrome substring's center
+        int right_bound = 0, pos = 0, max_pos = 0;
+        vector<int> Len(new_len, 1);
+        for (int i=1; i<new_len; i++) {
+            if (i < right_bound) {
+                Len[i] = min(right_bound-i, Len[2*pos-i]);
+            }
+            while (new_str[i+Len[i]] == new_str[i-Len[i]]) {
+                // already avoid overflow
+                Len[i]++;
+            }
+            if (i+Len[i] > right_bound) {
+                right_bound = i + Len[i];
+                pos = i;
+            }
+            max_pos = Len[i] > Len[max_pos] ? i : max_pos;
+        }
+        return s.substr((max_pos - Len[max_pos]) / 2, Len[max_pos] - 1);
+    }
+};
+```
 
 
 

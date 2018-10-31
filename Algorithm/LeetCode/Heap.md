@@ -72,7 +72,7 @@ public:
         auto compare = [](pair<int, int> &A, pair<int, int> &B) {
             return A.second > B.second;
         };
-        // cannot 
+        
         priority_queue<pair<int, int>, vector<pair<int, int>>, decltype(compare)> pq(compare);
         
         int i = 0;

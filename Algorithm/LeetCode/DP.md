@@ -805,17 +805,33 @@ public:
 };
 ```
 
-[solution](https://leetcode.com/problems/edit-distance/discuss/25846/20ms-Detailed-Explained-C%2B%2B-Solutions-(O(n)-Space)
+[solution](https://leetcode.com/problems/edit-distance/discuss/25846/20ms-Detailed-Explained-C%2B%2B-Solutions-O(n)-Space)
 
 
 
-## 15. LeetCode 
+## 15. LeetCode 198
 
 ```c++
 
 ```
 
 
+
+## 16. LeetCode 213
+
+```c++
+
+```
+
+
+
+## 17. LeetCode 337
+
+```c++
+
+```
+
+[solution](https://leetcode.com/problems/house-robber-iii/discuss/79330/Step-by-step-tackling-of-the-problem)
 
 
 

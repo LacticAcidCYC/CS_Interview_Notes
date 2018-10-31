@@ -1,4 +1,4 @@
-## 1. LeetCode 930 Binary Subarrays With Sum (same as 560)
+## 1. LeetCode 930 [Binary Subarrays With Sum](https://leetcode.com/problems/binary-subarrays-with-sum/) (same as 560)
 
 In an array `A` of `0`s and `1`s, how many **non-empty** subarrays have sum `S`?
 
@@ -480,6 +480,7 @@ public:
         
         int sum = 0;
         unordered_map<int, int> map;
+        // pay attention to the initialization of map[0]
         map[0] = -1;
         for (int i=0; i<n; i++) {
             sum += nums[i];
