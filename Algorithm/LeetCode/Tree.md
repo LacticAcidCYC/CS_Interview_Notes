@@ -544,7 +544,7 @@ public:
 
 
 
-## 10. LeetCode 145 | LeetCode 94 [Binary Tree Inorder Traversal](https://leetcode.com/problems/binary-tree-inorder-traversal/) | LeetCode 144
+## 10. LeetCode 144 [Binary Tree Preorder Traversal](https://leetcode.com/problems/binary-tree-preorder-traversal/) | LeetCode 94 [Binary Tree Inorder Traversal](https://leetcode.com/problems/binary-tree-inorder-traversal/) | LeetCode 145 [Binary Tree Postorder Traversal](https://leetcode.com/problems/binary-tree-postorder-traversal/)
 
 ### Binary Tree Traversal
 
@@ -552,7 +552,7 @@ public:
 
 [geeksforgeeks](https://www.geeksforgeeks.org/tree-traversals-inorder-preorder-and-postorder/)
 
-#### (1) Preorder
+#### (1) Preorder (BFS)
 
 Processes the root before the traversals of left and right children.
 
@@ -590,9 +590,42 @@ public:
 };
 ```
 
+DFS:
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<int> preorderTraversal(TreeNode* root) {
+        if (!root) return {};
+        vector<int> pre;
+        traverse(root, pre);
+        return pre;
+    }
+    
+    void traverse(TreeNode* root, vector<int> &pre) {
+        if (!root) return;
+        
+        pre.push_back(root->val);
+        traverse(root->left, pre);
+        traverse(root->right, pre);
+    }
+};
+```
 
 
-#### (2) Inorder
+
+
+
+#### (2) Inorder (BFS)
 
 Processes the root after the traversal of left child and before the traversal of right child.
 
@@ -631,9 +664,40 @@ public:
 };
 ```
 
+DFS:
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<int> inorderTraversal(TreeNode* root) {
+        if (!root) return {};
+        vector<int> in;
+        traverse(root, in);
+        return in;
+    }
+    
+    void traverse(TreeNode* root, vector<int> &in) {
+        if (!root) return;
+        
+        traverse(root->left, in);
+        in.push_back(root->val);
+        traverse(root->right, in);
+    }
+};
+```
 
 
-#### (3) Postorder
+
+#### (3) Postorder (BFS)
 
 Processes the root after the traversals of left and right children.
 
@@ -670,6 +734,246 @@ public:
     }
 };
 ```
+
+DFS:
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<int> postorderTraversal(TreeNode* root) {
+        if (!root) return {};
+        vector<int> post;
+        traverse(root, post);
+        return post;
+    }
+    
+    void traverse(TreeNode* root, vector<int> &post) {
+        if (!root) return;
+        
+        traverse(root->left, post);
+        traverse(root->right, post);
+        post.push_back(root->val);
+    }
+};
+```
+
+
+
+## 11. LeetCode 99 [Recover Binary Search Tree](https://leetcode.com/problems/recover-binary-search-tree/)
+
+### Inorder Traversal and Find the Decreasing numbers (1 or 2)
+
+After Inorder traversal, the numbe should have been in ascending order.
+
+e.g. 
+
+1,3,2,4
+
+3,2,1
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(n)
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    void recoverTree(TreeNode* root) {
+        TreeNode *first = NULL, *second = NULL;
+        TreeNode *prev = new TreeNode(INT_MIN);
+        
+        inorder_dfs(root, first, second, prev);
+        
+        swap(first->val, second->val);
+    }
+    
+    void inorder_dfs(TreeNode* root, TreeNode* &first, TreeNode* &second, TreeNode* &prev) {
+        if (!root) return;
+        
+        inorder_dfs(root->left, first, second, prev);
+        
+        if (prev->val > root->val) {
+            if (!first) {
+                // There may be just one time current elment smaller than prev one!!
+                first = prev;
+                second = root;
+            } else {
+                second = root;
+                return;
+            }
+        }
+        
+        /*
+        if (!first && prev->val > root->val) {
+            first = prev;
+        }
+        if (first && prev->val > root->val) {
+            second = root;
+        }*/
+        
+        prev = root;
+        
+        inorder_dfs(root->right, first, second, prev);
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/recover-binary-search-tree/discuss/32535/No-Fancy-Algorithm-just-Simple-and-Powerful-In-Order-Traversal)
+
+
+
+## 12. LeetCode 103 [Binary Tree Zigzag Level Order Traversal](https://leetcode.com/problems/binary-tree-zigzag-level-order-traversal/)
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(n)
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<vector<int>> zigzagLevelOrder(TreeNode* root) {
+        if (!root) return {};
+        vector<vector<int>> ans;
+        
+        queue<pair<TreeNode*, int>> q;
+        q.push({root, 1});
+        
+        while (!q.empty()) {
+            auto top = q.front();
+            q.pop();
+            
+            if (ans.size() < top.second) {
+                ans.push_back({});
+                if (top.second > 1 && top.second % 2) {
+                    reverse(ans[top.second-2].begin(), ans[top.second-2].end());
+                }
+            }
+            ans[top.second-1].push_back(top.first->val);
+            
+            if (top.first->left) {
+                q.push({top.first->left, top.second+1});
+            }
+            if (top.first->right) {
+                q.push({top.first->right, top.second+1});
+            }
+        }
+        
+        if (ans.size() % 2 == 0) {
+            reverse(ans[ans.size()-1].begin(), ans[ans.size()-1].end());
+        }
+        
+        return ans;
+    }
+};
+
+// improved version
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<vector<int>> zigzagLevelOrder(TreeNode* root) {
+        if (!root) return {};
+        vector<vector<int>> orders;
+        vector<int> level;
+        queue<TreeNode*> q;
+        q.push(root);
+        int depth = 0;
+        
+        while (!q.empty()) {
+            int level_num = q.size();
+            level.clear();
+            for (int i=0; i<level_num; i++) {
+                TreeNode* cur = q.front();
+                q.pop();
+                level.push_back(cur->val);
+                if (cur->left) {
+                    q.push(cur->left);
+                }
+                if (cur->right) {
+                    q.push(cur->right);
+                }
+            }
+            
+            if (depth++ % 2) {
+                reverse(level.begin(), level.end());
+            }
+            orders.push_back(level);
+        }
+        
+        return orders;
+    }
+};
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
