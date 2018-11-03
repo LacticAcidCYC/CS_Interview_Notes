@@ -86,7 +86,7 @@ public:
 
 
 
-## 3. LeetCode 347
+## 3. LeetCode 347 [Top K Frequent Elements](https://leetcode.com/problems/top-k-frequent-elements/)
 
 - auto | auto& | auto&&
 
@@ -534,7 +534,7 @@ public:
 
 
 
-## 10. LeetCode 187
+## 10. LeetCode 187 [Repeated DNA Sequences](https://leetcode.com/problems/repeated-dna-sequences/)
 
 -Set
 

@@ -108,6 +108,83 @@ public:
 
 
 
+## 3. Coffee Machine
+
+### Description
+
+```
+Coffee Machine has a few buttons, [100, 120], [200, 230], [400, 410] (inclusive);
+
+Find if we can get the amount within a given range.
+
+e.g. [90, 120] --> true 
+e.g. [300, 360] --> true  (click b1 3 times or b1 + b2)
+e.g. [300, 400] --> true  (click b1 3 times)
+e.g. [100, 110] --> false
+```
+
+### Solution:
+
+```c++
+#include <iostream>
+#include <vector>
+using namespace std;
+
+bool getCoffee(vector<pair<int, int>> &buttons, pair<int, int> target);
+bool dfs(vector<pair<int, int>> &buttons, pair<int, int> &target, pair<int, int> &range,
+        vector<int> &amounts, int num_btn);
+
+bool getCoffee(vector<pair<int, int>> &buttons, pair<int, int> target) {
+  int n = buttons.size();
+
+  vector<int> amounts(n);
+  for (int i=0; i<n; i++) {
+    amounts[i] = target.second / buttons[i].first;
+  }
+
+  pair<int, int> range{0, 0};
+
+  return dfs(buttons, target, range, amounts, 0);
+}
+
+bool dfs(vector<pair<int, int>> &buttons, pair<int, int> &target, pair<int, int> &range,
+        vector<int> &amounts, int num_btn) {
+  if (num_btn == buttons.size()) {
+    return false;
+  }
+  if (range.first >= target.first && range.second <= target.second) {
+    return true;
+  }
+
+  for (int i=amounts[num_btn]; i>=0; i--) {
+    range.first += i * buttons[num_btn].first;
+    range.second += i * buttons[num_btn].second;
+    // cout << num_btn << "," << i << " || " << range.first << "," << range.second << endl;
+    if (range.first > target.second) {
+      range.first -= i * buttons[num_btn].first;
+      range.second -= i * buttons[num_btn].second;
+      continue;
+    }
+    if (dfs(buttons, target, range, amounts, num_btn+1)) {
+      return true;
+    }
+    range.first -= i * buttons[num_btn].first;
+    range.second -= i * buttons[num_btn].second;
+  }
+
+  return false;
+}
+
+int main() {
+	vector<pair<int, int>> buttons = {{100, 120}, {200, 230}, {400, 410}};
+  pair<int, int> target = {300, 350};
+  cout << getCoffee(buttons, target) << endl;
+	return 0;
+}
+```
+
+
+
 
 
 
