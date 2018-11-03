@@ -811,8 +811,46 @@ public:
 
 ## 15. LeetCode 198 [House Robber](https://leetcode.com/problems/house-robber/)
 
-```c++
+[Analysis](https://leetcode.com/problems/house-robber/discuss/156523/From-good-to-great.-How-to-approach-most-of-DP-problems.)
 
+### (1) DP
+
+```c++
+class Solution {
+public:
+    int rob(vector<int>& nums) {
+        int n = nums.size();
+        if (n == 0) return 0;
+        if (n == 1) return nums[0];
+        vector<int> dp(n+1, 0);
+        dp[0] = 0;
+        dp[1] = nums[0];
+        for (int i=2; i<=n; i++) {
+            dp[i] = max(dp[i-1], nums[i-1] + dp[i-2]);
+        }
+        
+        return dp[n];
+    }
+};
+
+// improved
+class Solution {
+public:
+    int rob(vector<int>& nums) {
+        int n = nums.size();
+        if (n == 0) return 0;
+        if (n == 1) return nums[0];
+        int prev1 = 0;
+        int prev2 = 0;
+        for (const auto &i : nums) {
+            int tmp = prev1;
+            prev1 = max(prev1, i+prev2);
+            prev2 = tmp;
+        }
+        
+        return prev1;
+    }
+};
 ```
 
 
@@ -820,18 +858,157 @@ public:
 ## 16. LeetCode 213 [House Robber II](https://leetcode.com/problems/house-robber-ii/)
 
 ```c++
-
+class Solution {
+public:
+    int rob(vector<int>& nums) {
+        int n = nums.size();
+        if (n == 0) return 0;
+        if (n == 1) return nums[0];
+        
+        int max_val = 0;
+        int prev1 = 0;
+        int prev2 = 0;
+        
+        // 0 -> n-2
+        for (int i=0; i<n-1; i++) {
+            int tmp = prev1;
+            prev1 = max(prev1, nums[i] + prev2);
+            prev2 = tmp;
+        }
+        max_val = prev1;
+        
+        prev1 = 0;
+        prev2 = 0;
+        // n-1 -> 1
+        for (int i=n-1; i>0; i--) {
+            int tmp = prev1;
+            prev1 = max(prev1, nums[i] + prev2);
+            prev2 = tmp;
+        }
+        return max(max_val, prev1);
+    }
+};
 ```
 
 
 
 ## 17. LeetCode 337
 
-```c++
+[solution](https://leetcode.com/problems/house-robber-iii/discuss/79330/Step-by-step-tackling-of-the-problem)
 
+### (1) naive
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    int rob(TreeNode* root) {
+        if (!root) return 0;
+        int res = 0;
+        
+        // rob root
+        if (root->left) {
+            res += (rob(root->left->left) + rob(root->left->right));
+        }
+        if (root->right) {
+            res += (rob(root->right->left) + rob(root->right->right));
+        }
+        
+        // compare rob root and not rob root
+        return max(res + root->val, rob(root->left) + rob(root->right));
+    }
+};
 ```
 
-[solution](https://leetcode.com/problems/house-robber-iii/discuss/79330/Step-by-step-tackling-of-the-problem)
+
+
+### (2) recursive + memo
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    int rob(TreeNode* root) {
+        if (!root) return 0;
+        unordered_map<TreeNode*, int> mp;
+        return helper(mp, root);
+    }
+    
+    int helper(unordered_map<TreeNode*, int> &mp, TreeNode* root) {
+        if (!root) return 0;
+        if (mp.count(root)) {
+            return mp[root];
+        }
+        
+        int res = 0;
+        // rob root
+        if (root->left) {
+            res += (helper(mp, root->left->left) + helper(mp, root->left->right));
+        }
+        if (root->right) {
+            res += (helper(mp, root->right->left) + helper(mp, root->right->right));
+        }
+        
+        mp[root] = max(res + root->val, helper(mp, root->left) + helper(mp, root->right));
+        return mp[root];
+    }
+};
+```
+
+
+
+### (3) DFS + DP
+
+#### Split the result into 2 values
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    int rob(TreeNode* root) {
+        if (!root) return 0;
+        vector<int> res = dfs_dp(root);
+        return max(res[0], res[1]);
+    }
+    
+    vector<int> dfs_dp(TreeNode* root) {
+        if (!root) return {0, 0};
+        
+        vector<int> val(2, 0);
+        vector<int> left = dfs_dp(root->left);
+        vector<int> right = dfs_dp(root->right);
+        
+        val[0] = max(left[0], left[1]) + max(right[0], right[1]);
+        val[1] = root->val + left[0] + right[0];
+        
+        return val;
+    }
+};
+```
 
 
 

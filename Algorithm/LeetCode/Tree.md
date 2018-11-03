@@ -2,6 +2,8 @@
 
 ### BST
 
+### (1) Binary Search (DFS)
+
 ```c++
 // Time Complexity: O(n)
 // Space Complexity: O(n)
@@ -36,6 +38,16 @@ public:
 [another-followup-post](https://leetcode.com/problems/kth-smallest-element-in-a-bst/discuss/63659/What-if-you-could-modify-the-BST-node's-structure)
 
 [other-solutions](https://leetcode.com/problems/kth-smallest-element-in-a-bst/discuss/63734/O(k)-space-O(n)-time-10%2B-short-lines-3-solutions)
+
+
+
+### (2) Inorder-Traversal (DFS)
+
+```c++
+
+```
+
+
 
 
 
@@ -273,7 +285,7 @@ private:
 
 
 
-## 6. LeetCode [Path Sum IV](https://leetcode.com/problems/path-sum-iv/)
+## 6. LeetCode 666 [Path Sum IV](https://leetcode.com/problems/path-sum-iv/)
 
 ### (1) Convert to Tree + DFS
 
@@ -552,7 +564,7 @@ public:
 
 [geeksforgeeks](https://www.geeksforgeeks.org/tree-traversals-inorder-preorder-and-postorder/)
 
-#### (1) Preorder (BFS)
+#### (1) Preorder (Iterative)
 
 Processes the root before the traversals of left and right children.
 
@@ -625,7 +637,7 @@ public:
 
 
 
-#### (2) Inorder (BFS)
+#### (2) Inorder (Iterative)
 
 Processes the root after the traversal of left child and before the traversal of right child.
 
@@ -697,7 +709,7 @@ public:
 
 
 
-#### (3) Postorder (BFS)
+#### (3) Postorder (Iterative)
 
 Processes the root after the traversals of left and right children.
 
