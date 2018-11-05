@@ -79,3 +79,74 @@ public:
 
 
 
+## 2. LeetCode 933
+
+### (1) Deque
+
+```c++
+class RecentCounter {
+public:
+    RecentCounter() {
+        
+    }
+    
+    int ping(int t) {
+        while (!dq.empty()) {
+            int min = dq.back();
+            if (t - min > 3000) {
+                dq.pop_back();
+            } else {
+                break;
+            }
+        }
+        dq.push_front(t);
+        return dq.size();
+    }
+private:
+    deque<int> dq;
+};
+
+/**
+ * Your RecentCounter object will be instantiated and called as such:
+ * RecentCounter* obj = new RecentCounter();
+ * int param_1 = obj->ping(t);
+ */
+```
+
+
+
+### (2) vector + two pointers
+
+```c++
+class RecentCounter {
+    // max capicity should >= 3000 + 1
+    // however, due to the implementation of ping(),
+    // it's possible that there are 3002 elements in the queue
+    // so the min size of queue is 3002
+    static const int POOL_SIZE = 3002;
+    int pings[POOL_SIZE];
+    int st;
+    int ed;
+    int size;
+    
+public:
+    RecentCounter() {
+        st = 0;
+        ed = 0;
+        size = 0;
+    }
+    
+    int ping(int t) {
+        pings[ed++] = t;
+        ed %= POOL_SIZE;
+        size ++;
+
+        while (pings[st] < t - 3000) {
+            st = (++st) % POOL_SIZE;
+            size --;
+        }
+        return size;
+    }
+};
+```
+

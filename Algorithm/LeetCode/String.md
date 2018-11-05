@@ -1092,6 +1092,78 @@ public:
 
 
 
+## 5. LeetCode 936 [Stamping The Sequence](https://leetcode.com/problems/stamping-the-sequence/)
+
+### Explanation
+
+What I basiclly did here is trying to reverse the whole operations.
+The operation token later will be more apperant than the operation token before. The letters which stamped later will cover the letters stamped before and we really don't care about the letters which are covered.
+
+```latex
+ *  *  *  *  *  *  *
+ *  *  * |a  b  c  a|
+|a  b  c  a| b  c  a
+ a |a  b  c  a| c  a
+```
+
+We just try to match the stamp with the target. Since we do not care about the letters which are coverd by others, so we can apply a `*` match any letters. For example:
+
+"aabcaca" -> "a****ca" -> "*****ca"->"*******"
+
+
+
+### Codes:
+
+```c++
+// Time Complexity: O(mn) m=len_s, n=len_t
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    vector<int> movesToStamp(string stamp, string target) {
+        vector<int> stamp_indexes;
+        int len_t = target.length();
+        string stars(len_t, '*');
+        
+        while (target != stars) {
+            int index = match(stamp, target);
+            if (index == len_t) return {};
+            stamp_indexes.push_back(index);
+        }
+        reverse(stamp_indexes.begin(), stamp_indexes.end());
+        return stamp_indexes;
+    }
+    
+    int match(string &stamp, string &target) {
+        int len_t = target.length();
+        int len_s = stamp.length();
+        
+        for (int left=0; left<len_t; left++) {
+            int i = left; // iterator for target
+            int j = 0; // iterator for stamp
+            
+            bool find = false;
+            while (i < len_t && j < len_s && (target[i] == '*' || target[i] == stamp[j])) {
+                if (target[i] == stamp[j]) find = true;
+                i++;
+                j++;
+            }
+            
+            if (j == len_s && find) {
+                for (int k=left; k<left+len_s; k++) {
+                    target[k] = '*';
+                }
+                return left;
+            }
+        }
+        
+        return len_t;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/stamping-the-sequence/discuss/189258/C%2B%2B-Reverse-Operation-30-ms-better-than-DFS)
+
 
 
 

@@ -185,6 +185,75 @@ int main() {
 
 
 
+## 4. LeetCode 934 [Shortest Bridge](https://leetcode.com/problems/shortest-bridge/)
+
+### Expand the Island
+
+[solution](https://leetcode.com/problems/shortest-bridge/discuss/189293/C%2B%2B-BFS-Island-Expansion)
+
+We first paint islands using DFS, so the first island is identified by color 2, and second - by color 3.
+Then we start expanding the second island by paining connected empty area. Each round, we increase the color (4, 5, and so on) so we can keep track of the newly painted area. This ends when we "bump" into the first island.
+
+```c++
+// Time Complexity: O(mn)
+// Space Complexity: O(mn) (recursive stack)
+
+class Solution {
+public:
+    int shortestBridge(vector<vector<int>>& A) {
+        int m = A.size();
+        int n = A[0].size();
+        // paint the two islands with color 2 & 3
+        for (auto i=0, color = 2; i<m; i++) {
+            for (auto j=0; j<n; j++) {
+                if (paint(A, i, j, color)) {
+                    color++;
+                }
+            }
+        }
+        
+        // expand the island with color 3
+        for (auto color=3; ; color++) {
+            for (auto i=0; i<m; i++) {
+                for (auto j=0; j<n; j++) {
+                    if (A[i][j] == color) {
+                        if (expand(A, i-1, j, color+1) || expand(A, i, j+1, color+1) ||
+                            expand(A, i+1, j, color+1) || expand(A, i, j-1, color+1)) {
+                            return color - 3;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    bool paint(vector<vector<int>>& matrix, int row, int col, int color) {
+        if (row < 0 || row == matrix.size() || col < 0 || col == matrix.size() || matrix[row][col] != 1) {
+            return false;
+        }
+        matrix[row][col] = color;
+        // paint the 4 adjacent grids
+        paint(matrix,row-1,col,color);
+        paint(matrix,row,col+1,color);
+        paint(matrix,row+1,col,color);
+        paint(matrix,row,col-1,color);
+        return true;
+    }
+    
+    bool expand(vector<vector<int>>& matrix, int row, int col, int color) {
+        if (row < 0 || row == matrix.size() || col < 0 || col == matrix.size()) {
+            return false;
+        }
+        if(matrix[row][col] == 0) {
+            matrix[row][col] = color;
+        }
+        return matrix[row][col] == 2;
+    }
+};
+```
+
+
+
 
 
 

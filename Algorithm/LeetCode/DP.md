@@ -1012,7 +1012,61 @@ public:
 
 
 
+## 18. LeetCode 935 [Knight Dialer](https://leetcode.com/problems/knight-dialer/)
 
+Let dp(i)(j) stand for the number of the distinct number end with **i** after pressing **j** times.
+
+Initialization: dp(i)(0) = 1 for i in 0-9
+
+Generally, we use dp(i)(j-1) to update the dp(next)(j) for all the next number which number **i** can jump to.
+
+Finally, we can just sum up dp(i)(N-1) for i in 0-9
+
+```c++
+class Solution {
+public:
+    int knightDialer(int N) {
+        const int mod = 1000000007;
+        if (N == 1) return 10;
+        vector<vector<int>> steps = {
+            {4,6},
+            {6,8},
+            {7,9},
+            {4,8},
+            {0,3,9},
+            {},
+            {0,1,7},
+            {2,6},
+            {1,3},
+            {2,4}
+        };
+        
+        vector<vector<int>> dp(10, vector<int>(N, 0));
+        for (int i=0; i<10; i++) {
+            dp[i][0] = 1;
+        }
+        
+        for (int j=1; j<N; j++) {
+            for (int i=0; i<10; i++) {
+                int pre = dp[i][j-1];
+                if (pre == 0) continue;
+                for (int k=0; k<steps[i].size(); k++) {
+                    int next = steps[i][k];
+                    dp[next][j] = (dp[next][j] + pre) % mod;
+                }
+            }
+        }
+        
+        int res = 0;
+        for (int i=0; i<10; i++) {
+            //cout << dp[i][N-1] << endl;
+            res = (res + dp[i][N-1]) % mod;
+        }
+        
+        return res;
+    }
+};
+```
 
 
 
