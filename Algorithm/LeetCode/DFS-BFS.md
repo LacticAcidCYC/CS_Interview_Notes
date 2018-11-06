@@ -108,7 +108,7 @@ public:
 
 
 
-## 3. Coffee Machine
+## 3. Coffee Machine (Mock Interview Problem)
 
 ### Description
 

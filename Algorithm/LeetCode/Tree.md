@@ -951,15 +951,404 @@ public:
 
 
 
+## 13. LeetCode 116 [Populating Next Right Pointers in Each Node](https://leetcode.com/problems/populating-next-right-pointers-in-each-node/)
+
+### (1) Iterative
+
+kind of level order traversal (root->left->right->left.left->left.right....)
+
+```c++
+/**
+ * Definition for binary tree with next pointer.
+ * struct TreeLinkNode {
+ *  int val;
+ *  TreeLinkNode *left, *right, *next;
+ *  TreeLinkNode(int x) : val(x), left(NULL), right(NULL), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    void connect(TreeLinkNode *root) {
+        if(!root || !root->left) {
+            return;
+        }
+        TreeLinkNode *iter = NULL;
+        while(root->left) {
+            iter = root;
+            iter->left->next = iter->right;
+            while(iter->next) {
+                iter->right->next = iter->next->left;
+                iter = iter->next;
+                iter->left->next = iter->right;
+            }
+            root = root->left;
+        }
+    }
+};
+```
+
+
+
+### (2) Recursive
+
+Connect left child and right child;
+
+if next exists, connect right child with next left child; (connect left subtree and right subtree)
+
+Recursively on left subtree and right sub then.
+
+```c++
+/**
+ * Definition for binary tree with next pointer.
+ * struct TreeLinkNode {
+ *  int val;
+ *  TreeLinkNode *left, *right, *next;
+ *  TreeLinkNode(int x) : val(x), left(NULL), right(NULL), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    void connect(TreeLinkNode *root) {
+        if (!root || !root->left) return;
+        
+        root->left->next = root->right;
+        if (root->next) {
+            root->right->next = root->next->left;
+        }
+        connect(root->left);
+        connect(root->right);
+    }
+};
+```
 
 
 
 
 
+## 14. LeetCode 117 [Populating Next Right Pointers in Each Node II](https://leetcode.com/problems/populating-next-right-pointers-in-each-node-ii/)
+
+### (1) Iterative
+
+```c++
+/**
+ * Definition for binary tree with next pointer.
+ * struct TreeLinkNode {
+ *  int val;
+ *  TreeLinkNode *left, *right, *next;
+ *  TreeLinkNode(int x) : val(x), left(NULL), right(NULL), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    void connect(TreeLinkNode *root) {
+        if (!root) return;
+        TreeLinkNode* cur = root;
+        TreeLinkNode* next_itr = NULL;
+        TreeLinkNode* next_head = NULL;
+        
+        while (cur) {
+            while (cur) {
+                if (cur->left) {
+                    if (next_itr) {
+                        next_itr->next = cur->left;
+                    } else {
+                        next_head = cur->left;
+                    }
+                    next_itr = cur->left;
+                }
+                
+                if (cur->right) {
+                    if (next_itr) {
+                        next_itr->next = cur->right;
+                    } else {
+                        next_head = cur->right;
+                    }
+                    next_itr = cur->right;
+                }
+                cur = cur->next;
+            }
+            
+            cur = next_head;
+            next_itr = NULL;
+            next_head = NULL;
+        }
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/populating-next-right-pointers-in-each-node-ii/discuss/37828/O(1)-space-O(n)-complexity-Iterative-Solution)
 
 
 
+### (2) Recursive
 
+```c++
+/**
+ * Definition for binary tree with next pointer.
+ * struct TreeLinkNode {
+ *  int val;
+ *  TreeLinkNode *left, *right, *next;
+ *  TreeLinkNode(int x) : val(x), left(NULL), right(NULL), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    void connect(TreeLinkNode *root) {
+        if (!root) return;
+        TreeLinkNode *head = new TreeLinkNode(0);
+        TreeLinkNode *it = head;
+        TreeLinkNode *cur = root;
+        
+        while (cur) {
+            if (cur->left) {
+                it->next = cur->left;
+                it = it->next;
+            }
+            if (cur->right) {
+                it->next = cur->right;
+                it = it->next;
+            }
+            cur = cur->next;
+        }
+        
+        connect(head->next);
+    }
+};
+```
+
+
+
+## 15. LeetCode [Convert Sorted Array to Binary Search Tree](https://leetcode.com/problems/convert-sorted-array-to-binary-search-tree/)
+
+### Binary search
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(logn)
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* sortedArrayToBST(vector<int>& nums) {
+        if (nums.empty()) return NULL;
+        return helper(nums, 0, nums.size()-1);
+    }
+    
+    TreeNode* helper(vector<int>& nums, int start, int end) {
+        if (start > end) return NULL;
+        int mid = start + (end - start) / 2;
+        TreeNode* root = new TreeNode(nums[mid]);
+        root->left = helper(nums, start, mid-1);;
+        root->right = helper(nums, mid+1, end);
+        
+        return root;
+    }
+};
+```
+
+
+
+## 16. LeetCode 235 [Lowest Common Ancestor of a Binary Search Tree](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/)
+
+### (1) Recursive
+
+```c++
+// Time Complexity: O(n) (worse case: a long tree like a list)
+// Space Complexity: O(h)
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        if (p->val > q->val) {
+            return lowestCommonAncestor(root, q, p);
+        }
+        
+        if (root->val > q->val) {
+            return lowestCommonAncestor(root->left, p, q);
+        } else if (root->val < p->val) {
+            return lowestCommonAncestor(root->right, p, q);
+        } else {
+            return root;
+        }
+    }
+};
+```
+
+
+
+### (2) Iterative
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        if (p->val > q->val) {
+            return lowestCommonAncestor(root, q, p);
+        }
+        
+        TreeNode* cur = root;
+        
+        while (cur) {
+            if (cur->val > q->val) {
+                cur = cur->left;
+            } else if (cur->val < p->val) {
+                cur = cur->right;
+            } else {
+                return cur;
+            }
+        }
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/discuss/64980/C%2B%2B-Recursive-and-Iterative)
+
+
+
+## 17. LeetCode 236 [Lowest Common Ancestor of a Binary Tree](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/)
+
+### Idea
+
+A brute-force approach is to see if the nodes are in different subtrees of the root, or if one of the nodes is the root. In this case, the root must be the LCA. If both nodes are in the same subtree, we recurse on that subtree. The time complexity will be O(n^2), where n is the number of the nodes. And the worse case is these two nodes are at the bottom of the tree.
+
+For a better time complexity, we just want to do one-time pass on the tree. If two nodes are in a subtree, we want to directly calculate the LCA, instead of returning a boolean value indicating that both nodes are in that subtree. Thus, the helper function below returns a pair with two value--the first is an integer indicating how many of the two nodes are presented in that subtree, and the second is their LCA, if both of them are present.
+
+The algorithm is structurally similar to a recursive postorder traversal, and the time complexity are the same, which are O(n) and O(h) (h is the height of the tree).
+
+### (1) Recursive (similar to postorder traversal)
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(logn)
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        return LCAHelper(root, p, q).second;
+    }
+    
+    pair<int, TreeNode*> LCAHelper(TreeNode* root, TreeNode* p, TreeNode* q) {
+        if (!root) {
+            return {0, NULL};
+        }
+        
+        auto left_res = LCAHelper(root->left, p, q);
+        if (left_res.first == 2) {
+            return left_res;
+        }
+        
+        auto right_res = LCAHelper(root->right, p, q);
+        if (right_res.first == 2) {
+            return right_res;
+        }
+        
+        int numberOfNodes = left_res.first + right_res.first + (root->val == p->val) + (root->val == q->val);
+        return {numberOfNodes, numberOfNodes == 2 ? root : NULL};
+    }
+};
+```
+
+[mypost](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/discuss/190223/c%2B%2B-recursive-solution-with-explanation)
+
+
+
+### (2) Recursive (super short)
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        if (!root || root == p || root == q) return root;
+        TreeNode* left = lowestCommonAncestor(root->left, p, q);
+        TreeNode* right = lowestCommonAncestor(root->right, p, q);
+        return !left ? right : !right ? left : root;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/discuss/65225/4-lines-C%2B%2BJavaPythonRuby)
+
+
+
+### (3) Iterative 
+
+```c++
+class Solution {
+    struct Frame {
+        TreeNode* node;
+        Frame* parent;
+        vector<TreeNode*> subs;
+    };
+public:
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        Frame answer;
+        stack<Frame> stack;
+        stack.push({root, &answer});
+        while (stack.size()) {
+            Frame *top = &stack.top(), *parent = top->parent;
+            TreeNode *node = top->node;
+            if (!node || node == p || node == q) {
+                parent->subs.push_back(node);
+                stack.pop();
+            } else if (top->subs.empty()) {
+                stack.push({node->right, top});
+                stack.push({node->left, top});
+            } else {
+                TreeNode *left = top->subs[0], *right = top->subs[1];
+                parent->subs.push_back(!left ? right : !right ? left : node);
+                stack.pop();
+            }
+        }
+        return answer.subs[0];
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/discuss/65245/Iterative-Solutions-in-PythonC%2B%2B)
 
 
 

@@ -1166,9 +1166,71 @@ public:
 
 
 
+## 6. LeetCode 115 [Distinct Subsequences](https://leetcode.com/problems/distinct-subsequences/)
+
+### DP
+
+```c++
+// Time Complexity: O(mn) m=len_s, n=len_t
+// Space Complexity: O(mn)
+
+class Solution {
+public:
+    int numDistinct(string s, string t) {
+        int len_s = s.length();
+        int len_t = t.length();
+        vector<vector<int>> dp(len_s+1, vector<int>(len_t+1, 0));
+        
+        for (int i=0; i<=len_s; i++) {
+            dp[i][0] = 1;
+        }
+        
+        for (int i=1; i<=len_s; i++) {
+            for (int j=1; j<=len_t; j++) {
+                if (s[i-1] != t[j-1]) {
+                    dp[i][j] = dp[i-1][j];
+                } else {
+                    dp[i][j] = dp[i-1][j] + dp[i-1][j-1];
+                }
+            }
+        }
+        
+        return dp[len_s][len_t];
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/distinct-subsequences/discuss/37316/7-10-lines-C%2B%2B-Solutions-with-Detailed-Explanations-(O(m*n)-time-and-O(m)-space)
 
 
 
+## 7. LeetCode 10 [Regular Expression Matching](https://leetcode.com/problems/regular-expression-matching/)
+
+### DP
+
+```c++
+class Solution {
+public:
+    bool isMatch(string s, string p) {
+        int len1 = s.length();
+        int len2 = p.length();
+        vector<vector<bool>> match(len1+1, vector<bool>(len2+1, false));
+        match[0][0] = true;
+        for(int i=0; i<=len1; i++) {
+            for(int j=1; j<=len2; j++) {
+                if(p[j-1] == '*') {
+                    match[i][j] = (j > 1 && match[i][j-2]) || ((i > 0 && (p[j-2] == s[i-1] || p[j-2] == '.')  && match[i-1][j]));
+                } else {
+                    match[i][j] = i > 0 && (s[i-1] == p[j-1] || p[j-1] == '.') && match[i-1][j-1];
+                }
+            }
+        }
+        return match[len1][len2];
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/regular-expression-matching/discuss/5684/9-lines-16ms-C%2B%2B-DP-Solutions-with-Explanations)
 
 
 
