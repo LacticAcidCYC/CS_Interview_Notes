@@ -602,7 +602,7 @@ public:
 };
 ```
 
-DFS:
+#### Recursive
 
 ```c++
 /**
@@ -676,7 +676,7 @@ public:
 };
 ```
 
-DFS:
+#### Recursive
 
 ```c++
 /**
@@ -713,6 +713,53 @@ public:
 
 Processes the root after the traversals of left and right children.
 
+#### Normal
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<int> postorderTraversal(TreeNode* root) {
+        if (!root) return {};
+        vector<int> post;
+        stack<TreeNode*> st;
+        TreeNode* it = root;
+        TreeNode* last = NULL;
+        
+        while (!st.empty() || it) {
+            if (it) {
+                st.push(it);
+                it = it->left;
+            } else {
+                TreeNode* tmp = st.top();
+                // if current node has right child and right child has not been traversed
+                if (tmp->right && last != tmp->right) {
+                    it = tmp->right;
+                } else {
+                    post.push_back(tmp->val);
+                    last = tmp;
+                    st.pop();
+                }
+            }
+        }
+        
+        return post;
+    }
+};
+```
+
+
+
+#### Preorder + reverse
+
 ```c++
 /**
  * Definition for a binary tree node.
@@ -747,7 +794,7 @@ public:
 };
 ```
 
-DFS:
+#### Recursive
 
 ```c++
 /**
@@ -1233,6 +1280,8 @@ public:
 
 ## 17. LeetCode 236 [Lowest Common Ancestor of a Binary Tree](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/)
 
+[geeksforgeeks](https://www.geeksforgeeks.org/lowest-common-ancestor-binary-tree-set-1/): idea of solution 2,3,4 below
+
 ### Idea
 
 A brute-force approach is to see if the nodes are in different subtrees of the root, or if one of the nodes is the root. In this case, the root must be the LCA. If both nodes are in the same subtree, we recurse on that subtree. The time complexity will be O(n^2), where n is the number of the nodes. And the worse case is these two nodes are at the bottom of the tree.
@@ -1277,7 +1326,7 @@ public:
             return right_res;
         }
         
-        int numberOfNodes = left_res.first + right_res.first + (root->val == p->val) + (root->val == q->val);
+        int numberOfNodes = left_res.first + right_res.first + (root == p) + (root == q);
         return {numberOfNodes, numberOfNodes == 2 ? root : NULL};
     }
 };
@@ -1314,7 +1363,7 @@ public:
 
 
 
-### (3) Iterative 
+### (3) Iterative (iterative version of method (2))
 
 ```c++
 class Solution {
@@ -1352,11 +1401,387 @@ public:
 
 
 
+### (4) Iterative Post-order Traversal Solution
+
+Use post-order traversal to traverse the path and find the path to node p and q, then compare the two paths to find the last matched number (node).
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(logn)
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        if (!root || root == p || root == q) return root;
+        
+        TreeNode *it = root, *last = NULL;
+        vector<TreeNode*> st; // use for stack and path storage
+        vector<TreeNode*> path2p, path2q;
+        
+        while (path2p.empty() || path2q.empty()) {
+            // post-order traversal
+            if (it) {
+                st.push_back(it);
+                if (it == p) path2p = st;
+                if (it == q) path2q = st;
+                it = it->left;
+            } else {
+                TreeNode* tmp = st.back();
+                if (tmp->right && tmp->right != last) {
+                    it = tmp->right;
+                } else {
+                    last = tmp;
+                    st.pop_back();
+                }
+            }
+        }
+        
+        int n = min(path2p.size(), path2q.size());
+        for (int i=0; i<n; i++) {
+            if (path2p[i] != path2q[i]) {
+                return path2p[i-1];
+            }
+        }
+        
+        return path2p[n-1];
+    }
+};
+```
+
+
+
+## 18. LeetCode 255 [Verify Preorder Sequence in Binary Search Tree](https://leetcode.com/problems/verify-preorder-sequence-in-binary-search-tree/)
+
+### Explanation
+
+Kinda simulate the traversal, keeping a stack of nodes (just their values) of which we're still in the left subtree. If the next number is smaller than the last stack value, then we're still in the left subtree of all stack nodes, so just push the new one onto the stack. But before that, pop all smaller ancestor values, as we must now be in their right subtrees (or even further, in the right subtree of an ancestor). Also, use the popped values as a lower bound, since being in their right subtree means we must never come across a smaller number anymore.
+
+### (1) O(n) time and O(n) space
+
+```c++
+class Solution {
+public:
+    bool verifyPreorder(vector<int>& preorder) {
+        stack<int> path;
+        int lower_bound = INT_MIN;
+        for (auto const &i : preorder) {
+            if (i < lower_bound) {
+                return false;
+            }
+            while (!path.empty() && i > path.top()) {
+                lower_bound = path.top();
+                path.pop();
+            }
+            path.push(i);
+        }
+        
+        return true;
+    }
+};
+```
+
+[solution1](https://leetcode.com/problems/verify-preorder-sequence-in-binary-search-tree/discuss/68185/C%2B%2B-easy-to-understand-solution-with-thought-process-and-detailed-explanation)
+
+[solution2](https://leetcode.com/problems/verify-preorder-sequence-in-binary-search-tree/discuss/68142/Java-O(n)-and-O(1)-extra-space)
+
+
+
+### (2) O(1) space (abusing the given array)
+
+```c++
+class Solution {
+public:
+    bool verifyPreorder(vector<int>& preorder) {
+        int lower_bound = INT_MIN;
+        int index = -1;
+        for (auto number : preorder) {
+            if (number < lower_bound) {
+                return false;
+            }
+            while (index >= 0 && number > preorder[index]) {
+                lower_bound = preorder[index--];
+            }
+            preorder[++index] = number;
+        }
+        
+        return true;
+    }
+};
+```
+
+
+
+## 19. LeetCode [Closest Binary Search Tree Value](https://leetcode.com/problems/closest-binary-search-tree-value/)
+
+### (1) Binary Search + iterative
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    int closestValue(TreeNode* root, double target) {
+        int upper_bound = root->val;
+        int lower_bound = root->val;
+        while (root) {
+            if (root->val == target) return root->val;
+            else if (root->val > target) {
+                upper_bound = root->val;
+                root = root->left;
+            } else {
+                lower_bound = root->val;
+                root = root->right;
+            }
+        }
+        return abs(target-upper_bound) > abs(target-lower_bound) ? lower_bound : upper_bound;
+    }
+};
+```
+
+
+
+### (2) Binary Search (shorter version)
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    int closestValue(TreeNode* root, double target) {
+        int closest = root->val;
+        while (root) {
+            if (abs(closest-target) >= abs(root->val-target)) {
+                closest = root->val;
+            }
+            root = target < root->val ? root->left : root->right;
+        }
+        return closest;
+    }
+};
+```
+
+
+
+### (3) Recursive (fancy)
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    int closestValue(TreeNode* root, double target) {
+        auto a = root->val;
+        auto child = target < a ? root->left : root->right;
+        if (!child) return a;
+        auto b = closestValue(child, target);
+        return abs(target-a) >= abs(target-b) ? b : a;
+    }
+};
+```
 
 
 
 
 
+## 20. LeetCode
+
+### (1) Using two stack + recursive
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<int> closestKValues(TreeNode* root, double target, int k) {
+        vector<int> res;
+        
+        stack<int> sp; // predecessors
+        stack<int> ss; // successors
+        
+        inorder_traverse(root, sp, false, target);
+        inorder_traverse(root, ss, true, target);
+        
+        while (k--) {
+            if (sp.empty()) {
+                res.push_back(ss.top());
+                ss.pop();
+            } else if (ss.empty()) {
+                res.push_back(sp.top());
+                sp.pop();
+            } else if (abs(ss.top() - target) < abs(sp.top() - target)) {
+                res.push_back(ss.top());
+                ss.pop();
+            } else {
+                res.push_back(sp.top());
+                sp.pop();
+            }
+        }
+        
+        return res;
+    }
+    
+    void inorder_traverse(TreeNode* root, stack<int> &st, bool reverse, double target) {
+        if (!root) return;
+        
+        inorder_traverse(reverse ? root->right : root->left, st, reverse, target);
+        if ((!reverse && root->val > target) || (reverse && root->val <= target)) return;
+        st.push(root->val);
+        inorder_traverse(reverse ? root->left : root->right, st, reverse, target);
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/closest-binary-search-tree-value-ii/discuss/70511/AC-clean-Java-solution-using-two-stacks)
+
+
+
+### (2) Using two stack + successor + predecessor
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<int> closestKValues(TreeNode* root, double target, int k) {
+        vector<int> res;
+        stack<TreeNode*> pre, suc;
+        TreeNode* it = root;
+        
+        while (it) {
+            if (target <= it->val) {
+                suc.push(it);
+                it = it->left;
+            } else {
+                pre.push(it);
+                it = it->right;
+            }
+        }
+        
+        while (k--) {
+            if (pre.empty() && suc.empty()) {
+                break;
+            } else if (pre.empty() || !suc.empty() && (suc.top()->val - target < target - pre.top()->val)) {
+                res.push_back(getSuccessor(suc));
+            } else {
+                res.push_back(getPredecessor(pre));
+            }
+        }
+        
+        return res;
+    }
+    
+    int getSuccessor(stack<TreeNode*> &suc) {
+        TreeNode* top = suc.top();
+        suc.pop();
+        TreeNode* it = top->right;
+        while (it) {
+            suc.push(it);
+            it = it->left;
+        }
+        return top->val;
+    }
+    
+    int getPredecessor(stack<TreeNode*> &pre) {
+        TreeNode* top = pre.top();
+        pre.pop();
+        TreeNode* it = top->left;
+        while (it) {
+            pre.push(it);
+            it = it->right;
+        }
+        return top->val;
+    }
+    
+};
+```
+
+[other solution](https://leetcode.com/problems/closest-binary-search-tree-value-ii/discuss/70499/Java-5ms-iterative-following-hint-O(klogn)-time-and-space)
+
+
+
+### (3) Using deque
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<int> closestKValues(TreeNode* root, double target, int k) {
+        deque<int> dq;
+        
+        inorder_traverse(root, dq, target);
+        
+        while (dq.size() > k) {
+            if (abs(dq.front() - target) < abs(dq.back() - target)) {
+                dq.pop_back();
+            } else {
+                dq.pop_front();
+            }
+        }
+        
+        return vector<int>(dq.begin(), dq.end());
+    }
+    
+    void inorder_traverse(TreeNode* root, deque<int> &dq, double target) {
+        if (!root) return;
+        
+        inorder_traverse(root->left, dq, target);
+        dq.push_back(root->val);
+        inorder_traverse(root->right, dq, target);
+    }
+};
+```
 
 
 
