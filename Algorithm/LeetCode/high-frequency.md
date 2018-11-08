@@ -1069,6 +1069,341 @@ public:
 
 
 
+## 20. LeetCode 289 [Game of Life](https://leetcode.com/problems/game-of-life/)
+
+### (1) original
+
+```c++
+class Solution {
+public:
+    void gameOfLife(vector<vector<int>>& board) {
+        int m = board.size();
+        int n = board[0].size();
+        
+        for (int i=0; i<m; i++) {
+            for (int j=0; j<n; j++) {
+                int live_cnt = countNeighbourLiveCell(board, i, j);
+                if (board[i][j] == 1) {
+                    if (live_cnt >= 2 && live_cnt <= 3) {
+                        board[i][j] = 3;
+                    }
+                } else {
+                    if (live_cnt == 3) {
+                        board[i][j] = 2;
+                    }
+                }
+            }
+        }
+        
+        for (int i=0; i<m; i++) {
+            for (int j=0; j<n; j++) {
+                board[i][j] >>= 1;
+            }
+        }
+    }
+    
+private:
+    int countNeighbourLiveCell(vector<vector<int>>& board, int r, int c) {
+        const vector<vector<int>> dirs = {
+            {-1,-1},{-1,0},{-1,1},{0,-1},{0,1},{1,-1},{1,0},{1,1}
+        };
+        int m = board.size();
+        int n = board[0].size();
+        int cnt = 0;
+        
+        for (int i=0; i<8; i++) {
+            int nr = r + dirs[i][0];
+            int nc = c + dirs[i][1];
+            if (nr >= 0 && nr < m && nc >= 0 && nc < n) {
+                cnt += board[nr][nc] & 1;
+            }
+        }
+        return cnt;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/game-of-life/discuss/73230/C%2B%2B-O(1)-space-O(mn)-time)
+
+
+
+### (2) Neat
+
+```c++
+class Solution {
+public:
+    void gameOfLife(vector<vector<int>>& board) {
+        int m = board.size();
+        int n = board[0].size();
+        
+        for (int i=0; i<m; i++) {
+            for (int j=0; j<n; j++) {
+                // initialize to -1 for 1 and 0 for 0
+                int live_cnt = -board[i][j];
+                for (int r=max(i-1,0); r<min(i+2,m); r++) {
+                    for (int c=max(j-1,0); c<min(j+2,n); c++) {
+                        live_cnt += board[r][c] & 1;
+                    }
+                }
+                // live_cnt == 2 && board[i][j] == 1 || live_cnt == 3
+                if ((live_cnt | board[i][j]) == 3) {
+                    board[i][j] |= 2;
+                }
+            }
+        }
+        
+        for (int i=0; i<m; i++) {
+            for (int j=0; j<n; j++) {
+                board[i][j] >>= 1;
+            }
+        }
+    }
+};
+```
+
+
+
+## 21. LeetCode 238 [Product of Array Except Self](https://leetcode.com/problems/product-of-array-except-self/)
+
+```c++
+class Solution {
+public:
+    vector<int> productExceptSelf(vector<int>& nums) {
+        int product = 1;
+        int n = nums.size();
+        vector<int> res(n, 0);
+        for (int i=1; i<=n; i++) {
+            res[i-1] = product;
+            product *= nums[i-1];
+        }
+        product = 1;
+        for (int i=n-1; i>=0; i--) {
+            res[i] *= product;
+            product *= nums[i];
+        }
+        
+        return res;
+    }
+};
+```
+
+
+
+## 22. LeetCode 457 [Circular Array Loop](https://leetcode.com/problems/circular-array-loop/)
+
+[problem clarification](https://leetcode.com/problems/circular-array-loop/discuss/94146/I-cannot-understand-why-test-case-2-1-1-2-2-gives-false)
+
+```c++
+class Solution {
+public:
+    bool circularArrayLoop(vector<int>& nums) {
+        int n = nums.size();
+        for (int i=0; i<n; i++) {
+            if (nums[i] == 0) {
+                continue;
+            }
+            int slow = i, fast = getNext(nums, i);
+            int head_val = nums[i];
+            while (head_val * nums[fast] > 0
+                && head_val * nums[getNext(nums, fast)] > 0) {
+                if (slow == fast) {
+                    // check for one element loop
+                    if (fast == getNext(nums, fast)) {
+                        break;
+                    }
+                    return true;
+                }
+                slow = getNext(nums, slow);
+                fast = getNext(nums, getNext(nums, fast));
+            }
+            // loop not found, set all the visited elements to 0
+            slow = i;
+            while (nums[slow] * head_val > 0) {
+                int next = getNext(nums, slow);
+                nums[slow] = 0;
+                slow = next;
+            }
+        }
+        return false;
+    }
+    
+    int getNext(vector<int> &nums, int index) {
+        int n = nums.size();
+        int next = index + nums[index];
+        return next > 0 ? next % n : (next % n) + n;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/circular-array-loop/discuss/94148/Java-SlowFast-Pointer-Solution)
+
+
+
+## 23. LeetCode 403 [Frog Jump]
+
+```c++
+
+```
+
+
+
+## 24. LeetCode 339 [Nested List Weight Sum](https://leetcode.com/problems/nested-list-weight-sum/)
+
+### DFS
+
+```c++
+/**
+ * // This is the interface that allows for creating nested lists.
+ * // You should not implement it, or speculate about its implementation
+ * class NestedInteger {
+ *   public:
+ *     // Constructor initializes an empty nested list.
+ *     NestedInteger();
+ *
+ *     // Constructor initializes a single integer.
+ *     NestedInteger(int value);
+ *
+ *     // Return true if this NestedInteger holds a single integer, rather than a nested list.
+ *     bool isInteger() const;
+ *
+ *     // Return the single integer that this NestedInteger holds, if it holds a single integer
+ *     // The result is undefined if this NestedInteger holds a nested list
+ *     int getInteger() const;
+ *
+ *     // Set this NestedInteger to hold a single integer.
+ *     void setInteger(int value);
+ *
+ *     // Set this NestedInteger to hold a nested list and adds a nested integer to it.
+ *     void add(const NestedInteger &ni);
+ *
+ *     // Return the nested list that this NestedInteger holds, if it holds a nested list
+ *     // The result is undefined if this NestedInteger holds a single integer
+ *     const vector<NestedInteger> &getList() const;
+ * };
+ */
+class Solution {
+public:
+    int depthSum(vector<NestedInteger>& nestedList) {
+        int sum = 0;
+        for (auto const &ni : nestedList) {
+            sum += cal(ni, 1);
+        }
+        return sum;
+    }
+    
+    int cal(NestedInteger ni, int depth) {
+        int val = 0;
+        if (ni.isInteger()) {
+            return ni.getInteger() * depth;
+        } else {
+            for (auto const &i : ni.getList()) {
+                val += cal(i, depth+1);
+            }
+        }
+        return val;
+    }
+};
+
+// shorter
+class Solution {
+public:
+    int depthSum(vector<NestedInteger>& nestedList) {
+        return helper(nestedList, 1);
+    }
+    
+private:
+    int helper(vector<NestedInteger>& nestedList, int depth) {
+        int res = 0;
+        for(NestedInteger ni : nestedList) {
+            res += ni.isInteger() ? ni.getInteger() * depth : helper(ni.getList(), depth+1);
+        }
+        return res;
+    }
+};
+```
+
+
+
+## 25. LeetCode 364 [Nested List Weight Sum II](https://leetcode.com/problems/nested-list-weight-sum-ii/)
+
+### BFS
+
+First sum up the integer with the "highest" depth->prevSum;
+
+Pass the prevSum to next level and sum up with the curSum on that level;
+
+On each level, create a NestedInteger vector to store the list on that level for the next level calculation.
+
+e.g.
+
+[1,[4,[6,[8]]]]
+
+1
+
+1+4
+
+1+4+6
+
+1+4+6+8
+
+Sum = 36
+
+```c++
+/**
+ * // This is the interface that allows for creating nested lists.
+ * // You should not implement it, or speculate about its implementation
+ * class NestedInteger {
+ *   public:
+ *     // Constructor initializes an empty nested list.
+ *     NestedInteger();
+ *
+ *     // Constructor initializes a single integer.
+ *     NestedInteger(int value);
+ *
+ *     // Return true if this NestedInteger holds a single integer, rather than a nested list.
+ *     bool isInteger() const;
+ *
+ *     // Return the single integer that this NestedInteger holds, if it holds a single integer
+ *     // The result is undefined if this NestedInteger holds a nested list
+ *     int getInteger() const;
+ *
+ *     // Set this NestedInteger to hold a single integer.
+ *     void setInteger(int value);
+ *
+ *     // Set this NestedInteger to hold a nested list and adds a nested integer to it.
+ *     void add(const NestedInteger &ni);
+ *
+ *     // Return the nested list that this NestedInteger holds, if it holds a nested list
+ *     // The result is undefined if this NestedInteger holds a single integer
+ *     const vector<NestedInteger> &getList() const;
+ * };
+ */
+class Solution {
+public:
+    int depthSumInverse(vector<NestedInteger>& nestedList) {
+        return helper(nestedList, 0);
+    }
+    
+    int helper(vector<NestedInteger>& nestedList, int prevSum) {
+        int curSum = prevSum;
+        vector<NestedInteger> lists;
+        for (auto ni : nestedList) {
+            if (ni.isInteger()) {
+                curSum += ni.getInteger();
+            } else {
+                for (auto nInt : ni.getList()) {
+                    lists.push_back(nInt);
+                }
+            }
+        }
+        int listSum = lists.empty() ? 0 : helper(lists, curSum);
+        return listSum + curSum;
+    }
+};
+```
+
+
+
 
 
 
