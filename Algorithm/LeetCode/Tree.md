@@ -1839,9 +1839,338 @@ public:
 
 
 
+## 22. LeetCode 199 [Binary Tree Right Side View](https://leetcode.com/problems/binary-tree-right-side-view/)
+
+### BFS (level order traversal)
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<int> rightSideView(TreeNode* root) {
+        vector<int> res;
+        if (!root) return res;
+        vector<int> level;
+        queue<TreeNode*> q;
+        q.push(root);
+        
+        while (!q.empty()) {
+            level.clear();
+            int n = q.size();
+            for (int i=0; i<n; i++) {
+                auto node = q.front();
+                q.pop();
+                level.push_back(node->val);
+                if (node->left) {
+                    q.push(node->left);
+                }
+                if (node->right) {
+                    q.push(node->right);
+                }
+            }
+            res.push_back(level.back());
+        }
+        
+        return res;
+    }
+};
+```
 
 
 
+## 23. LeetCode 545 [Boundary of Binary Tree](https://leetcode.com/problems/boundary-of-binary-tree/)
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<int> boundaryOfBinaryTree(TreeNode* root) {
+        vector<int> res;
+        if (!root) return res;
+        if (!root->left && !root->right) return {root->val};
+        
+        // add root
+        res.push_back(root->val);
+        
+        // find left-most
+        getLeftBoundary(root->left, res);
+        
+        // find leaves
+        getLeaves(root->left, res);
+        getLeaves(root->right, res);
+        
+        // find right-most
+        getRightBoundary(root->right, res);
+        
+        return res;
+    }
+    
+    void getLeftBoundary(TreeNode* root, vector<int>& res) {
+        if (!root || !root->left && !root->right) return;
+        res.push_back(root->val);
+        if (root->left) {
+            getLeftBoundary(root->left, res);
+        } else { 
+            getLeftBoundary(root->right, res);
+        }
+    }
+    
+    void getRightBoundary(TreeNode* root, vector<int>& res) {
+        if (!root || !root->left && !root->right) return;
+        if (root->right) {
+            getRightBoundary(root->right, res);
+        } else {
+            getRightBoundary(root->left, res);
+        }
+        res.push_back(root->val); // reverse order
+    }
+    
+    void getLeaves(TreeNode* root, vector<int> &res) {
+        if (!root) return;
+        if (!root->left && !root->right) {
+            res.push_back(root->val);
+            return;
+        }
+        getLeaves(root->left, res);
+        getLeaves(root->right, res);
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/boundary-of-binary-tree/discuss/101280/Java(12ms)-left-boundary-left-leaves-right-leaves-right-boundary)
+
+
+
+## 24. LeetCode 297 [Serialize and Deserialize Binary Tree](https://leetcode.com/problems/serialize-and-deserialize-binary-tree/)
+
+### Design
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Codec {
+public:
+
+    // Encodes a tree to a single string.
+    string serialize(TreeNode* root) {
+        ostringstream out;
+        serializeHelper(root, out);
+        return out.str();
+    }
+
+    // Decodes your encoded data to tree.
+    TreeNode* deserialize(string data) {
+        istringstream in(data);
+        return deserializeHelper(in);
+    }
+    
+private:
+    void serializeHelper(TreeNode* root, ostringstream &out) {
+        if (!root) {
+            out << "# ";
+        } else {
+            out << root->val << " ";
+            serializeHelper(root->left, out);
+            serializeHelper(root->right, out);
+        }
+    }
+    
+    TreeNode* deserializeHelper(istringstream &in) {
+        string val;
+        in >> val;
+        if (val == "#") {
+            return NULL;
+        }
+        TreeNode* root = new TreeNode(stoi(val));
+        root->left = deserializeHelper(in);
+        root->right = deserializeHelper(in);
+        return root;
+    }
+};
+
+// Your Codec object will be instantiated and called as such:
+// Codec codec;
+// codec.deserialize(codec.serialize(root));
+```
+
+[solution](https://leetcode.com/problems/serialize-and-deserialize-binary-tree/discuss/74259/Recursive-preorder-Python-and-C%2B%2B-O(n))
+
+
+
+## 25. LeetCode 404 [Sum of Left Leaves](https://leetcode.com/problems/sum-of-left-leaves/)
+
+### (1) My first solution
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    int sumOfLeftLeaves(TreeNode* root) {
+        if (!root) return 0;
+        int sum = 0;
+        helper(root, sum);
+        return sum;
+    }
+    
+    void helper(TreeNode* root, int &sum) {
+        if (!root) return;
+        if (!root->left) {
+            helper(root->right, sum);
+            return;
+        }
+        if (!root->left->left && !root->left->right) {
+            sum += root->left->val;
+            helper(root->right, sum);
+            return;
+        }
+        helper(root->left, sum);
+        helper(root->right, sum);
+    }
+};
+
+// improved
+class Solution {
+public:
+    int sumOfLeftLeaves(TreeNode* root) {
+        if (!root) return 0;
+        int sum = 0;
+        helper(root, sum);
+        return sum;
+    }
+    
+    void helper(TreeNode* root, int &sum) {
+        if (!root) return;
+        if (root->left && !root->left->left && !root->left->right) {
+            sum += root->left->val;
+        } else {
+            helper(root->left, sum);
+        }
+        helper(root->right, sum);
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/sum-of-left-leaves/discuss/88950/Java-iterative-and-recursive-solutions)
+
+
+
+### (2) recursive-2
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    int sumOfLeftLeaves(TreeNode* root) {
+        if (!root) return 0;
+        int sum = 0;
+        if (root->left && !root->left->left && !root->left->right) {
+            sum += root->left->val;
+        } else {
+            sum += sumOfLeftLeaves(root->left);
+        }
+        sum += sumOfLeftLeaves(root->right);
+        return sum;
+    }
+};
+```
+
+
+
+### (3) Iterative (BFS)
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    int sumOfLeftLeaves(TreeNode* root) {
+        if (!root) return 0;
+        int sum = 0;
+        queue<TreeNode*> q;
+        q.push(root);
+        
+        while (!q.empty()) {
+            auto node = q.front();
+            q.pop();
+            if (node->left) {
+                if (!node->left->left && !node->left->right) {
+                    sum += node->left->val;
+                } else {
+                    q.push(node->left);
+                }
+            }
+            if (node->right) {
+                if (node->right->left || node->right->right) {
+                    q.push(node->right);
+                }
+            }
+        }
+        return sum;
+    }
+};
+```
+
+
+
+## 26. LeetCode 298
+
+```c++
+
+```
+
+
+
+## 27. LeetCode 549
+
+```c++
+
+```
 
 
 

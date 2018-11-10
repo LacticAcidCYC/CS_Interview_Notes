@@ -254,7 +254,259 @@ public:
 
 
 
+## 5. LeetCode 130 [Surrounded Regions](https://leetcode.com/problems/surrounded-regions/)
 
+### (1) BFS
+
+```c++
+class Solution {
+public:
+    void solve(vector<vector<char>>& board) {
+        if (board.empty() || board[0].empty()) return;
+        int m = board.size();
+        int n = board[0].size();
+        
+        const vector<vector<int>> dirs = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
+        
+        vector<vector<bool>> visited(m, vector<bool>(n, false));
+        vector<pair<int, int>> area;
+        
+        for (int i=0; i<m; i++) {
+            for (int j=0; j<n; j++) {
+                if (!visited[i][j]) {
+                    visited[i][j] = true;
+                    if (board[i][j] == 'O') {
+                        area.clear();
+                        queue<pair<int, int>> q;
+                        q.push({i, j});
+                        area.push_back({i, j});
+                        bool TOUCH_BORDER = false;
+                        
+                        while (!q.empty()) {
+                            auto front = q.front();
+                            q.pop();
+                            if (front.first == 0 || front.first == m-1 || front.second == 0 || front.second == n-1) {
+                                TOUCH_BORDER = true;
+                            }
+                            for (int k=0; k<4; k++) {
+                                int nx = front.first + dirs[k][0];
+                                int ny = front.second + dirs[k][1];
+                                if (nx >= 0 && nx < m && ny >= 0 && ny < n && board[nx][ny] == 'O' && !visited[nx][ny]) {
+                                    q.push({nx, ny});
+                                    area.push_back({nx, ny});
+                                    visited[nx][ny] = true;
+                                }
+                            }
+                        }
+                        
+                        if (!TOUCH_BORDER) {
+                            for (auto const &p : area) {
+                                board[p.first][p.second] = 'X';
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+};
+```
+
+
+
+### (2) BFS-2
+
+#### Explanation
+
+1. First, change all the 'O' on the border and its connected cells to 'S'
+
+2. scan the matrix, change all the 'S' to 'O', all the 'O' to 'X'
+
+```c++
+class Solution {
+public:
+    void solve(vector<vector<char>>& board) {
+        if (board.empty() || board[0].empty()) return;
+        int m = board.size();
+        int n = board[0].size();
+        
+        const vector<vector<int>> dirs = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
+        
+        vector<pair<int, int>> borderOs;
+        for (int i=0; i<m; i++) {
+            if (board[i][0] == 'O') {
+                borderOs.push_back({i, 0});
+            }
+            if (board[i][n-1] == 'O') {
+                borderOs.push_back({i, n-1});
+            }
+        }
+        for (int j=1; j<n-1; j++) {
+            if (board[0][j] == 'O') {
+                borderOs.push_back({0, j});
+            }
+            if (board[m-1][j] == 'O') {
+                borderOs.push_back({m-1, j});
+            }
+        }
+        
+        for (auto p : borderOs) {
+            queue<pair<int, int>> q;
+            if (board[p.first][p.second] == 'O') {
+                board[p.first][p.second] = 'S';
+                q.push(p);
+            }
+            while (!q.empty()) {
+                auto front = q.front();
+                q.pop();
+                for (int k=0; k<4; k++) {
+                    int nx = front.first + dirs[k][0];
+                    int ny = front.second + dirs[k][1];
+                    if (nx >= 0 && nx < m && ny >= 0 && ny < n && board[nx][ny] == 'O') {
+                        q.push({nx, ny});
+                        board[nx][ny] = 'S';
+                    }
+                }
+            }
+        }
+        
+        for (int i=0; i<m; i++) {
+            for (int j=0; j<n; j++) {
+                if (board[i][j] == 'S') {
+                    board[i][j] = 'O';
+                } else if (board[i][j] == 'O') {
+                    board[i][j] = 'X';
+                }
+            }
+        }
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/surrounded-regions/discuss/41630/9-lines-Python-148-ms)
+
+
+
+## 6. LeetCode 301 [Remove Invalid Parentheses](https://leetcode.com/problems/remove-invalid-parentheses/)
+
+### Explanation
+
+1. count all the 'unmatched' **(** and **)**;
+2. removed the invalid parentheses using dfs.
+
+```c++
+// Time Complexity: O(2^n)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    vector<string> removeInvalidParentheses(string s) {
+        int left_cnt = 0, right_cnt = 0;
+        
+        for (auto c : s) {
+            if (c == ')') {
+                if (left_cnt == 0) {
+                    right_cnt++;
+                } else {
+                    left_cnt--;
+                }
+            } else if (c == '(') {
+                left_cnt++;
+            }
+        }
+        
+        vector<string> res;
+        dfs(s, res, left_cnt, right_cnt, 0);
+        
+        return res;
+    }
+    
+private:
+    void dfs(string s, vector<string> &res, int left_cnt, int right_cnt, int index) {
+        if (left_cnt == 0 && right_cnt == 0 && isValid(s)) {
+            res.push_back(s);
+            return;
+        }
+        
+        for (int i=index; i<s.length(); i++) {
+            // important!! avoid duplicates e.g. "(((("
+            if (i != index && s[i] == s[i-1]) continue;
+            if (s[i] == '(' || s[i] == ')') {
+                auto tmp = s;
+                tmp.erase(i, 1);
+                if (left_cnt > 0 && s[i] == '(') {
+                    dfs(tmp, res, left_cnt-1, right_cnt, i);
+                } else if (right_cnt > 0 && s[i] == ')') {
+                    dfs(tmp, res, left_cnt, right_cnt-1, i);
+                }
+            }
+        }
+        
+    }
+    
+    bool isValid(string s) {
+        int count = 0;
+        
+        for (auto c : s) {
+            if (c == '(') {
+                count++;
+            } else if (c == ')') {
+                count--;
+            }
+            if (count < 0) return false;
+        }
+        
+        return count == 0;
+    }
+};
+```
+
+[bfs-solution](https://leetcode.com/problems/remove-invalid-parentheses/discuss/75032/Share-my-Java-BFS-solution)
+
+[solution](https://leetcode.com/problems/remove-invalid-parentheses/discuss/75050/My-C%2B%2B-DFS-Solution-16ms)
+
+
+
+## 7. LeetCode 97 [Interleaving String](https://leetcode.com/problems/interleaving-string/)
+
+### BFS
+
+```c++
+class Solution {
+public:
+    bool isInterleave(string s1, string s2, string s3) {
+        int m = s1.length();
+        int n = s2.length();
+        if (m + n != s3.length()) return false;
+        
+        vector<int> visited((m+1)*(n+1), 0); // use 1-D vector to simulate the matrix
+        queue<pair<int, int>> q; // store the candidate path points
+        q.push({0, 0});
+        
+        while (!q.empty()) {
+            auto p = q.front();
+            q.pop();
+            if (p.first == m && p.second == n) return true;
+            
+            // move right
+            if (p.second < n && s2[p.second] == s3[p.first+p.second] && !visited[p.first * (n+1) + p.second + 1]) {
+                visited[p.first*(n+1) + p.second + 1] = true;
+                q.push({p.first, p.second+1});
+            }
+            
+            // move down
+            if (p.first < m && s1[p.first] == s3[p.first+p.second] && !visited[(p.first + 1) * (n+1) + p.second]) {
+                visited[(p.first + 1) * (n+1) + p.second] = true;
+                q.push({p.first+1, p.second});
+            }
+        }
+        
+        return false;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/interleaving-string/discuss/31948/8ms-C%2B%2B-solution-using-BFS-with-explanation)
 
 
 

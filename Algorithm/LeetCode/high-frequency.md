@@ -1326,7 +1326,7 @@ private:
 
 ## 25. LeetCode 364 [Nested List Weight Sum II](https://leetcode.com/problems/nested-list-weight-sum-ii/)
 
-### BFS
+### (1) BFS
 
 First sum up the integer with the "highest" depth->prevSum;
 
@@ -1398,6 +1398,65 @@ public:
         }
         int listSum = lists.empty() ? 0 : helper(lists, curSum);
         return listSum + curSum;
+    }
+};
+```
+
+
+
+### (2) Iterative
+
+```c++
+/**
+ * // This is the interface that allows for creating nested lists.
+ * // You should not implement it, or speculate about its implementation
+ * class NestedInteger {
+ *   public:
+ *     // Constructor initializes an empty nested list.
+ *     NestedInteger();
+ *
+ *     // Constructor initializes a single integer.
+ *     NestedInteger(int value);
+ *
+ *     // Return true if this NestedInteger holds a single integer, rather than a nested list.
+ *     bool isInteger() const;
+ *
+ *     // Return the single integer that this NestedInteger holds, if it holds a single integer
+ *     // The result is undefined if this NestedInteger holds a nested list
+ *     int getInteger() const;
+ *
+ *     // Set this NestedInteger to hold a single integer.
+ *     void setInteger(int value);
+ *
+ *     // Set this NestedInteger to hold a nested list and adds a nested integer to it.
+ *     void add(const NestedInteger &ni);
+ *
+ *     // Return the nested list that this NestedInteger holds, if it holds a nested list
+ *     // The result is undefined if this NestedInteger holds a single integer
+ *     const vector<NestedInteger> &getList() const;
+ * };
+ */
+class Solution {
+public:
+    int depthSumInverse(vector<NestedInteger>& nestedList) {
+        int sum = 0, prevSum = 0;
+        auto lists = nestedList;
+        while (!lists.empty()) {
+            vector<NestedInteger> next;
+            for (auto ni : lists) {
+                if (ni.isInteger()) {
+                    prevSum += ni.getInteger();
+                } else {
+                    for (auto l : ni.getList()) {
+                        next.push_back(l);
+                    }
+                }
+            }
+            sum += prevSum;
+            lists = next;
+        }
+        
+        return sum;
     }
 };
 ```

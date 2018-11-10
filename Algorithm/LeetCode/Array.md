@@ -729,6 +729,9 @@ public:
 My idea is similiar to my idol(lol) [StefanPochmann](https://leetcode.com/problems/trapping-rain-water/discuss/17364/7-lines-C-C++), while this algorithm keeps track of the total water assuming that the intermediate space is empty. In each step, recalculate the total water.
 
 ```c++
+// Time Complexity: O(n)
+// Space Complexity: O(1)
+
 class Solution {
 public:
     int trap(vector<int>& height) {
@@ -760,7 +763,145 @@ public:
 
 
 
+## 14. LeetCode 26 [Remove Duplicates from Sorted Array](https://leetcode.com/problems/remove-duplicates-from-sorted-array/)
 
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(1)
+
+class Solution {
+public:
+    int removeDuplicates(vector<int>& nums) {
+        if (nums.empty()) return 0;
+        int j = 1;
+        for (int i=1; i<nums.size(); i++) {
+            if (nums[i] > nums[i-1]) {
+                nums[j++] = nums[i];
+            }
+        }
+        nums.resize(j);
+        return j;
+    }
+};
+
+// improved
+class Solution {
+public:
+    int removeDuplicates(vector<int>& nums) {
+        if (nums.empty()) return 0;
+        int j = 0;
+        for (auto i : nums) {
+            if (j == 0 || i > nums[j-1]) {
+                nums[j++] = i;
+            }
+        }
+        return j;
+    }
+};
+```
+
+
+
+## 15. LeetCode 80 [Remove Duplicates from Sorted Array II](https://leetcode.com/problems/remove-duplicates-from-sorted-array-ii/)
+
+### (1) two pointers
+
+12345
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(1)
+
+class Solution {
+public:
+    int removeDuplicates(vector<int>& nums) {
+        if (nums.empty()) return 0;
+        int left = 0, right = 0, cnt = 0;
+        int cur = nums[left];
+        
+        while (right < nums.size()) {
+            if (nums[right] == cur) {
+                if (cnt++ < 2) {
+                    nums[left++] = cur;
+                }
+            } else {
+                cnt = 1;
+                cur = nums[right];
+                nums[left++] = cur;
+            }
+            right++;
+        }
+        return left;
+    }
+};
+```
+
+
+
+### (2) Similar to the idea in LeetCode 26
+
+11223344
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(1)
+
+class Solution {
+public:
+    int removeDuplicates(vector<int>& nums) {
+        if (nums.empty()) return 0;
+        int j = 0;
+        
+        for (auto i : nums) {
+            if (j < 2 || i > nums[j-2]) {
+                nums[j++] = i;
+            }
+        }
+        
+        return j;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/remove-duplicates-from-sorted-array-ii/discuss/27976/3-6-easy-lines-C%2B%2B-Java-Python-Ruby)
+
+
+
+## 16. LeetCode 128 [Longest Consecutive Sequence](https://leetcode.com/problems/longest-consecutive-sequence/)
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    int longestConsecutive(vector<int>& nums) {
+        unordered_set<int> num_set;
+        
+        for (int num : nums) {
+            num_set.insert(num);
+        }
+        
+        int length = 0;
+        for (int num : num_set) {
+            if (!num_set.count(num-1)) {
+                int cur_num = num;
+                int cur_len = 1;
+                
+                while (num_set.count(cur_num+1)) {
+                    cur_num++;
+                    cur_len++;
+                }
+                
+                length = max(length, cur_len);
+            }
+        }
+        return length;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/longest-consecutive-sequence/discuss/41057/Simple-O(n)-with-Explanation-Just-walk-each-streak)
 
 
 

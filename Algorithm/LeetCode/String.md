@@ -1108,7 +1108,7 @@ The operation token later will be more apperant than the operation token before.
 
 We just try to match the stamp with the target. Since we do not care about the letters which are coverd by others, so we can apply a `*` match any letters. For example:
 
-"aabcaca" -> "a****ca" -> "*****ca"->"*******"
+aabcaca -> a * * * * ca -> * * * * * ca->* * * * * * *
 
 
 
@@ -1234,7 +1234,133 @@ public:
 
 
 
+## 8. LeetCode 97 [Interleaving String](https://leetcode.com/problems/interleaving-string/)
 
+### (1) DP
+
+`dp[i][j]`: whether the `first i+j elements of s3` is the interleaving string of `first i elements of s1` and `first j elements of s2`. So, the transition formula is:
+`dp[i][j] = (dp[i-1][j] && s3[i+j-1] == s1[i-1]) || (dp[i][j-1] && s2[j-1] == s3[i+j-1])`
+
+Initialization:
+
+`dp[0][0] = true`
+
+`dp[0][j] = dp[0][j-1] && (s2[j-1] == s3[j-1])`
+
+`dp[i][0] = dp[i-1][0] && (s1[i-1] == s3[i-1])`
+
+```c++
+class Solution {
+public:
+    bool isInterleave(string s1, string s2, string s3) {
+        int m = s1.length();
+        int n = s2.length();
+        if (m + n != s3.length()) return false;
+        
+        vector<vector<int>> dp(m+1, vector<int>(n+1, 0));
+        
+        // initialization
+        dp[0][0] = 1;
+        for (int i=1; i<=m; i++) {
+            dp[i][0] = dp[i-1][0] && (s1[i-1] == s3[i-1]);
+        }
+        
+        for (int j=1; j<=n; j++) {
+            dp[0][j] = dp[0][j-1] && (s2[j-1] == s3[j-1]);
+        }
+        
+        for (int i=1; i<=m; i++) {
+            for (int j=1; j<=n; j++) {
+                dp[i][j] = (dp[i-1][j] && (s1[i-1] == s3[i+j-1])) || (dp[i][j-1] && (s2[j-1] == s3[i+j-1]));
+            }
+        }
+        
+        return dp[m][n];
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/interleaving-string/discuss/31879/My-DP-solution-in-C%2B%2B)
+
+
+
+### (2) BFS
+
+kind of finding path in a binary tree!!!
+
+```c++
+class Solution {
+public:
+    bool isInterleave(string s1, string s2, string s3) {
+        int m = s1.length();
+        int n = s2.length();
+        if (m + n != s3.length()) return false;
+        
+        vector<int> visited((m+1)*(n+1), 0); // use 1-D vector to simulate the matrix
+        queue<pair<int, int>> q; // store the candidate path points
+        q.push({0, 0});
+        
+        while (!q.empty()) {
+            auto p = q.front();
+            q.pop();
+            if (p.first == m && p.second == n) return true;
+            
+            // move right
+            if (p.second < n && s2[p.second] == s3[p.first+p.second] && !visited[p.first * (n+1) + p.second + 1]) {
+                visited[p.first*(n+1) + p.second + 1] = true;
+                q.push({p.first, p.second+1});
+            }
+            
+            // move down
+            if (p.first < m && s1[p.first] == s3[p.first+p.second] && !visited[(p.first + 1) * (n+1) + p.second]) {
+                visited[(p.first + 1) * (n+1) + p.second] = true;
+                q.push({p.first+1, p.second});
+            }
+        }
+        
+        return false;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/interleaving-string/discuss/31948/8ms-C%2B%2B-solution-using-BFS-with-explanation)
+
+
+
+## 9. LeetCode 68 [Text Justification](https://leetcode.com/problems/text-justification/)
+
+```c++
+class Solution {
+public:
+    vector<string> fullJustify(vector<string>& words, int maxWidth) {
+        vector<string> res;
+        int n = words.size();
+        for (int i=0, words_cnt, words_len; i<n; i += words_cnt) {
+            words_cnt = 0;
+            words_len = 0;
+            for (; i + words_cnt < n && words_len + words[i + words_cnt].length() <= maxWidth - words_cnt; words_cnt++) {
+                words_len += words[i + words_cnt].length();
+            }
+            
+            string line = words[i];
+            for (int j=1; j<words_cnt; j++) {
+                if (i + words_cnt == n) line += ' ';
+                else {
+                    line += string((maxWidth - words_len) / (words_cnt - 1) + 
+                                   (j <= (maxWidth - words_len) % (words_cnt - 1)), ' ');
+                }
+                line += words[i + j];
+            }
+            
+            line += string(maxWidth - line.length(), ' ');
+            res.push_back(line);
+        }
+        return res;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/text-justification/discuss/24873/Share-my-concise-c%2B%2B-solution-less-than-20-lines)
 
 
 
