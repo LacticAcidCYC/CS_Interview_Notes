@@ -1364,6 +1364,63 @@ public:
 
 
 
+## 10. LeetCode 940 [Distinct Subsequences II](https://leetcode.com/problems/distinct-subsequences-ii/)
+
+### DP
+
+[geeksforgeeks](https://www.geeksforgeeks.org/count-distinct-subsequences/)
+
+```c++
+class Solution {
+public:
+    int distinctSubseqII(string S) {
+        int n = S.length();
+        const int mod = 1000000007;
+        unordered_map<char, int> mp;
+        
+        vector<long> dp(n+1, 0);
+        dp[0] = 1;
+        
+        for (int i=1; i<=n; i++) {
+            dp[i] = 2 * dp[i-1];
+            
+            if (mp.count(S[i-1])) {
+                dp[i] = (dp[i] - dp[mp[S[i-1]]] + mod) % mod;
+            }
+            mp[S[i-1]] = i-1;
+        }
+        
+        return dp[n]-1;
+    }
+};
+
+// improved
+class Solution {
+public:
+    int distinctSubseqII(string S) {
+        int n = S.length();
+        const int mod = 1000000007;
+        unordered_map<char, int> mp;
+        
+        vector<int> dp(n+1, 0);
+        dp[0] = 1;
+        
+        for (int i=1; i<=n; i++) {
+            dp[i] = (2 * dp[i-1]) % mod;
+            
+            if (mp.count(S[i-1])) {
+                dp[i] = (dp[i] - dp[mp[S[i-1]]] + mod) % mod;
+            }
+            mp[S[i-1]] = i-1;
+        }
+        
+        return dp[n]-1;
+    }
+};
+```
+
+
+
 
 
 

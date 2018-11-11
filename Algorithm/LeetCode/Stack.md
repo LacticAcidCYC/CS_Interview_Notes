@@ -2,8 +2,6 @@
 
 ## 1. LeetCode 394 [Decode String](https://leetcode.com/problems/decode-string/)
 
-
-
 ### (1) one stack
 
 ```c++
@@ -120,6 +118,88 @@ public:
 ```
 
 
+
+## 2. LeetCode 150 [Evaluate Reverse Polish Notation](https://leetcode.com/problems/evaluate-reverse-polish-notation/)
+
+### (1) original
+
+```c++
+class Solution {
+public:
+    int evalRPN(vector<string>& tokens) {
+        stack<int> st;
+        for (auto const &t : tokens) {
+            if (t == "+") {
+                int b = st.top();
+                st.pop();
+                int a = st.top();
+                st.pop();
+                st.push(a + b);
+            } else if (t == "-") {
+                int b = st.top();
+                st.pop();
+                int a = st.top();
+                st.pop();
+                st.push(a - b);
+            } else if (t == "*") {
+                int b = st.top();
+                st.pop();
+                int a = st.top();
+                st.pop();
+                st.push(a * b);
+            } else if (t == "/") {
+                int b = st.top();
+                st.pop();
+                int a = st.top();
+                st.pop();
+                st.push(a / b);
+            } else {
+                st.push(stoi(t));
+            }
+        }
+        return st.top();
+    }
+};
+```
+
+
+
+### std::function
+
+#include <functional>
+
+[cppreference](https://zh.cppreference.com/w/cpp/utility/functional/function)
+
+### (2) fancy
+
+```c++
+class Solution {
+public:
+    int evalRPN(vector<string>& tokens) {
+        unordered_map<string, function<int (int, int)>> mp{
+            {"+", [] (const int& a, const int& b) { return a + b;}},
+            {"-", [] (const int& a, const int& b) { return a - b;}},
+            {"*", [] (const int& a, const int& b) { return a * b;}},
+            {"/", [] (const int& a, const int& b) { return a / b;}}
+        };
+        stack<int> st;
+        for (auto const &t : tokens) {
+            if (mp.count(t)) {
+                int b = st.top();
+                st.pop();
+                int a = st.top();
+                st.pop();
+                st.push(mp[t](a, b));
+            } else {
+                st.push(stoi(t));
+            }
+        }
+        return st.top();
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/evaluate-reverse-polish-notation/discuss/47514/Fancy-C%2B%2B-lambda-expression-solution)
 
 
 

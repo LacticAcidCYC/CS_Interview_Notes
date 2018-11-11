@@ -1,6 +1,6 @@
 # Data Structure Design
 
-## 1. LeetCode 251
+## 1. LeetCode 251 [Flatten 2D Vector](https://leetcode.com/problems/flatten-2d-vector/)
 
 ### (1) Using C++ iterators
 
@@ -79,7 +79,7 @@ public:
 
 
 
-## 2. LeetCode 933
+## 2. LeetCode 933 [Number of Recent Calls](https://leetcode.com/problems/number-of-recent-calls/)
 
 ### (1) Deque
 
@@ -149,4 +149,115 @@ public:
     }
 };
 ```
+
+
+
+### (3) Queue
+
+```c++
+class RecentCounter {
+public:
+    RecentCounter() {
+        
+    }
+    
+    int ping(int t) {
+        q.push(t);
+        while (q.front() < t - 3000) {
+            q.pop();
+        }
+        return q.size();
+    }
+    
+private:
+    queue<int> q;
+};
+
+/**
+ * Your RecentCounter object will be instantiated and called as such:
+ * RecentCounter* obj = new RecentCounter();
+ * int param_1 = obj->ping(t);
+ */
+```
+
+
+
+## 3. LeetCode 146 [LRU Cache](https://leetcode.com/problems/lru-cache/)
+
+### List
+
+[cplusplus](http://www.cplusplus.com/reference/list/list/?kw=list)
+
+```c++
+class LRUCache {
+public:
+    LRUCache(int capacity) : _capacity(capacity) {}
+    
+    int get(int key) {
+        auto it = cache.find(key);
+        if (it == cache.end()) return -1;
+        use(it);
+        return it->second.first;
+    }
+    
+    void put(int key, int value) {
+        auto it = cache.find(key);
+        if (it != cache.end()) {
+            use(it);
+        } else {
+            if (cache.size() == _capacity) {
+                cache.erase(used.back());
+                used.pop_back();
+            }
+            used.push_front(key);
+        }
+        cache[key] = {value, used.begin()};
+    }
+    
+private:
+    typedef list<int> LI; // double-linked list
+    typedef pair<int, LI::iterator> PIIT;
+    typedef unordered_map<int, PIIT> HIPIIT;
+    
+    void use(HIPIIT::iterator it) {
+        int key = it->first;
+        used.erase(it->second.second);
+        used.push_front(key);
+        it->second.second = used.begin();
+    }
+    
+    LI used;
+    HIPIIT cache;
+    int _capacity;
+};
+
+/**
+ * Your LRUCache object will be instantiated and called as such:
+ * LRUCache obj = new LRUCache(capacity);
+ * int param_1 = obj.get(key);
+ * obj.put(key,value);
+ */
+```
+
+[solution](https://leetcode.com/problems/lru-cache/discuss/45976/C%2B%2B11-code-74ms-Hash-table-%2B-List)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
