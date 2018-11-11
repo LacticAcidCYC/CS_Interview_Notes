@@ -1105,10 +1105,144 @@ public:
 
 
 
-## 20. LeetCode
+## 20. LeetCode 139
+
+[solution](https://leetcode.com/articles/word-break/)
+
+### (1) Brute-Force (recursion + backtracking)
 
 ```c++
+// Time complexity : O(n^n) 
+// Consider the worst case where s = "aaaaaaaaaaaaaa" and every prefix of s 
+// is present in the dictionary of words, then the recursion tree can grow upto n^n.
+// Space complexity : O(n) The depth of recursion tree can go up to n. 
 
+class Solution {
+public:
+    bool wordBreak(string s, vector<string>& wordDict) {
+        unordered_set<string> hashset(wordDict.begin(), wordDict.end());
+        return dfs(s, hashset, 0);
+    }
+    
+    bool dfs(string &s, unordered_set<string> &wordDict, int begin) {
+        if (begin == s.length()) {
+            return true;
+        }
+        
+        for (int i=begin+1; i<=s.length(); i++) {
+            if (wordDict.count(s.substr(begin, i-begin)) && dfs(s, wordDict, i)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+};
+```
+
+
+
+### (2) Recursion with memorization
+
+```c++
+// Time complexity : O(n^2) Size of recursion tree can go up to n^2.
+// Space complexity : O(n) The depth of recursion tree can go up to n. 
+
+class Solution {
+public:
+    bool wordBreak(string s, vector<string>& wordDict) {
+        unordered_set<string> hashset(wordDict.begin(), wordDict.end());
+        vector<int> memo(s.length(), -1);
+        return dfs(s, hashset, 0, memo);
+    }
+    
+    bool dfs(string &s, unordered_set<string> &wordDict, int begin, vector<int> &memo) {
+        if (begin == s.length()) {
+            return true;
+        }
+        
+        if (memo[begin] != -1) {
+            return !(memo[begin] == 0);
+        }
+        
+        for (int i=begin+1; i<=s.length(); i++) {
+            if (wordDict.count(s.substr(begin, i-begin)) && dfs(s, wordDict, i, memo)) {
+                return true;
+            }
+        }
+        
+        return memo[begin] = 0;
+    }
+};
+```
+
+
+
+### (3) BFS
+
+```c++
+// Time complexity : O(n^2) 
+// For every starting index, the search can continue till the end of the given string.
+// Space complexity : O(n) The depth of recursion tree can go up to n. 
+
+class Solution {
+public:
+    bool wordBreak(string s, vector<string>& wordDict) {
+        unordered_set<string> hashset(wordDict.begin(), wordDict.end());
+        int n = s.length();
+        vector<int> visited(n, 0);
+        queue<int> q;
+        q.push(0);
+        
+        while (!q.empty()) {
+            int begin = q.front();
+            q.pop();
+            if (visited[begin] == 0) {
+                for (int i=begin+1; i<=n; i++) {
+                    if (hashset.count(s.substr(begin, i-begin))) {
+                        if (i == n) {
+                            return true;
+                        }
+                        q.push(i);
+                    } 
+                }
+                visited[begin] = 1;
+            }
+        }
+        
+        return false;
+    }
+};
+```
+
+
+
+### (4) DP
+
+```c++
+// Time complexity : O(n^2) Two loops are there to fill dp array.
+// Space complexity : O(n) Length of pp array is n+1.
+
+class Solution {
+public:
+    bool wordBreak(string s, vector<string>& wordDict) {
+        unordered_set<string> hashset(wordDict.begin(), wordDict.end());
+        int n = s.length();
+        vector<bool> dp(n+1, false);
+        dp[0] = true;
+        
+        for (int i=1; i<=n; i++) {
+            for (int j=0; j<i; j++) {
+                if (dp[j] && hashset.count(s.substr(j, i-j))) {
+                    dp[i] = true;
+                    break;
+                }
+            }
+        }
+        
+        return dp[n];
+    }
+};
 ```
 
 

@@ -127,11 +127,68 @@ public:
 
 
 
+## 3. LeetCode 160 [Intersection of Two Linked Lists](https://leetcode.com/problems/intersection-of-two-linked-lists/)
 
+### (1) Two Pointers
 
+```c++
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode *getIntersectionNode(ListNode *headA, ListNode *headB) {
+        if (!headA || !headB) return NULL;
+        
+        ListNode* iterA = headA;
+        ListNode* iterB = headB;
+        
+        while (iterA->next && iterB->next) {
+            iterA = iterA->next;
+            iterB = iterB->next;
+        }
+        
+        int balance = 0;
+        if (!iterA->next) {
+            while (iterB->next) {
+                iterB = iterB->next;
+                balance++;
+            }
+        } else {
+            while (iterA->next) {
+                iterA = iterA->next;
+                balance--;
+            }
+        }
+        
+        if (iterA != iterB) return NULL;
+        iterA = headA;
+        iterB = headB;
+        if (balance > 0) {
+            while (balance--) {
+                iterB = iterB->next;
+            }
+        } else {
+            while (balance++) {
+                iterA = iterA->next;
+            }
+        }
+        
+        while (iterA != iterB) {
+            iterA = iterA->next;
+            iterB = iterB->next;
+        }
+        return iterA;
+    }
+};
+```
 
-
-
+[solution](https://leetcode.com/articles/intersection-of-two-linked-lists/)
 
 
 
