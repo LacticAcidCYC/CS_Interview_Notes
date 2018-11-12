@@ -2188,18 +2188,121 @@ public:
 
 
 
-## 27. LeetCode 298
+## 27. LeetCode 298 [Binary Tree Longest Consecutive Sequence](https://leetcode.com/problems/binary-tree-longest-consecutive-sequence/)
+
+### (1) Recurive1
 
 ```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    int longestConsecutive(TreeNode* root) {
+        return dfs(root, NULL, 0);
+    }
+    
+    int dfs(TreeNode* root, TreeNode* parent, int len) {
+        if (!root) return len;
+        len = (parent && root->val == parent->val + 1) ? len + 1 : 1;
+        return max(len, max(dfs(root->left, root, len), dfs(root->right, root, len)));
+    }
+};
+```
 
+[solution](https://leetcode.com/problems/binary-tree-longest-consecutive-sequence/discuss/74548/C%2B%2B-solution-in-4-lines)
+
+
+
+### (2) DFS2
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    int longestConsecutive(TreeNode* root) {
+        if (!root) return 0;
+        int res = 0;
+        dfs(root, 1, res);
+        return res;
+    }
+    
+    void dfs(TreeNode* root, int len, int& res) {
+        res = max(res, len);
+        if (root->left) {
+            dfs(root->left, (root->left->val == root->val + 1) ? len + 1 : 1, res);
+        }
+        if (root->right) {
+            dfs(root->right, (root->right->val == root->val + 1) ? len + 1 : 1, res);
+        }
+    }
+};
 ```
 
 
 
-## 28. LeetCode 549
+## 28. LeetCode 549 [Binary Tree Longest Consecutive Sequence II](https://leetcode.com/problems/binary-tree-longest-consecutive-sequence-ii/)
 
 ```c++
-
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    int longestConsecutive(TreeNode* root) {
+        int res = 0;
+        dfs(root, res);
+        return res;
+    }
+    
+    vector<int> dfs(TreeNode* root, int &res) {
+        if (!root) return {0, 0};
+        int asc = 1, dsc = 1;
+        
+        // left sub
+        if (root->left) {
+            auto lres = dfs(root->left, res);
+            if (root->val == root->left->val + 1) {
+                dsc = lres[1] + 1;
+            } else if (root->val == root->left->val - 1) {
+                asc = lres[0] + 1;
+            }
+        }
+        
+        // right sub
+        if (root->right) {
+            auto rres = dfs(root->right, res);
+            if (root->val == root->right->val + 1) {
+                dsc = max(dsc, rres[1] + 1);
+            } else if (root->val == root->right->val - 1) {
+                asc = max(asc, rres[0] + 1);
+            }
+        }
+        
+        res = max(res, asc + dsc - 1);
+        return {asc, dsc};
+    } 
+};
 ```
 
 

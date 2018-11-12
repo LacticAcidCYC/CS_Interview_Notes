@@ -1105,16 +1105,16 @@ public:
 
 
 
-## 20. LeetCode 139
+## 20. LeetCode 139 [Word Break](https://leetcode.com/problems/word-break/)
 
 [solution](https://leetcode.com/articles/word-break/)
 
 ### (1) Brute-Force (recursion + backtracking)
 
 ```c++
-// Time complexity : O(n^n) 
-// Consider the worst case where s = "aaaaaaaaaaaaaa" and every prefix of s 
-// is present in the dictionary of words, then the recursion tree can grow upto n^n.
+// Time complexity : O(2^n) 
+// Consider the worst case where s = "aaaaaaaaaaaaaab" and every prefix of s 
+// is present in the dictionary of words, then the recursion tree can grow upto 2^n.
 // Space complexity : O(n) The depth of recursion tree can go up to n. 
 
 class Solution {
@@ -1145,7 +1145,8 @@ public:
 ### (2) Recursion with memorization
 
 ```c++
-// Time complexity : O(n^2) Size of recursion tree can go up to n^2.
+// Time complexity : O(n^2) ? Size of recursion tree can go up to n^2.
+// but if considering string::substr's complexity, it would be O(n^3), same as below solution
 // Space complexity : O(n) The depth of recursion tree can go up to n. 
 
 class Solution {
@@ -1178,10 +1179,10 @@ public:
 
 
 
-### (3) BFS
+### (3) BFS + memorization
 
 ```c++
-// Time complexity : O(n^2) 
+// Time complexity : O(n^3) 
 // For every starting index, the search can continue till the end of the given string.
 // Space complexity : O(n) The depth of recursion tree can go up to n. 
 
@@ -1220,7 +1221,7 @@ public:
 ### (4) DP
 
 ```c++
-// Time complexity : O(n^2) Two loops are there to fill dp array.
+// Time complexity : O(n^3) Two loops are there to fill dp array.
 // Space complexity : O(n) Length of pp array is n+1.
 
 class Solution {

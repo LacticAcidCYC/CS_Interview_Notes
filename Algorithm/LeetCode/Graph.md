@@ -311,19 +311,58 @@ public:
 
 
 
-## 2. LeetCode 399
+## 2. LeetCode 399 [Evaluate Division](https://leetcode.com/problems/evaluate-division/)
 
 ```c++
-
+class Solution {
+public:
+    vector<double> calcEquation(vector<pair<string, string>> equations, vector<double>& values, vector<pair<string, string>> queries) {
+        unordered_map<string, unordered_map<string, double>> graph;
+        vector<double> res;
+        
+        for (int i=0; i<equations.size(); i++) {
+            graph[equations[i].first][equations[i].second] = values[i];
+            if (values[i] != 0) {
+                graph[equations[i].second][equations[i].first] = 1 / values[i];
+            }
+        }
+        
+        for (auto p : queries) {
+            unordered_set<string> memo; // used for visited avoiding cycle
+            double tmp = dfs(p.first, p.second, graph, memo);
+            res.push_back(tmp ? tmp : -1.0);
+        }
+        
+        return res;
+    }
+    
+private:
+    double dfs(string s, string t, unordered_map<string, unordered_map<string, double>> &graph, unordered_set<string> &memo) {
+        if (graph[s].count(t)) return graph[s][t];
+        for (auto edge : graph[s]) {
+            if (!memo.count(edge.first)) {
+                memo.insert(edge.first);
+                double tmp = dfs(edge.first, t, graph, memo);
+                if (tmp) {
+                    return edge.second * tmp;
+                }
+            }
+        }
+        
+        return 0;
+    }
+};
 ```
 
 [union-find](https://leetcode.com/problems/evaluate-division/discuss/88170/0ms-C%2B%2B-Union-Find-Solution-EASY-to-UNDERSTAND)
 
 [graph](https://leetcode.com/problems/evaluate-division/discuss/88168/c%2B%2B-0ms-Hash%2BDFS-solution)
 
+[graph+dfs](https://leetcode.com/problems/evaluate-division/discuss/88169/Java-AC-Solution-using-graph)
 
 
-## 3. LeetCode 785
+
+## 3. LeetCode 785 [Is Graph Bipartite?](https://leetcode.com/problems/is-graph-bipartite/)
 
 ### (1) DFS
 

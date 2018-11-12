@@ -218,6 +218,85 @@ public:
 
 
 
+## 4. LeetCode 358 [Rearrange String k Distance Apart](https://leetcode.com/problems/rearrange-string-k-distance-apart/)
+
+### hash map + max-heap + greedy
+
+```c++
+// Time Complexity: O(n) (O(n26log26))
+// Space Complexity: O(1) (O(26))
+
+class Solution {
+public:
+    string rearrangeString(string s, int k) {
+        if (k <= 0) return s;
+        unordered_map<char, int> dict;
+        
+        for (auto c : s) {
+            dict[c]++;
+        }
+        
+        priority_queue<pair<int, char>> pq;
+        for (auto p : dict) {
+            pq.push({p.second, p.first});
+        }
+        
+        int n = s.length();
+        string res = "";
+        while (!pq.empty()) {
+            vector<pair<int, char>> cache;
+            int window = min(k, n);
+            
+            for (int i=0; i<window; i++) {
+                if (pq.empty()) return "";
+                auto p = pq.top();
+                pq.pop();
+                res += p.second;
+                n--;
+                if (p.first > 1) {
+                    cache.push_back({p.first-1, p.second});
+                }
+            }
+            
+            for (auto p : cache) {
+                pq.push(p);
+            }
+        }
+        
+        return res;
+    }
+};
+```
+
+
+
+## 5. LeetCode 621 [Task Scheduler](https://leetcode.com/problems/task-scheduler/)
+
+```c++
+class Solution {
+public:
+    int leastInterval(vector<char>& tasks, int n) {
+        vector<int> mp(26, 0);
+        int maxCount = INT_MIN;
+        for (auto c : tasks) {
+            mp[c - 'A']++; 
+            maxCount = max(maxCount, mp[c - 'A']);
+        }
+        
+        int res = (n + 1) * (maxCount - 1);
+        for (auto cnt : mp) {
+            if (cnt == maxCount) {
+                res++;
+            }
+        }
+        
+        return max((int)tasks.size(), res);
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/task-scheduler/discuss/104504/C%2B%2B-8lines-O(n)): explanation in comments
+
 
 
 
