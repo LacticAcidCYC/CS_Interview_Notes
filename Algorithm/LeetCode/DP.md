@@ -1248,6 +1248,354 @@ public:
 
 
 
+## 21. LeetCode 413 [Arithmetic Slices](https://leetcode.com/problems/arithmetic-slices/)
+
+### (1) Brute Force (O(n^3) => O(n^2))
+
+The most naive solution is to consider every pair of elements(with atleast 1 element between them), so that the range of elements lying between these two elements acts as a slice. Then, we can iterate over every such slice(range) to check if all the consecutive elements within this range have the same difference.
+
+```c++
+// Time Complexity: O(n^3)
+// Space Complexity: O(1)
+
+class Solution {
+public:
+    int numberOfArithmeticSlices(vector<int>& A) {
+        int res = 0;
+        int n = A.size();
+        
+        for (int s=0; s<n-2; s++) {
+            int diff = A[s+1] - A[s];
+            for (int e=s+2; e<n; e++) {
+                int i = 0;
+                for (i=s+1; i<=e; i++) {
+                    if (s[i] - s[i-1] != diff) {
+                        break;
+                    }
+                }
+                if (i > e) {
+                    res++;
+                }
+            }
+        }
+        return res;
+    }
+};
+```
+
+We can see, that if we are currently considering the range bound by the elements, let's say, A[s] (start) and A[e] (end), we have checked the consecutive elements in this range to have the same difference. Now, when we move on to the next range between the indices ssand e+1, we again perform a check on all the elements in the range s:e, along with one additional pair A[e+1] and A[e]. We can remove this redundant check in the range s:e and just check the last pair to have the same difference as the one used for the previous range(same s, incremented e).
+
+```c++
+// Time Complexity: O(n^2)
+// Space Complexity: O(1)
+
+class Solution {
+public:
+    int numberOfArithmeticSlices(vector<int>& A) {
+        int res = 0;
+        int n = A.size();
+        
+        for (int s=0; s<n-2; s++) {
+            int diff = A[s+1] - A[s];
+            for (int e=s+2; e<n; e++) {
+                if (A[e] - A[e-1] == diff) {
+                    res++;
+                } else {
+                    break;
+                }
+            }
+        }
+        return res;
+    }
+};
+```
+
+
+
+### (2) Recursive (DFS)
+
+Suppose we know the number of arithmetic slices in the range **(0,i-1)** constituted by the elements **[a0,a1,a2,...a(i−1)]**, to be say **x**. If this range itself is an arithmetic slice, all the consecutive elements have the same difference (equal to say, **a(i−1)−a(i−2)**). Now, adding a new element **ai** to it to extend the range to **(0,i)** will constitute an arithmetic slice only if this new element satisfies **a[i] - a[i-1] = a[i-1] - a[i-2].** The new range then will have **x+1** arithmetic slices.
+
+```c++
+// Time Complexity: O(n) the recursion function is called at most n-2 times.
+// Space Complexity: O(n) the depth of the recursion tree goes up to n-2.
+
+class Solution {
+public:
+    int numberOfArithmeticSlices(vector<int>& A) {
+        int res = 0;
+        dfs(A, A.size()-1, res);
+        return res;
+    }
+    
+    int dfs(vector<int> &A, int end, int &res) {
+        if (end < 2) {
+            return 0;
+        }
+        
+        int count = 0;
+        if (A[end] - A[end-1] == A[end-1] - A[end-2]) {
+            count = 1 + dfs(A, end-1, res);
+            res += count;
+        } else {
+            dfs(A, end-1, res);
+        }
+        
+        return count;
+    }
+};
+```
+
+
+
+### (3) DP
+
+dp[i]: store the number of arithmetic slices possible in the range (k, i), k refers to the minimum index possible such that (k, j) constitutes a valid arithmetic slice.
+
+Initialization:
+
+dp[0] = 0;
+
+dp[1] = 0;
+
+Recurrence Equation:
+
+dp[i] = 1 + dp[i-1] if A[i] - A[i-1] == A[i-1] - A[i-2]
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    int numberOfArithmeticSlices(vector<int>& A) {
+        int n = A.size();
+        if (n < 3) return 0;
+        
+        vector<int> dp(n, 0);
+        dp[0] = 0;
+        dp[1] = 0;
+        int res = 0;
+        for (int i=2; i<n; i++) {
+            if (A[i] - A[i-1] == A[i-1] - A[i-2]) {
+                dp[i] = dp[i-1] + 1;
+            }
+            res += dp[i];
+        }
+        
+        return res;
+    }
+};
+```
+
+
+
+### Constant Space
+
+In the last approach, we can observe that we only require the element dp[i-1] to determine the value to be entered at dp[i]. Thus, instead of making use of a 1-D array to store the required data, we can simply keep a track of just the last element.
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(1)
+
+class Solution {
+public:
+    int numberOfArithmeticSlices(vector<int>& A) {
+        int n = A.size();
+        if (n < 3) return 0;
+        
+        int lastCnt = 0;
+        int res = 0;
+        for (int i=2; i<n; i++) {
+            if (A[i] - A[i-1] == A[i-1] - A[i-2]) {
+                lastCnt++;
+            } else {
+                lastCnt = 0;
+            }
+            res += lastCnt;
+        }
+        
+        return res;
+    }
+};
+```
+
+
+
+## 22. LeetCode 300 [Longest Increasing Subsequence](https://leetcode.com/problems/longest-increasing-subsequence/)
+
+### (1) DP
+
+dp(i): represents the length of the longest increasing subsequence possible considering the array elements up to ith index, by necessarily including the ith element.
+
+In order to find out dp[i], we need to try to append the current element(nums[i]) in every possible increasing subsequences upto the (i-1)th index (including the (i-1)th index), such that the new sequence formed by adding the current element is also an increasing subsequence. Thus, we can easily determine dp[i] using:
+
+dp[i] = max (dp[j]) + 1, 0 <= j < i;
+
+At the end,
+
+Res = max (dp[i]), 0 <= i < n 
+
+```c++
+// Time Complexity: O(n^2)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    int lengthOfLIS(vector<int>& nums) {
+        int n = nums.size();
+        if (n == 0) return 0;
+        
+        vector<int> dp(n, 0);
+        dp[0] = 1;
+        int res = 1;
+        
+        for (int i=1; i<n; i++) {
+            int curMax = 0;
+            for (int j=0; j<i; j++) {
+                if (nums[i] > nums[j]) {
+                    curMax = max(curMax, dp[j]);
+                }
+            }
+            dp[i] = curMax + 1;
+            res = max(res, dp[i]);
+        }
+        
+        return res;
+    }
+};
+```
+
+
+
+### (2) Binary Search + DP?
+
+```c++
+// Time Complexity: O(nlogn)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    int lengthOfLIS(vector<int>& nums) {
+        int n = nums.size();
+        if (n == 0) return 0;
+        
+        vector<int> lis;
+        
+        for (auto const &i : nums) {
+            auto pos = lower_bound(lis.begin(), lis.end(), i);
+            
+            if (pos == lis.end()) {
+                lis.push_back(i);
+            } else {
+                *pos = i;
+            }
+        }
+        
+        return (int) lis.size();
+    }
+};
+```
+
+
+
+## 23. LeetCode 354 [Russian Doll Envelopes](https://leetcode.com/problems/russian-doll-envelopes/)
+
+### Related LeetCode 300
+
+```c++
+// Time Complexity: O(nlogn)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    int maxEnvelopes(vector<pair<int, int>>& envelopes) {
+        sort(envelopes.begin(), envelopes.end(), [](const pair<int, int> &A, const pair<int, int> &B) {
+            return A.first < B.first || (A.first == B.first && A.second > B.second);
+        });
+        
+        vector<int> lis;
+        
+        for (auto const &p : envelopes) {
+            auto pos = lower_bound(lis.begin(), lis.end(), p.second);
+            
+            if (pos == lis.end()) {
+                lis.push_back(p.second);
+            } else {
+                *pos = p.second;
+            }
+        }
+        
+        return (int) lis.size();
+    }
+};
+```
+
+
+
+### Classic DP Solution
+
+```c++
+// Time Complexity: O(n^2)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    int maxEnvelopes(vector<pair<int, int>>& envelopes) {
+        if (envelopes.empty()) return 0;
+        sort(envelopes.begin(), envelopes.end());
+        vector<int> dp(envelopes.size(), 1);
+        
+        for (int i = 0; i < envelopes.size(); ++i) {
+            for (int j = 0; j < i; ++j) {
+                if (envelopes[j].first < envelopes[i].first && envelopes[j].second < envelopes[i].second) {
+                    dp[i]  = max(dp[i] , dp[j] + 1);
+                }
+            }
+        }
+        return *max_element(dp.begin(), dp.end());
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/russian-doll-envelopes/discuss/82808/C%2B%2B-9-line-Short-and-Clean-O(nlogn)-solution-(plus-classic-O(n2)-dp-solution)
+
+
+
+## 24. LeetCode 264 [Ugly Number II](https://leetcode.com/problems/ugly-number-ii/)
+
+```c++
+class Solution {
+public:
+    int nthUglyNumber(int n) {
+        if(n <= 0) return 0;
+        if(n == 1) return 1;
+        vector<int> ugly(n);
+        ugly[0] = 1;
+        int a=0, b=0, c=0;
+        for(int i=1; i<n; i++) {
+            ugly[i] = min(ugly[a] * 2, min(ugly[b] * 3, ugly[c] * 5));
+            if(ugly[i] == ugly[a] * 2) a++;
+            if(ugly[i] == ugly[b] * 3) b++;
+            if(ugly[i] == ugly[c] * 5) c++;
+        }
+        return ugly[n-1];
+    }
+};
+```
+
+
+
+## 25. LeetCode 343
+
+```c++
+
+```
+
+
+
+
+
 
 
 

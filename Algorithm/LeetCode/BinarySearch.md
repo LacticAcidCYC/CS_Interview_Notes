@@ -827,6 +827,69 @@ Since I halve the tree in every recursive step, I have O(log(n)) steps. Finding 
 
 
 
+## 14. LeetCode 300 [Longest Increasing Subsequence](https://leetcode.com/problems/longest-increasing-subsequence/)
+
+```c++
+// Time Complexity: O(nlogn)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    int lengthOfLIS(vector<int>& nums) {
+        int n = nums.size();
+        if (n == 0) return 0;
+        
+        vector<int> lis;
+        
+        for (auto const &i : nums) {
+            auto pos = lower_bound(lis.begin(), lis.end(), i);
+            
+            if (pos == lis.end()) {
+                lis.push_back(i);
+            } else {
+                *pos = i;
+            }
+        }
+        
+        return (int) lis.size();
+    }
+};
+```
+
+
+
+## 15. LeetCode 354 [Russian Doll Envelopes](https://leetcode.com/problems/russian-doll-envelopes/)
+
+```c++
+// Time Complexity: O(nlogn)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    int maxEnvelopes(vector<pair<int, int>>& envelopes) {
+        sort(envelopes.begin(), envelopes.end(), [](const pair<int, int> &A, const pair<int, int> &B) {
+            return A.first < B.first || (A.first == B.first && A.second > B.second);
+        });
+        
+        vector<int> lis;
+        
+        for (auto const &p : envelopes) {
+            auto pos = lower_bound(lis.begin(), lis.end(), p.second);
+            
+            if (pos == lis.end()) {
+                lis.push_back(p.second);
+            } else {
+                *pos = p.second;
+            }
+        }
+        
+        return (int) lis.size();
+    }
+};
+```
+
+
+
 
 
 
