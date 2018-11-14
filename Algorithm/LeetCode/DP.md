@@ -1564,7 +1564,15 @@ public:
 
 ## 24. LeetCode 264 [Ugly Number II](https://leetcode.com/problems/ugly-number-ii/)
 
+1. Essentially, we have to multiply the existed ugly numbers by 2, 3 and 5 to get a bigger ugly number, however, if we blindly multiply all the existed numbers by 2, 3 and 5, then the number could grow much faster than needed
+2. Hence, every time we only try to find the next smallest ugly number
+3. Also, since any existed number will be multiplied by 2, 3 and 5 once and only once, otherwise duplicate, we can use a pointer to keep track of where the 2, 3 and 5 are going to multiply in the next step.
+4. Once, we find the next minimum, we can move on the corresponding pointer, otherwise it always stays at the already existed ugly number which would makes pointer useless
+
 ```c++
+// Time Complexity: O(n)
+// Space Complexity: O(n)
+
 class Solution {
 public:
     int nthUglyNumber(int n) {
@@ -1586,17 +1594,140 @@ public:
 
 
 
-## 25. LeetCode 343
+## 25. LeetCode 343 [Integer Break](https://leetcode.com/problems/integer-break/)
+
+dp[i] stores the max product from i. Suppose we break the number i to j (j < i) and i - j, we want to compare dp[i] and j * (i - j) in each iteration. However, j or i - j maybe break into multiple smaller numbers to get greater product itself. For example, if j is 8, then we would want to consider f[j] which is 2 * 3 * 3 = 18 instead of j. So we would want to get the greater from j and f[j]. Then the transition function is dp[i] = max(dp[i], max(j, dp[j]) * max(i - j, f[i - j])).
 
 ```c++
+// Time Complexity: O(n)
+// Space Complexity: O(n)
 
+class Solution {
+public:
+    int integerBreak(int n) {
+        vector<int> dp(n+1);
+        dp[1] = 1;
+        for (int i=2; i<=n; i++) {
+            for (int j=1; j<=i/2; j++) {
+                dp[i] = max(dp[i], max(j, dp[j]) * max(i-j, dp[i-j]));
+            }
+        }
+        
+        return dp[n];
+    }
+};
+```
+
+[dp-solution](https://leetcode.com/problems/integer-break/discuss/80694/Java-DP-solution)
+
+[math](https://leetcode.com/problems/integer-break/discuss/80720/Easy-to-understand-C%2B%2B-with-explanation)
+
+[math-2](https://leetcode.com/problems/integer-break/discuss/80689/A-simple-explanation-of-the-math-part-and-a-O(n)-solution)
+
+
+
+## 26. LeetCode 357 [Count Numbers with Unique Digits](https://leetcode.com/problems/count-numbers-with-unique-digits/)
+
+```c++
+class Solution {
+public:
+    int countNumbersWithUniqueDigits(int n) {
+        vector<int> dp(n+1, 0);
+        dp[0] = 1;
+        dp[1] = 10;
+        int t = 1, s = 9;
+        for(int i=2; i<=n; i++) {
+            if(i > 10) dp[i] = dp[10];
+            else {
+                t *= s--;
+                dp[i] = 9 * t + dp[i-1];
+            }
+        }
+        return dp[n];
+    }
+};
+
+// another
+class Solution {
+public:
+    int countNumbersWithUniqueDigits(int n) {
+        if(n == 0) return 1;
+        if(n == 1) return 10;
+        if(n == 2) return 91;
+        int r[11];
+        r[1] = 10;
+        r[2] = 81;
+        int cnt = r[1] + r[2];
+        for(int i=3; i<=n; i++) {
+            r[i] = r[i-1] * (11 - i);
+            cnt += r[i];
+        }
+        return cnt;
+    }
+};
 ```
 
 
 
+## 27. LeetCode 375 [Guess Number Higher or Lower II](https://leetcode.com/problems/guess-number-higher-or-lower-ii/)
+
+### (1) DP
+
+```c++
+// Time Complexity: O(n^3)
+// Space Complexity: O(n^2)
+
+class Solution {
+public:
+    int getMoneyAmount(int n) {
+        vector<vector<int>> dp(n+1, vector<int>(n+1, INT_MAX));
+        for(int i=0; i<=n; i++) dp[i][i] = 0;
+        for(int i=0; i<n; i++) dp[i][i+1] = i;
+        
+        for(int j=3; j<=n; j++) {
+            for(int i=j-2; i>0; i--) {
+                for(int k=(i+j) / 2; k<j; k++) {
+                    int left = dp[i][k-1];
+                    int right = dp[k+1][j];
+                    int localMax = k + max(left, right);
+                    dp[i][j] = min(dp[i][j], localMax);
+                    if(left >= right) break;
+                }
+            }
+        }
+        return dp[1][n];
+    }
+};
+```
 
 
 
+### (2) Recursive
+
+```c++
+// Time Complexity: O(n^3)
+// Space Complexity: O(n^2)
+
+class Solution {
+public:
+    int getMoneyAmount(int n) {
+        vector<vector<int>> dp(n+1, vector<int>(n+1, 0));
+        return dpRecursive(dp, 1, n);
+    }
+    
+    int dpRecursive(vector<vector<int>>& dp, int i, int j) {
+        if(i >= j) return 0;
+        if(dp[i][j] != 0) return dp[i][j];
+        int res = INT_MAX;
+        for(int m=(i+j)/2; m<=j; m++) {
+            int tmp = m + max(dpRecursive(dp, i, m-1), dpRecursive(dp, m+1, j));
+            res = min(res, tmp);
+        }
+        dp[i][j] = res;
+        return res;
+    }
+};
+```
 
 
 
