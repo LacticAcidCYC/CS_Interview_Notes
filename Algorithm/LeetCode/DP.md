@@ -1628,6 +1628,18 @@ public:
 
 ## 26. LeetCode 357 [Count Numbers with Unique Digits](https://leetcode.com/problems/count-numbers-with-unique-digits/)
 
+10^0 = 1 => 1 dp[0]
+
+10^1 = 10 => 0-9: 10 dp[1]
+
+10^2 = 100 => dp[2] = 9 * 9 + dp[1] _ _
+
+10^3 = 1000 => dp[3] = 9 * 9 * 8 + dp[2] _ _ _
+
+....
+
+if n > 10, dp[i] = dp[10]
+
 ```c++
 class Solution {
 public:
@@ -1671,7 +1683,19 @@ public:
 
 ## 27. LeetCode 375 [Guess Number Higher or Lower II](https://leetcode.com/problems/guess-number-higher-or-lower-ii/)
 
+[solution](https://leetcode.com/problems/guess-number-higher-or-lower-ii/discuss/84764/Simple-DP-solution-with-explanation~~)
+
 ### (1) DP
+
+For each number x in range[i~j]
+we do: result_when_pick_x = x + **max**{DP([i~x-1]), DP([x+1, j])}
+--> *// the max means whenever you choose a number, the feedback is always bad and therefore leads you to a worse branch.*
+then we get DP([i~j]) = **min**{xi, ... ,xj}
+--> *// this min makes sure that you are minimizing your cost.*
+
+Further Explanation:
+
+dp(i)(j) is the minimal cost to guess from range(i...j). When you choose an x where i <= x <= j, you may find the target number from left i...x-1, or you may find the target number from the x+1...j, because you don't know which way should go, **so to guarantee you have enough money to find the target, you need to prepare the more, which is max(dp(i)(x-1), dp(x+1)(j)).**
 
 ```c++
 // Time Complexity: O(n^3)
@@ -1702,7 +1726,7 @@ public:
 
 
 
-### (2) Recursive
+### (2) Recursive + memorization
 
 ```c++
 // Time Complexity: O(n^3)
@@ -1727,6 +1751,136 @@ public:
         return res;
     }
 };
+```
+
+
+
+### (3) DP O(n^2)
+
+[solution](https://leetcode.com/problems/guess-number-higher-or-lower-ii/discuss/84826/An-O(n2)-DP-Solution-Quite-Hard.)
+
+
+
+## 28. LeetCode 673 [Number of Longest Increasing Subsequence](https://leetcode.com/problems/number-of-longest-increasing-subsequence/)
+
+### Explanation
+
+### Similar to LeetCode 300
+
+Suppose for sequences ending at nums[i], we know the length lenght[i] of the longest subsequence, and the number count[i] of such sequences with that length.
+
+For every `j < i` with `A[j] < A[i]`, we might append `A[i]` to a longest subsequence ending at `A[j]`. It means that we have demonstrated `count[j]` subsequences of length `length[j] + 1`.
+
+Now, if those sequences are longer than `length[i]`, then we know we have `count[j]`sequences of this length. If these sequences are equal in length to `length[i]`, then we know that there are now `count[j]` additional sequences to be counted of that length (ie. `count[i] += count[j]`).
+
+```c++
+// Time Complexity: O(n^2)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    int findNumberOfLIS(vector<int>& nums) {
+        int n = nums.size();
+        if (n <= 1) return n;
+        
+        vector<int> lengths(n, 0);
+        vector<int> cnts(n, 1);
+        int longest = 0, res = 0;
+        
+        for (int i=0; i<n; i++) {
+            for (int j=0; j<i; j++) {
+                if (nums[j] < nums[i]) {
+                    if (lengths[j] + 1 > lengths[i]) {
+                        lengths[i] = lengths[j] + 1;
+                        cnts[i] = cnts[j];
+                    } else if (lengths[j] + 1 == lengths[i]) {
+                        cnts[i] += cnts[j];
+                    }
+                }
+            }
+            longest = max(longest, lengths[i]);
+        }
+        
+        for (int i=0; i<n; i++) {
+            if (lengths[i] == longest) {
+                res += cnts[i];
+            }
+        }
+        
+        return res;
+    }
+};
+```
+
+
+
+## 29. LeetCode 132 [Palindrome Partitioning II](https://leetcode.com/problems/palindrome-partitioning-ii/)
+
+Problem: Given a string *s*, partition *s* such that every substring of the partition is a palindrome.
+
+Return the minimum cuts needed for a palindrome partitioning of *s*.
+
+
+
+### Explanation
+
+1. [youtube](<https://www.youtube.com/watch?v=lDYIvtBVmgo>) (O(n^3) + O(n^2))
+
+2. A typical dp problem:
+   For each position `i`, incrementally find palindrome of length `1,3,5,...`, then, of length `2,4,6`. Suppose the **start index** of the found palindrome is `idx_s` and the **end index**of the palindrome is `idx_e`, update the dp table as the follow formula:
+   `dp[idx_e] = min(dp[idx_e], dp[idx_s-1] + 1)`
+
+   Wait a min, how about `idx_s` equal to 0? Seems like we should and some kind of special case test. Actually, this can be avoided by a **sentinel** trick.
+
+```c++
+// Time Complexity: O(n^2)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    int minCut(string s) {
+        int n = (int)s.size();
+        vector<int> mincnts(n+1); // number of cuts for the first k characters
+        for (int i=0; i<=n; i++) {
+            mincnts[i] = i-1;
+        }
+        for (int i=0; i<n; i++) {
+            // odd length palindrome
+            for (int j=0; i-j>=0 && i+j<n && s[i-j] == s[i+j]; j++) {
+                mincnts[i+j+1] = min(mincnts[i+j+1], 1+mincnts[i-j]); 
+            }
+            // even length palindrome
+            for (int j=1; i-j+1>=0 && i+j<n && s[i-j+1] == s[i+j]; j++) {
+                mincnts[i+j+1] = min(mincnts[i+j+1], 1+mincnts[i-j+1]);
+            }
+        }
+        return mincnts[n];
+    }
+};
+```
+
+
+
+## 30. LeetCode 85
+
+```c++
+
+```
+
+
+
+## 31. LeetCode 221
+
+```c++
+
+```
+
+
+
+## 32. LeetCode 764
+
+```c++
+
 ```
 
 
