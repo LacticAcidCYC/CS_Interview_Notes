@@ -1861,18 +1861,148 @@ public:
 
 
 
-## 30. LeetCode 85
+## 30. LeetCode 85 [Maximal Rectangle](https://leetcode.com/problems/maximal-rectangle/)
 
 ```c++
+// Time Complexity: O(mn)
+// Space Complexity: O(n)
 
+class Solution {
+public:
+    int maximalRectangle(vector<vector<char>>& matrix) {
+        if (matrix.empty() || matrix[0].empty()) return 0;
+        int m = matrix.size();
+        int n = matrix[0].size();
+        
+        vector<int> left(n, 0);
+        vector<int> right(n, n);
+        vector<int> height(n, 0);
+        int res = 0;
+        
+        for (int i=0; i<m; i++) {
+            int cur_left_bound = 0, cur_right_bound = n; // [l, r); 
+            for (int j=0; j<n; j++) {
+                if (matrix[i][j] == '1') {
+                    left[j] = max(left[j], cur_left_bound);
+                } else {
+                    left[j] = 0;
+                    cur_left_bound = j + 1;
+                }
+            }
+            
+            for (int j=n-1; j>=0; j--) {
+                if (matrix[i][j] == '1') {
+                    right[j] = min(right[j], cur_right_bound);
+                } else {
+                    right[j] = n;
+                    cur_right_bound = j;
+                }
+            }
+            
+            for (int j=0; j<n; j++) {
+                if (matrix[i][j] == '1') {
+                    height[j]++;
+                } else {
+                    height[j] = 0;
+                }
+            }
+            
+            for (int j=0; j<n; j++) {
+                res = max(res, (right[j] - left[j]) * height[j]);
+            }
+        }
+        
+        return res;
+    }
+};
 ```
+
+[solution](https://leetcode.com/problems/maximal-rectangle/discuss/29054/Share-my-DP-solution)
 
 
 
 ## 31. LeetCode 221
 
-```c++
+### Explanation
 
+We initialize another matrix (dp) with the same dimensions as the original one initialized with all 0’s.
+
+dp(i,j) represents the side length of the maximum square whose bottom right corner is the cell with index (i,j) in the original matrix.
+
+Starting from index (0,0), for every 1 found in the original matrix, we update the value of the current element as
+
+->Recurrence:
+
+dp(i,j)=min(dp(i−1,j),dp(i−1,j−1),dp(i,j−1))+1.
+
+```c++
+// Time Complexity: O(mn)
+// Space Complexity: O(mn)
+
+class Solution {
+public:
+    int maximalSquare(vector<vector<char>>& matrix) {
+        if (matrix.empty() || matrix[0].empty()) return 0;
+        int m = matrix.size();
+        int n = matrix[0].size();
+        
+        vector<vector<int>> dp(m+1, vector<int>(n+1, 0));
+        int maxSide = 0;
+        
+        for (int i=1; i<=m; i++) {
+            for (int j=1; j<=n; j++) {
+                if (matrix[i-1][j-1] == '1') {
+                    dp[i][j] = min(dp[i-1][j-1], min(dp[i-1][j], dp[i][j-1])) + 1;
+                    maxSide = max(maxSide, dp[i][j]);
+                }
+            }
+        }
+        
+        return maxSide * maxSide;
+    }
+};
+```
+
+
+
+### Space Optimization
+
+In the previous approach for calculating dp of ith row we are using only the previous element and the `(i−1)th` row. Therefore, we don't need 2D dp matrix as 1D dp array will be sufficient for this.
+
+Initially the dp array contains all 0's. As we scan the elements of the original matrix across a row, we keep on updating the dp array as per the equation `dp[j]=min(dp[j-1],dp[j],prev)`, where prev refers to the old `dp[j-1]`. For every row, we repeat the same process and update in the same dp array.
+
+```c++
+// Time Complexity: O(mn)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    int maximalSquare(vector<vector<char>>& matrix) {
+        if (matrix.empty() || matrix[0].empty()) return 0;
+        int m = matrix.size();
+        int n = matrix[0].size();
+        
+        vector<int> dp(n+1, 0);
+        int maxSide = 0;
+        
+        for (int i=1; i<=m; i++) {
+            int prev = 0;
+            for (int j=1; j<=n; j++) {
+                int temp = dp[j];
+                if (matrix[i-1][j-1] == '1') {
+                    dp[j] = min(dp[j-1], min(dp[j], prev)) + 1;
+                    maxSide = max(maxSide, dp[j]);
+                } else {
+                    dp[j] = 0;
+                }
+                prev = temp;
+                
+            }
+        }
+        
+        return maxSide * maxSide;
+    }
+};
 ```
 
 
