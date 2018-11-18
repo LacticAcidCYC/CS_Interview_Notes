@@ -905,6 +905,87 @@ public:
 
 
 
+## 17. LeetCode 941 [Valid Mountain Array](https://leetcode.com/problems/valid-mountain-array/)
+
+### Explanation
+
+One-pass:
+
+Use a staus variable to record the process of going up(0) and going down(1). And the initial status is -1.
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(1)
+
+// original
+class Solution {
+public:
+    bool validMountainArray(vector<int>& A) {
+        int n = A.size();
+        if (n < 3) return false;
+        
+        int up = -1;
+        
+        for (int i=1; i<n; i++) {
+            if (A[i] < A[i-1]) {
+                if (up == -1) return false;
+                up = 1;
+            } else if (A[i] == A[i-1]) {
+                return false;
+            } else {
+                if (up == 1) return false;
+                up = 0;
+            }
+        }
+        
+        return up == 1;
+    }
+};
+```
+
+
+
+### Better
+
+**Intuition**
+
+If we walk along the mountain from left to right, we have to move strictly up, then strictly down.
+
+**Algorithm**
+
+Scan the array to find the peak, check if the peak is the first or the last number, return false;
+
+Then keep scanning the array to the end, if the end can be reached, then return true, otherwise return false.
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(1)
+
+class Solution {
+public:
+    bool validMountainArray(vector<int>& A) {
+        int n = A.size();
+        if (n < 3) return false;
+        
+        int i = 0;
+        
+        while (i < n-1 && A[i] < A[i+1]) {
+            i++;
+        }
+        
+        if (i == 0 || i == n-1) return false;
+        
+        while (i < n-1 && A[i] > A[i+1]) {
+            i++;
+        }
+        
+        return i == n-1;
+    }
+};
+```
+
+
+
 
 
 

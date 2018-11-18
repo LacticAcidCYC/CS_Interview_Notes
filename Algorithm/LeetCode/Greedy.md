@@ -299,6 +299,79 @@ public:
 
 
 
+## 6. LeetCode 942 [DI String Match](https://leetcode.com/problems/di-string-match/)
+
+### std::count
+
+count (InputIterator first, InputIterator last, const T& val);
+
+**Intuition1**
+
+If we see say `S[0] == 'I'`, we can always put `0` as the first element, then next number will always be greater no matter what is selected; similarly, if we see `S[0] == 'D'`, we can always put `N` as the first element, then next number will always be less no matter what is selected. So for the rest of the numbers, similarly, If we see say `S[i] == 'I'`, we can always put the **smallest** as the `ith` element or if we see `S[i] == 'D'`, we can always put the **largest** as the `ith` element.
+
+**Algorithm**
+
+Keep track of the smallest and largest element we haven't placed. If we see an `'I'`, place the small element; otherwise place the large element.
+
+**Intuition2**
+
+First count how many `D` (or `I`) in the string. If the count is `M`, then put `M` in the result array;
+
+Now there are `M` number (0,1,2,...,M-1) less than `M`, the number of the larger number is equal to the number of `I`;
+
+Then we can split the number set into 2 parts——  left(0,1,2,...,M-1) and right(M+1, N);
+
+If `S[i] == 'I'`, we can insert the least in right, otherwise insert the largest one in left.
+
+### Solution1 (One Pass):
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(1)
+
+class Solution {
+public:
+    vector<int> diStringMatch(string S) {
+        int n = S.length();
+        int low = 0, high = n;
+        vector<int> res(n+1);
+        
+        for (int i=0; i<n; i++) {
+            res[i] = S[i] == 'I' ? low++ : high--;
+        }
+        res[n] = low;
+        
+        return res;
+    }
+};
+```
+
+### Solution2 (Two Pass):
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(1)
+
+class Solution {
+public:
+    vector<int> diStringMatch(string S) {
+        int n = S.length();
+        int left = count(S.begin(), S.end(), 'D');
+        int right = left;
+        vector<int> res(n+1);
+        res[0] = left;
+        
+        for (int i=0; i<n; i++) {
+            res[i+1] = S[i] == 'I' ? ++right : --left;
+        }
+        
+        return res;
+    }
+};
+```
+
+
+
 
 
 
