@@ -313,7 +313,13 @@ public:
 
 ## 2. LeetCode 399 [Evaluate Division](https://leetcode.com/problems/evaluate-division/)
 
+### (1) DFS
+
 ```c++
+// N: number of equations; M: number of queries
+// Time Complexity: O(NM)
+// Space Complexity: O(N)
+
 class Solution {
 public:
     vector<double> calcEquation(vector<pair<string, string>> equations, vector<double>& values, vector<pair<string, string>> queries) {
@@ -354,11 +360,93 @@ private:
 };
 ```
 
-[union-find](https://leetcode.com/problems/evaluate-division/discuss/88170/0ms-C%2B%2B-Union-Find-Solution-EASY-to-UNDERSTAND)
-
 [graph](https://leetcode.com/problems/evaluate-division/discuss/88168/c%2B%2B-0ms-Hash%2BDFS-solution)
 
 [graph+dfs](https://leetcode.com/problems/evaluate-division/discuss/88169/Java-AC-Solution-using-graph)
+
+
+
+### (2) Union-Find
+
+After optimization: can reach O((n+m) * a(n))
+
+[solution](https://leetcode.com/problems/evaluate-division/discuss/88343/Union-find-algorithm%3A-c%2B%2B-0ms-solution-(almost-linear-complexity))
+
+[geeksforgeeks](https://www.geeksforgeeks.org/union-find-algorithm-set-2-union-by-rank/)
+
+```c++
+// N: number of equations; M: number of queries
+// Time Complexity: O(N^2 + M)
+// Space Complexity: O(N)
+
+// path compression (can be optimized by using 'union by rank')
+class Solution {
+public:
+    vector<double> calcEquation(vector<pair<string, string>> equations, vector<double>& values, vector<pair<string, string>> queries) {
+        unordered_map<string, Node*> mp; // <string, corresponding Node>
+        vector<double> res;
+        
+        int n = equations.size();
+        for (int i=0; i<n; i++) {
+            auto s1 = equations[i].first;
+            auto s2 = equations[i].second;
+            
+            if (mp.count(s1) && mp.count(s2)) {
+                unionNode(mp[s1], mp[s2], values[i], mp);
+            } else if (mp.count(s1)) {
+                mp[s2] = new Node(mp[s1]->val / values[i]);
+                mp[s2]->parent = mp[s1];
+            } else if (mp.count(s2)) {
+                mp[s1] = new Node(mp[s2]->val * values[i]);
+                mp[s1]->parent = mp[s2];
+            } else {
+                mp[s1] = new Node(values[i]);
+                mp[s2] = new Node(1);
+                mp[s1]->parent = mp[s2];
+            }
+        }
+        
+        for (auto &q : queries) {
+            if (!mp.count(q.first) || !mp.count(q.second) || findParent(mp[q.first]) != findParent(mp[q.second])) {
+                res.push_back(-1);
+            } else {
+                res.push_back(mp[q.first]->val / mp[q.second]->val);
+            }
+        }
+        
+        return res;
+    }
+    
+private:
+    struct Node {
+        Node* parent;
+        double val = 0.0;
+        Node(double x) : val(x), parent(this) {}
+    };
+    
+    void unionNode(Node* n1, Node* n2, double value, unordered_map<string, Node*> &mp) {
+        Node *p1 = findParent(n1), *p2 = findParent(n2);
+        if (p1 != p2) {
+            double radio = value * n2->val / n1->val;
+            for (auto &pair : mp) {
+                if (pair.second->parent == p1) {
+                    pair.second->val *= radio;
+                }
+            }
+            p1->parent = p2;
+        }
+    }
+    
+    Node* findParent(Node* node) {
+        if (node->parent != node) {
+            node->parent = findParent(node->parent);
+        }
+        return node->parent;
+    }
+};
+```
+
+[union-find](https://leetcode.com/problems/evaluate-division/discuss/88170/0ms-C%2B%2B-Union-Find-Solution-EASY-to-UNDERSTAND)
 
 
 
