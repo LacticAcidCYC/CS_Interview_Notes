@@ -167,6 +167,233 @@ public:
 
 
 
+## 4. LeetCode 84 [Largest Rectangle in Histogram](https://leetcode.com/problems/largest-rectangle-in-histogram/)
+
+[segment-tree-range-minimum-query](https://www.geeksforgeeks.org/segment-tree-set-1-range-minimum-query/)
+
+A **simple solution** is to one by one consider all bars as starting points and calculate area of all rectangles starting with every bar. Finally return maximum of all possible areas. Time complexity of this solution would be O(n^2).
+
+We can use **Divide and Conquer** to solve this in O(nLogn) time. The idea is to find the minimum value in the given array. Once we have index of the minimum value, the max area is maximum of following three values.
+**a)** Maximum area in left side of minimum value (Not including the min value)
+**b)** Maximum area in right side of minimum value (Not including the min value)
+**c)** Number of bars multiplied by minimum value.
+
+How to find the minimum efficiently? [Range Minimum Query using Segment Tree](https://www.geeksforgeeks.org/segment-tree-set-1-range-minimum-query/) can be used for this. We build segment tree of the given histogram heights. Once the segment tree is built, all [range minimum queries take O(Logn) time](https://www.geeksforgeeks.org/segment-tree-set-1-range-minimum-query/). So over all complexity of the algorithm becomes.
+
+Overall Time = Time to build Segment Tree + Time to recursively find maximum area
+
+[Time to build segment tree is O(n)](https://www.geeksforgeeks.org/segment-tree-set-1-sum-of-given-range/). Let the time to recursively find max area be T(n). It can be written as following.
+T(n) = O(Logn) + T(n-1)
+The solution of above recurrence is O(nLogn). So overall time is O(n) + O(nLogn) which is O(nLogn).
+
+```c++
+// A Divide and Conquer Program to find maximum rectangular area in a histogram 
+#include <math.h> 
+#include <limits.h> 
+#include <vector> 
+#include <iostream> 
+
+using namespace std; 
+
+// A utility function to get minimum of two numbers in hist[] 
+int minVal(vector<int>& hist, int i, int j) 
+{ 
+    if (i == -1) return j; 
+    if (j == -1) return i; 
+    return (hist[i] < hist[j])? i : j; 
+}
+
+// A recursive function that constructs Segment Tree for hist[ss..se]. 
+// si is index of current node in segment tree st 
+int constructSTUtil(vector<int>& hist, int ss, int se, int *st, int si) 
+{ 
+    // If there is one element in array, store it in current node of 
+    // segment tree and return 
+    if (ss == se) 
+       return (st[si] = ss); 
+  
+    // If there are more than one elements, then recur for left and 
+    // right subtrees and store the minimum of two values in this node 
+    int mid = ss + (se - ss) / 2;
+    st[si] =  minVal(hist, constructSTUtil(hist, ss, mid, st, si*2+1), 
+                     constructSTUtil(hist, mid+1, se, st, si*2+2)); 
+    return st[si]; 
+} 
+
+/* Function to construct segment tree from given array. This function 
+   allocates memory for segment tree and calls constructSTUtil() to 
+   fill the allocated memory */
+int *constructST(vector<int>& hist) 
+{ 
+    int n = hist.size();
+    // Allocate memory for segment tree 
+    int x = (int)(ceil(log2(n))); //Height of segment tree 
+    int max_size = 2*(int)pow(2, x) - 1; //Maximum size of segment tree 
+    int *st = new int[max_size]; 
+  
+    // Fill the allocated memory st 
+    constructSTUtil(hist, 0, n-1, st, 0); 
+  
+    // Return the constructed segment tree 
+    return st; 
+} 
+
+/*  A recursive function to get the index of minimum value in a given range of 
+    indexes. The following are parameters for this function. 
+  
+    hist   --> Input array for which segment tree is built 
+    st    --> Pointer to segment tree 
+    index --> Index of current node in the segment tree. Initially 0 is 
+             passed as root is always at index 0 
+    ss & se  --> Starting and ending indexes of the segment represented by 
+                 current node, i.e., st[index] 
+    qs & qe  --> Starting and ending indexes of query range */
+int RMQUtil(vector<int>& hist, int *st, int ss, int se, int qs, int qe, int index) 
+{ 
+    // If segment of this node is a part of given range, then return the 
+    // min of the segment 
+    if (qs <= ss && qe >= se) 
+        return st[index]; 
+  
+    // If segment of this node is outside the given range 
+    if (se < qs || ss > qe) 
+        return -1; 
+  
+    // If a part of this segment overlaps with the given range 
+    int mid = ss + (se - ss) / 2;
+    return minVal(hist, RMQUtil(hist, st, ss, mid, qs, qe, 2*index+1), 
+                  RMQUtil(hist, st, mid+1, se, qs, qe, 2*index+2)); 
+} 
+  
+// Return index of minimum element in range from index qs (quey start) to 
+// qe (query end).  It mainly uses RMQUtil() 
+int RMQ(vector<int>& hist, int *st, int qs, int qe) 
+{ 
+    int n = hist.size();
+    // Check for erroneous input values 
+    if (qs < 0 || qe > n-1 || qs > qe) 
+    { 
+        cout << "Invalid Input"; 
+        return -1; 
+    } 
+  
+    return RMQUtil(hist, st, 0, n-1, qs, qe, 0); 
+}
+
+// A recursive function to find the maximum rectangular area. 
+// It uses segment tree 'st' to find the minimum value in hist[l..r] 
+int getMaxAreaRec(vector<int>& hist, int *st, int l, int r) 
+{
+    int n = hist.size();
+    // Base cases 
+    if (l > r)  return INT_MIN; 
+    if (l == r)  return hist[l]; 
+  
+    // Find index of the minimum value in given range 
+    // This takes O(Logn)time 
+    int m = RMQ(hist, st, l, r); 
+  
+    /* Return maximum of following three possible cases 
+       a) Maximum area in Left of min value (not including the min) 
+       a) Maximum area in right of min value (not including the min) 
+       c) Maximum area including min */
+    return max(max(getMaxAreaRec(hist, st, l, m-1), 
+               getMaxAreaRec(hist, st, m+1, r)), 
+               (r-l+1)*(hist[m]) ); 
+} 
+
+// The main function to find max area 
+int getMaxArea(vector<int>& hist) 
+{ 
+    int n = hist.size();
+    // Build segment tree from given array. This takes 
+    // O(n) time 
+    int *st = constructST(hist); 
+  
+    // Use recursive utility function to find the 
+    // maximum area 
+    return getMaxAreaRec(hist, st, 0, n-1); 
+} 
+
+int main() 
+{ 
+    vector<int> hist = {6, 1, 5, 4, 5, 2, 6}; 
+    cout << "Maximum area is " << getMaxArea(hist); 
+    return 0; 
+} 
+```
+
+[geeksforgeeks](https://www.geeksforgeeks.org/largest-rectangular-area-in-a-histogram-set-1/)
+
+```c++
+class Solution {
+public:
+    int largestRectangleArea(vector<int>& heights) {
+        if (heights.empty()) return 0;
+        int n = heights.size();
+        int *st = constructST(heights); 
+
+        return getMaxAreaRec(heights, st, 0, n-1); 
+    }
+    
+private:
+    int minVal(vector<int>& hist, int i, int j) { 
+        if (i == -1) return j; 
+        if (j == -1) return i; 
+        return (hist[i] < hist[j])? i : j; 
+    }
+
+    int constructSTUtil(vector<int>& hist, int ss, int se, int *st, int si) { 
+        if (ss == se) 
+           return (st[si] = ss); 
+
+        int mid = ss + (se - ss) / 2;
+        st[si] =  minVal(hist, constructSTUtil(hist, ss, mid, st, si*2+1), 
+                         constructSTUtil(hist, mid+1, se, st, si*2+2)); 
+        return st[si]; 
+    } 
+
+    int *constructST(vector<int>& hist) { 
+        int n = hist.size();
+        int x = (int)(ceil(log2(n))); //Height of segment tree 
+        int max_size = 2*(int)pow(2, x) - 1; //Maximum size of segment tree 
+        int *st = new int[max_size]; 
+
+        constructSTUtil(hist, 0, n-1, st, 0); 
+
+        return st; 
+    } 
+
+    int RMQUtil(vector<int>& hist, int *st, int ss, int se, int qs, int qe, int index) 
+    { 
+        if (qs <= ss && qe >= se) 
+            return st[index]; 
+
+        if (se < qs || ss > qe) 
+            return -1; 
+
+        int mid = ss + (se - ss) / 2;
+        return minVal(hist, RMQUtil(hist, st, ss, mid, qs, qe, 2*index+1), 
+                      RMQUtil(hist, st, mid+1, se, qs, qe, 2*index+2)); 
+    } 
+
+    int getMaxAreaRec(vector<int>& hist, int *st, int l, int r) 
+    {
+        int n = hist.size();
+        if (l > r)  return INT_MIN; 
+        if (l == r)  return hist[l]; 
+
+        int m = RMQUtil(hist, st, 0, n-1, l, r, 0); 
+
+        return max(max(getMaxAreaRec(hist, st, l, m-1), 
+                   getMaxAreaRec(hist, st, m+1, r)), 
+                   (r-l+1)*(hist[m]) ); 
+    } 
+};
+```
+
+
+
 
 
 
