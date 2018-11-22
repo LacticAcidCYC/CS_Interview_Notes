@@ -205,8 +205,121 @@ public:
 
 ## 3. LeetCode 84 [Largest Rectangle in Histogram](https://leetcode.com/problems/largest-rectangle-in-histogram/)
 
-```c++
+[geeksforgeeks](https://www.geeksforgeeks.org/largest-rectangle-under-histogram/)
 
+### Explanation
+
+**For every bar ‘x’, we calculate the area with ‘x’ as the smallest bar in the rectangle. If we calculate such area for every bar ‘x’ and find the maximum of all areas, our task is done.** How to calculate area with ‘x’ as smallest bar? We need to **know index of the first smaller (smaller than ‘x’) bar on left of ‘x’ and index of first smaller bar on right of ‘x’.** Let us call these indexes as ‘left index’ and ‘right index’ respectively.
+
+We traverse all bars from left to right, maintain a stack of bars. Every bar is pushed to stack once. A bar is popped from stack when a bar of smaller height is seen. When a bar is popped, we calculate the area with the popped bar as smallest bar. How do we get left and right indexes of the popped bar – the current index tells us the ‘right index’ and index of previous item in stack is the ‘left index’. Following is the complete algorithm.
+
+**1)** Create an empty stack.
+
+**2)** Start from first bar, and do following for every bar ‘hist[i]’ where ‘i’ varies from 0 to n-1.
+……**a)** If stack is empty or hist[i] is higher than the bar at top of stack, then push ‘i’ to stack.
+……**b)** If this bar is smaller than the top of stack, then keep removing the top of stack while top of the stack is greater. Let the removed bar be hist[tp]. Calculate area of rectangle with hist[tp] as smallest bar. For hist[tp], the ‘left index’ is previous (previous to tp) item in stack and ‘right index’ is ‘i’ (current index).
+
+**3)** If the stack is not empty, then one by one remove all bars from stack and do step 2.b for every removed bar.
+
+Following is implementation of the above algorithm.
+
+```c++
+// Time Complexity: O(n) Since every bar is pushed and popped only once, the time complexity // of this method is O(n).
+// Space Complexity: O(n)
+
+// corner case: repeated bar with the same height
+// e.g. 1,3,4,4,4,4,2,3,5
+// when we visit the second 4, we can pop the first 4 to make sure the bars stored in stack
+// are always in increasing order.
+// Thus, we treat the first 4 bar like a higher bar because actually we only need to
+// calculate the area with the last '4' as smallest bar.
+
+class Solution {
+public:
+    int largestRectangleArea(vector<int>& heights) {
+        if (heights.empty()) return 0;
+        int n = heights.size();
+        stack<int> st; // used for store the indexes of the histograms
+        int left = -1, right = 0; // left bound index & right bound index
+        int res_area = 0;
+        
+        for (int i=0; i<n; i++) {
+            if (st.empty() || heights[i] > heights[st.top()]) {
+                st.push(i);
+            } else {
+                while (!st.empty() && heights[i] <= heights[st.top()]) {
+                    int top = st.top();
+                    st.pop();
+                    left = !st.empty() ? st.top() : -1;
+                    right = i;
+                    res_area = max(res_area, heights[top] * (right - left - 1));
+                }
+                st.push(i);
+            }
+        }
+        
+        right = n;
+        while (!st.empty()) {
+            int top = st.top();
+            st.pop();
+            left = !st.empty() ? st.top() : -1;
+            res_area = max(res_area, heights[top] * (right - left - 1));
+        }
+        
+        return res_area;
+    }
+};
+
+// shorter version
+class Solution {
+public:
+    int largestRectangleArea(vector<int>& heights) {
+        if (heights.empty()) return 0;
+        int n = heights.size();
+        // Create an empty stack. The stack holds indexes  
+    	// of heights array. The bars stored in stack are  
+    	// always in increasing order of their heights.
+        stack<int> st;
+        int top; // To store top of stack 
+        int max_area = 0; // Initalize max area 
+        
+        // Run through all bars of given histogram 
+        int i = 0;
+        while (i < n) {
+            // If this bar is higher than the bar on top  
+        	// stack, push it to stack
+            if (st.empty() || heights[i] > heights[st.top()]) {
+                st.push(i++);
+            } else {
+                // If this bar is lower than or equal to the top bar of stack,  
+                // then calculate area of rectangle with stack  
+                // top as the smallest (or minimum height) bar.  
+                // 'i' is 'right index' for the top and element  
+                // before top in stack is 'left index' 
+                while (!st.empty() && heights[i] <= heights[st.top()]) {
+                    top = st.top();
+                    st.pop();
+                    // Calculate the area with hist[tp] stack  
+            		// as smallest bar 
+                    // and update max area, if needed 
+                    max_area = max(max_area, heights[top] * (st.empty() ? i : i - st.top() - 1));
+                }
+                st.push(i++);
+            }
+        }
+        
+        // Now pop the remaining bars from stack and calculate 
+    	// area with every popped bar as the smallest bar
+        // same as above
+        while (!st.empty()) {
+            top = st.top();
+            st.pop();
+            max_area = max(max_area, heights[top] * (st.empty() ? i : i - st.top() - 1));
+        }
+        
+        return max_area;
+    }
+};
 ```
 
 

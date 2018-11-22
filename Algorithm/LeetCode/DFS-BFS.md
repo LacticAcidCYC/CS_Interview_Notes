@@ -510,6 +510,110 @@ public:
 
 
 
+## 8. LeetCode 329 [Longest Increasing Path in a Matrix](https://leetcode.com/problems/longest-increasing-path-in-a-matrix/)
+
+To get max length of increasing sequences:
+
+1. Do `DFS` from every cell
+2. Compare every 4 direction and skip cells that are out of boundary or smaller
+3. Get matrix `max` from every cell's `max`
+4. Use `matrix[x][y] <= matrix[i][j]` so we don't need a `visited[m][n]` array
+5. The key is to `cache` the distance because it's highly possible to revisit a cell
+
+```c++
+// Time Complexity: O(mn)
+// Space Complexity: O(mn)
+
+class Solution {
+public:
+    int longestIncreasingPath(vector<vector<int>>& matrix) {
+        if (matrix.empty() || matrix[0].empty()) return 0;
+        
+        vector<vector<int>> dirs = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
+        int m = matrix.size();
+        int n = matrix[0].size();
+        int max_path = 0;
+        vector<vector<int>> memo(m, vector<int>(n, 0));
+        
+        for (int i=0; i<m; i++) {
+            for (int j=0; j<n; j++) {
+                int max_len = dfs(matrix, dirs, memo, i, j);
+                max_path = max(max_path, max_len);
+            }
+        }
+        
+        return max_path;
+    }
+    
+private:
+    int dfs(vector<vector<int>>& matrix, vector<vector<int>> &dirs, vector<vector<int>> &memo, int row, int col) {
+        if (memo[row][col] != 0) return memo[row][col];
+        
+        int m = matrix.size();
+        int n = matrix[0].size();
+        int max_len = 0;
+        
+        for (int i=0; i<4; i++) {
+            int nr = row + dirs[i][0];
+            int nc = col + dirs[i][1];
+            
+            if (nr >= 0 && nr < m && nc >= 0 && nc < n && matrix[nr][nc] > matrix[row][col]) {
+                max_len = max(max_len, 1 + dfs(matrix, dirs, memo, nr, nc));
+            } else {
+                max_len = max(max_len, 1);
+            }
+        }
+        
+        memo[row][col] = max_len;
+        return max_len;
+    }
+};
+
+// other version
+class Solution {
+public:
+    int longestIncreasingPath(vector<vector<int>>& matrix) {
+        if (matrix.empty() || matrix[0].empty()) return 0;
+        
+        vector<vector<int>> dirs = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
+        int m = matrix.size();
+        int n = matrix[0].size();
+        int max_path = 0;
+        vector<vector<int>> memo(m, vector<int>(n, 0));
+        
+        for (int i=0; i<m; i++) {
+            for (int j=0; j<n; j++) {
+                int max_len = dfs(matrix, dirs, memo, i, j, INT_MIN);
+                max_path = max(max_path, max_len);
+            }
+        }
+        
+        return max_path;
+    }
+    
+private:
+    int dfs(vector<vector<int>>& matrix, vector<vector<int>> &dirs, vector<vector<int>> &memo, int i, int j, int prev) {
+        if (i < 0 || i >= matrix.size() || j < 0 || j >= matrix[0].size() || matrix[i][j] <= prev) {
+            return 0;
+        }
+        if (memo[i][j] != 0) return memo[i][j];
+
+        int max_len = 0;
+        
+        for (int k=0; k<4; k++) {
+            int ni = i + dirs[k][0];
+            int nj = j + dirs[k][1];
+            max_len = max(max_len, 1 + dfs(matrix, dirs, memo, ni, nj, matrix[i][j]));
+        }
+        
+        memo[i][j] = max_len;
+        return max_len;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/longest-increasing-path-in-a-matrix/discuss/78308/15ms-Concise-Java-Solution)
+
 
 
 
