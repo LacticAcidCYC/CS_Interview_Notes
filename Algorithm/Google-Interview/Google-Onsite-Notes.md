@@ -114,15 +114,44 @@ public:
 
 
 
-## 4. LeetCode 249
+## 4. LeetCode 249 [Group Shifted Strings](https://leetcode.com/problems/group-shifted-strings/)
 
 ```c++
+// Time Complexity: O(NK)
+// Space Complexity: O(NK)
+// where N is the length of strs, and K is the maximum length of a string in strs.
 
+class Solution {
+public:
+    vector<vector<string>> groupStrings(vector<string>& strings) {
+        if (strings.empty()) return {};
+        
+        vector<vector<string>> res;
+        unordered_map<string, vector<string>> mp;
+        
+        for (auto &s : strings) {
+            auto key = s;
+            int shift = key[0] - 'a';
+            for (auto &c : key) {
+                c = (c - shift) < 'a' ? (c - shift + 26) : c - shift;
+            }
+            mp[key].push_back(s);
+        }
+        
+        for (auto &p : mp) {
+            res.push_back(p.second);
+        }
+        
+        return res;
+    }
+};
 ```
 
 
 
 ### Related LeetCode 49
+
+#### (1) Categorize by Sorted String
 
 ```c++
 // Time Complexity: O(NKlogK)
@@ -132,24 +161,65 @@ public:
 class Solution {
 public:
     vector<vector<string>> groupAnagrams(vector<string>& strs) {
-        vector<vector<string>> result;
-        if(strs.size() == 0) return result;
-        unordered_map<string, vector<string>> um;
-        sort(strs.begin(), strs.end());
-        for(auto s : strs) {
-            string key = s;
+        if (strs.empty()) return {};
+        vector<vector<string>> res;
+        
+        unordered_map<string, vector<string>> mp;
+        for (auto &s : strs) {
+            auto key = s;
             sort(key.begin(), key.end());
-            um[key].push_back(s);
+            mp[key].push_back(s);
         }
-        for(auto u : um) {
-            result.push_back(u.second);
+        
+        for (auto &p : mp) {
+            res.push_back(p.second);
         }
-        return result;
+        
+        return res;
     }
 };
 ```
 
 
+
+#### (2) Categorize by Count
+
+```c++
+// Time Complexity: O(NK)
+// Space Complexity: O(NK)
+// Time Complexity: O(NK), where N is the length of strs, and K is the maximum length of a
+// string in strs. Counting each string is linear in the size of the string, and we count
+// every string.
+
+class Solution {
+public:
+    vector<vector<string>> groupAnagrams(vector<string>& strs) {
+        if (strs.empty()) return {};
+        vector<vector<string>> res;
+        
+        unordered_map<string, vector<string>> mp;
+        for (auto &s : strs) {
+            string key = "";
+            vector<int> cnts(26, 0);
+            for (auto &c : s) {
+                cnts[c - 'a']++;
+            }
+            
+            for (int i=0; i<26; i++) {
+                key += ("#" + to_string(cnts[i]));
+            }
+            
+            mp[key].push_back(s);
+        }
+        
+        for (auto &p : mp) {
+            res.push_back(p.second);
+        }
+        
+        return res;
+    }
+};
+```
 
 
 
