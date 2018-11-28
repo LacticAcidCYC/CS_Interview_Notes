@@ -1,3 +1,7 @@
+# DFS (Backtracking) & BFS
+
+
+
 ## 1. LeetCode 200 [Number of Islands](https://leetcode.com/problems/number-of-islands/)
 
 BFS:
@@ -615,6 +619,111 @@ private:
 [solution](https://leetcode.com/problems/longest-increasing-path-in-a-matrix/discuss/78308/15ms-Concise-Java-Solution)
 
 
+
+## 9. LeetCode 51 [N-Queens](https://leetcode.com/problems/n-queens/)
+
+```c++
+class Solution {
+public:
+    vector<vector<string>> solveNQueens(int n) {
+        vector<vector<string>> res;
+        vector<string> board(n, string(n, '.'));
+        solve(res, board, 0, n);
+        return res;
+    }
+private:
+    bool isValid(vector<string> &board, int row, int col, int n) {
+        // check column
+        for (int i=0; i<row; i++) {
+            if (board[i][col] == 'Q') {
+                return false;
+            }
+        }
+        // check 45 degree diagonal
+        for (int i=row-1, j=col-1; i>=0 && j>=0; --i, --j) {
+            if (board[i][j] == 'Q') {
+                return false;
+            }
+        }
+        // check 135
+        for (int i=row-1, j=col+1; i>=0 && j<n; --i, ++j) {
+            if (board[i][j] == 'Q') {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    // backtrack
+    void solve(vector<vector<string>> &res, vector<string> &board, int row, int n) {
+        if (row == n) {
+            res.push_back(board);
+            return;
+        }
+        for (int col = 0; col < n; col++) {
+            if (isValid(board, row, col, n)) {
+                board[row][col] = 'Q';
+                solve(res, board, row+1, n);
+                board[row][col] = '.';
+            }
+        }
+    }
+};
+```
+
+
+
+## 10. LeetCode 52 [N-Queens II](https://leetcode.com/problems/n-queens-ii/)
+
+```c++
+class Solution {
+public:
+    int totalNQueens(int n) {
+        int res = 0;
+        vector<string> board(n, string(n, '.'));
+        solve(res, board, 0, n);
+        return res;
+    }
+    
+private:
+    bool isValid(vector<string> &board, int row, int col, int n) {
+        // check column
+        for (int i=0; i<row; i++) {
+            if (board[i][col] == 'Q') {
+                return false;
+            }
+        }
+        // check 45 degree diagonal
+        for (int i=row-1, j=col-1; i>=0 && j>=0; --i, --j) {
+            if (board[i][j] == 'Q') {
+                return false;
+            }
+        }
+        // check 135
+        for (int i=row-1, j=col+1; i>=0 && j<n; --i, ++j) {
+            if (board[i][j] == 'Q') {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    // backtrack
+    void solve(int &res, vector<string> &board, int row, int n) {
+        if (row == n) {
+            res++;
+            return;
+        }
+        for (int col = 0; col < n; col++) {
+            if (isValid(board, row, col, n)) {
+                board[row][col] = 'Q';
+                solve(res, board, row+1, n);
+                board[row][col] = '.';
+            }
+        }
+    }
+};
+```
 
 
 
