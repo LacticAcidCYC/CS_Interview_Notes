@@ -421,6 +421,12 @@ public:
 ### (2) Binary Index Tree (Fenwick Tree)
 
 ```c++
+// Time Complexity:
+// construct tree: O(nlogn)
+// update: O(logn)
+// sum of range: O(logn)
+// Space Complexity: O(n)
+
 class NumArray {
 private:
     vector<int> BITree;
@@ -491,9 +497,39 @@ public:
 
 ```
 
+[solution](https://leetcode.com/problems/range-sum-query-2d-mutable/discuss/75870/Java-2D-Binary-Indexed-Tree-Solution-clean-and-short-17ms)
 
 
-## 8. LeetCode 
+
+## 8. LeetCode 340 [Longest Substring with At Most K Distinct Characters](https://leetcode.com/problems/longest-substring-with-at-most-k-distinct-characters/)
+
+```c++
+class Solution {
+public:
+    int lengthOfLongestSubstringKDistinct(string s, int k) {
+        int len = s.length();
+        if (k >= len) return len;
+        unordered_map<char, int> map;
+        int left = 0, right = 0, maxLen = 0, cnt = 0;
+        while (right < len) {
+            if (map[s[right++]]++ == 0) {
+                cnt++;
+            }
+            while (cnt > k) {
+                if (map[s[left++]]-- == 1) {
+                    cnt--;
+                }
+            }
+            maxLen = max(maxLen, right-left);
+        }
+        return maxLen;
+    }
+};
+```
+
+
+
+## 9. LeetCode 
 
 ```c++
 
