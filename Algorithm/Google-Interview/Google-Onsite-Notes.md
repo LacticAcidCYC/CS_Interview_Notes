@@ -309,13 +309,195 @@ public:
 
 
 
-## 6. LeetCode
+## 6. LeetCode 307 [Range Sum Query - Mutable](https://leetcode.com/problems/range-sum-query-mutable/)
+
+### (1) Segment Tree
+
+```c++
+// Time Complexity:
+// construct tree: O(n)
+// update: O(logn)
+// sum of range: O(logn)
+// Space Complexity: O(n)
+
+class NumArray {
+private:
+    vector<int> st; // segment tree
+    int N; // size of given array
+
+    // A recursive function that constructs Segment Tree for nums[ss..se]. 
+	// si is index of current node in segment tree st (start from 0(root))
+    int constructSTUtil(vector<int>& nums, int ss, int se, vector<int> &st, int si) { 
+        if (ss == se) 
+           return (st[si] = nums[ss]); 
+
+        int mid = ss + (se - ss) / 2;
+        st[si] =  constructSTUtil(nums, ss, mid, st, si*2+1) + constructSTUtil(nums, mid+1, se, st, si*2+2); 
+        return st[si]; 
+    } 
+
+    /* Function to construct segment tree from given array. This function 
+    allocates memory for segment tree and calls constructSTUtil() to 
+    fill the allocated memory */
+    vector<int> constructST(vector<int>& nums) { 
+        int n = nums.size();
+        if (n == 0) {
+            return {};
+        }
+        int x = (int)(ceil(log2(n))); //Height of segment tree 
+        int max_size = 2*(int)pow(2, x) - 1; //Maximum size of segment tree 
+        vector<int> st(max_size, 0); 
+
+        constructSTUtil(nums, 0, n-1, st, 0); 
+
+        return st; 
+    }
+    
+    // A recursive function that updates the value in Segment Tree
+    void updateUtil(vector<int> &st, int i, int val, int start, int end, int index) {
+        if (st.empty()) return;
+        if (start == end) {
+            st[index] = val;
+        } else {
+            int mid = start + (end - start) / 2;
+            if (i <= mid) {
+                updateUtil(st, i, val, start, mid, index*2+1);
+            } else {
+                updateUtil(st, i, val, mid+1, end, index*2+2);
+            }
+            st[index] = st[index*2+1] + st[index*2+2];
+        }
+    }
+
+    /*  A recursive function to get the sum of value in a given range of 
+    indexes. The following are parameters for this function. 
+  
+    st    --> segment tree 
+    index --> Index of current node in the segment tree. Initially 0 is 
+              passed as root is always at index 0 
+    ss & se  --> Starting and ending indexes of the segment represented by 
+                 current node, i.e., st[index] 
+    qs & qe  --> Starting and ending indexes of query range */
+    int sumRangeUtil(vector<int>& st, int ss, int se, int qs, int qe, int index) 
+    { 
+        if (st.empty()) return 0;
+        if (qs <= ss && qe >= se) 
+            return st[index]; 
+        
+        if (se < qs || ss > qe) 
+            return 0;
+
+        int mid = ss + (se - ss) / 2;
+        return sumRangeUtil(st, ss, mid, qs, qe, 2*index+1) + sumRangeUtil(st, mid+1, se, qs, qe, 2*index+2); 
+    }
+    
+public:
+    NumArray(vector<int> nums) {
+        N = nums.size();
+        st = constructST(nums); 
+    }
+    
+    void update(int i, int val) {
+        updateUtil(st, i, val, 0, N-1, 0);
+    }
+    
+    int sumRange(int i, int j) {
+        return sumRangeUtil(st, 0, N-1, i, j, 0);
+    }
+}; 
+
+/**
+ * Your NumArray object will be instantiated and called as such:
+ * NumArray obj = new NumArray(nums);
+ * obj.update(i,val);
+ * int param_2 = obj.sumRange(i,j);
+ */
+```
+
+[solution](https://leetcode.com/problems/range-sum-query-mutable/discuss/75724/17-ms-Java-solution-with-segment-tree)
+
+
+
+### (2) Binary Index Tree (Fenwick Tree)
+
+```c++
+class NumArray {
+private:
+    vector<int> BITree;
+    vector<int> _nums;
+    
+    void updateBIT(int index, int val) {
+        index++;
+        while (index < _nums.size()) {
+            BITree[index] += val;
+            index += (index & (-index));
+        }
+    }
+    
+    int getSum(int index) {
+        int sum = 0;
+        index++;
+        while (index > 0) {
+            sum += BITree[index];
+            index -= (index & (-index));
+        }
+        return sum;
+    }
+
+public:
+    NumArray(vector<int> nums) {
+        int n = nums.size();
+        _nums.resize(n+1);
+        BITree.resize(n+1);
+        for (int i=0; i<n; i++) {
+            updateBIT(i, nums[i]);
+            _nums[i] = nums[i];
+        }
+    }
+    
+    void update(int i, int val) {
+        if (_nums[i] != val) {
+            updateBIT(i, val - _nums[i]);
+            _nums[i] = val;
+        }
+    }
+    
+    int sumRange(int i, int j) {
+        return getSum(j) - getSum(i-1);
+    }
+};
+
+/**
+ * Your NumArray object will be instantiated and called as such:
+ * NumArray obj = new NumArray(nums);
+ * obj.update(i,val);
+ * int param_2 = obj.sumRange(i,j);
+ */
+```
+
+[solution](https://leetcode.com/problems/range-sum-query-mutable/discuss/75721/strongly-recommend-for-beginnersclean-C%2B%2B-implementation-with-detailed-explaination)
+
+[geeksforgeeks](https://www.geeksforgeeks.org/binary-indexed-tree-or-fenwick-tree-2/)
+
+[youtube](https://www.youtube.com/watch?v=WbafSgetDDk)
+
+[other](https://stackoverflow.com/questions/41969429/why-the-bit-operation-i-i-equals-to-rightmost-bit)
+
+
+
+## 7. LeetCode 308
 
 ```c++
 
 ```
 
 
+
+## 8. LeetCode 
+
+```c++
+
+```
 
 
 

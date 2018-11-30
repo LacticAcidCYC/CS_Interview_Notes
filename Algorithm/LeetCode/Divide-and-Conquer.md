@@ -178,7 +178,7 @@ We can use **Divide and Conquer** to solve this in O(nLogn) time. The idea is to
 **b)** Maximum area in right side of minimum value (Not including the min value)
 **c)** Number of bars multiplied by minimum value.
 
-How to find the minimum efficiently? [Range Minimum Query using Segment Tree](https://www.geeksforgeeks.org/segment-tree-set-1-range-minimum-query/) can be used for this. We build segment tree of the given histogram heights. Once the segment tree is built, all [range minimum queries take O(Logn) time](https://www.geeksforgeeks.org/segment-tree-set-1-range-minimum-query/). So over all complexity of the algorithm becomes.
+How to find the minimum efficiently? [Range Minimum Query using Segment Tree](https://www.geeksforgeeks.org/segment-tree-set-1-range-minimum-query/) can be used for this. We build segment tree of the given histogram heights. Once the segment tree is built, all [range minimum queries take O(Logn) time](https://www.geeksforgeeks.org/segment-tree-set-1-range-minimum-query/). So over all complexity of the algorithm becomes:
 
 Overall Time = Time to build Segment Tree + Time to recursively find maximum area
 
