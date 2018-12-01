@@ -311,6 +311,17 @@ public:
 
 ## 6. LeetCode 307 [Range Sum Query - Mutable](https://leetcode.com/problems/range-sum-query-mutable/)
 
+### Intuition
+
+We have an array arr[0 . . . n-1]. We should be able to
+**1** Find the sum of first i elements.
+**2** Change value of a specified element of the array arr[i] = x where 0 <= i <= n-1.
+
+A **simple solution** is to run a loop from 0 to i-1 and calculate sum of elements. To update a value, simply do arr[i] = x. The first operation takes O(n) time and second operation takes O(1) time. Another simple solution is to create another array and store sum from start to i at the i’th index in this array. Sum of a given range can now be calculated in O(1) time, but update operation takes O(n) time now. This works well if the number of query operations are large and very few updates.
+
+**Can we perform both the operations in O(log n) time once given the array?** 
+One Efficient Solution is to use [Segment Tree](https://www.geeksforgeeks.org/segment-tree-set-1-sum-of-given-range/) that does both operations in O(Logn) time.
+
 ### (1) Segment Tree
 
 ```c++
@@ -420,6 +431,62 @@ public:
 
 ### (2) Binary Index Tree (Fenwick Tree)
 
+*Using Binary Indexed Tree, we can do both tasks in O(Logn) time. The advantages of Binary Indexed Tree over Segment are, requires less space and very easy to implement.*
+
+**How does Binary Indexed Tree work?**
+The idea is based on the fact that all positive integers can be represented as sum of powers of 2. For example 19 can be represented as 16 + 2 + 1. Every node of BI Tree stores sum of n elements where n is a power of 2. For example, sum of first 12 elements can be obtained by sum of last 4 elements (from 9 to 12) plus sum of 8 elements (from 1 to 8). The number of set bits in binary representation of a number n is O(Logn). Therefore, we traverse at-most O(Logn) nodes in both getSum() and update() operations. Time complexity of construction is O(nLogn) as it calls update() for all n elements.
+
+**Representation**
+Binary Indexed Tree is represented as an array. Let the array be BITree[]. Each node of Binary Indexed Tree stores sum of some elements of given array. Size of Binary Indexed Tree is equal to n where n is size of input array. In the below code, we have used size as n+1 for ease of implementation.
+
+**Construction**
+We construct the Binary Indexed Tree by first initializing all values in BITree[] as 0. Then we call update() operation for all indexes to store actual sums, update is discussed below.
+
+**Operations**
+
+Node at index 0 is a dummy node.
+
+A node at index y is parent of a node at index x, iff y can be obtained by removing last set bit from binary representation of x.
+
+e.g. 
+
+7(0111) -> 6(0110) -> 4(0100)
+
+```latex
+getSum(index): Returns sum of arr[0..index]
+// Returns sum of arr[0..index] using BITree[0..n].  It assumes that
+// BITree[] is constructed for given array arr[0..n-1]
+1) Initialize sum as 0 and index as index+1.
+2) Do following while index is greater than 0.
+...a) Add BITree[index] to sum
+...b) Go to parent of BITree[index].  Parent can be obtained by removing
+     the last set bit from index, i.e., index = index - (index & (-index))
+3) Return sum.
+```
+
+
+
+The update process needs to make sure that all BITree nodes that have arr[i] as part of the section they cover must be updated. We get all such nodes of BITree by repeatedly adding the decimal number corresponding to the last set bit.
+
+e.g. 
+
+1(0001) -> 2(0010) -> 4(0100) -> 8(1000)...
+
+5(0101) -> 6(0110) -> 8(1000)...
+
+```latex
+update(index, val): Updates BIT for operation arr[index] += val
+// Note that arr[] is not changed here.  It changes
+// only BI Tree for the already made change in arr[].
+1) Initialize index as index+1.
+2) Do following while index is smaller than or equal to n.
+...a) Add value to BITree[index]
+...b) Go to parent of BITree[index].  Parent can be obtained by removing
+     the last set bit from index, i.e., index = index + (index & (-index))
+```
+
+Following are the implementations of Binary Indexed Tree.
+
 ```c++
 // Time Complexity:
 // construct tree: O(nlogn)
@@ -434,7 +501,7 @@ private:
     
     void updateBIT(int index, int val) {
         index++;
-        while (index < _nums.size()) {
+        while (index < BITree.size()) {
             BITree[index] += val;
             index += (index & (-index));
         }
@@ -451,17 +518,17 @@ private:
     }
 
 public:
-    NumArray(vector<int> nums) {
+    NumArray(vector<int> nums) : _nums(nums) {
+        if (nums.empty()) return;
         int n = nums.size();
-        _nums.resize(n+1);
         BITree.resize(n+1);
         for (int i=0; i<n; i++) {
             updateBIT(i, nums[i]);
-            _nums[i] = nums[i];
         }
     }
     
     void update(int i, int val) {
+        if (_nums.empty() || i < 0 || i >= _nums.size()) return;
         if (_nums[i] != val) {
             updateBIT(i, val - _nums[i]);
             _nums[i] = val;
@@ -469,6 +536,7 @@ public:
     }
     
     int sumRange(int i, int j) {
+        if (_nums.empty() || i < 0 || i >= _nums.size() || j < 0 || j >= _nums.size()) return 0;
         return getSum(j) - getSum(i-1);
     }
 };
@@ -491,13 +559,157 @@ public:
 
 
 
-## 7. LeetCode 308
+## 7. LeetCode 308 [Range Sum Query 2D - Mutable](https://leetcode.com/problems/range-sum-query-2d-mutable/)
+
+### Simple idea using prefix sum
+
+Time Complexity:
+construct tree: O(mn)
+update: O(n)
+sum of range: O(1)?
+Space Complexity: O(mn)
+
+### Binary Index Tree
+
+Idea is the same as 307
 
 ```c++
+// Time Complexity:
+// construct tree: O(mnlogmlogn)
+// update: O(logmlogn)
+// sum of range: O(logmlogn)
+// Space Complexity: O(mn)
 
+class NumMatrix {
+private:
+    vector<vector<int>> bit;
+    vector<vector<int>> _matrix;
+    int m;
+    int n;
+    
+    void updateBIT(int row, int col, int val) {
+        row++;
+        col++;
+        for (int i=row; i<bit.size(); i += i & (-i)) {
+            for (int j=col; j<bit[0].size(); j += j & (-j)) {
+                bit[i][j] += val;
+            }
+        }
+    }
+    
+    int getSum(int row, int col) {
+        row++;
+        col++;
+        int sum = 0;
+        for (int i=row; i>0; i -= i & (-i)) {
+            for (int j=col; j>0; j -= j & (-j)) {
+                sum += bit[i][j];
+            }
+        }
+        
+        return sum;
+    }
+    
+public:
+    NumMatrix(vector<vector<int>> matrix) : _matrix(matrix) {
+        if (matrix.empty() || matrix[0].empty()) { return;}
+        m = matrix.size();
+        n = matrix[0].size();
+        bit = vector<vector<int>>(m+1, vector<int>(n+1, 0));
+        for (int i=0; i<m; i++) {
+            for (int j=0; j<n; j++) {
+                updateBIT(i, j, matrix[i][j]);
+            }
+        }
+    }
+    
+    void update(int row, int col, int val) {
+        if (m == 0 || n == 0 || row < 0 || row >= m || col < 0 || col >= n) return;
+        if (val != _matrix[row][col]) {
+            updateBIT(row, col, val - _matrix[row][col]);
+            _matrix[row][col] = val;
+        }
+    }
+    
+    int sumRegion(int row1, int col1, int row2, int col2) {
+        if (m == 0 || n == 0 || row1 < 0 || row1 >= m || col1 < 0 || col1 >= n
+           || row2 < 0 || row2 >= m || col2 < 0 || col2 >= n) return 0;
+        return getSum(row2, col2) + getSum(row1-1, col1-1) - getSum(row1-1, col2) - getSum(row2, col1-1);
+    }
+};
+
+/**
+ * Your NumMatrix object will be instantiated and called as such:
+ * NumMatrix obj = new NumMatrix(matrix);
+ * obj.update(row,col,val);
+ * int param_2 = obj.sumRegion(row1,col1,row2,col2);
+ */
 ```
 
 [solution](https://leetcode.com/problems/range-sum-query-2d-mutable/discuss/75870/Java-2D-Binary-Indexed-Tree-Solution-clean-and-short-17ms)
+
+
+
+### Related Questions (LeetCode 315, 218, 493)
+
+#### LeetCode 315 [Count of Smaller Numbers After Self](https://leetcode.com/problems/count-of-smaller-numbers-after-self/)
+
+```c++
+// Time Complexity: O(nlogn)
+// Space Complexity: O(n)
+
+class Solution {
+private:
+    vector<int> bit;
+    
+    void updateBIT(int number) {
+        while (number < bit.size()) {
+            bit[number]++;
+            number += number & (-number);
+        }
+    }
+    
+    int getCnt(int number) {
+        int cnt = 0;
+        while (number > 0) {
+            cnt += bit[number];
+            number -= number & (-number);
+        }
+        
+        return cnt;
+    }
+    
+public:
+    vector<int> countSmaller(vector<int>& nums) {
+        if (nums.empty()) return {};
+        int n = nums.size();
+        vector<int> res(n);
+        
+        int min_val = INT_MAX; // use for avoiding minus value
+        int max_val = INT_MIN; // use for constructing the binary index tree
+        vector<int> _nums(n);
+        
+        for (auto &number : nums) {
+            min_val = min(min_val, number);
+            max_val = max(max_val, number);
+        }
+        
+        for (int i=0; i<n; i++) {
+            _nums[i] = nums[i] - min_val + 1;
+        }
+        
+        bit.resize(max_val - min_val + 2);
+        for (int i=n-1; i>=0; i--) {
+            res[i] = getCnt(_nums[i]-1);
+            updateBIT(_nums[i]);
+        }
+        
+        return res;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/count-of-smaller-numbers-after-self/discuss/76611/Short-Java-Binary-Index-Tree-BEAT-97.33-With-Detailed-Explanation)
 
 
 
@@ -529,7 +741,31 @@ public:
 
 
 
-## 9. LeetCode 
+## 9. LeetCode 359
+
+```c++
+
+```
+
+
+
+## 10. LeetCode 399
+
+```c++
+
+```
+
+
+
+## 11. LeetCode 418
+
+```c++
+
+```
+
+
+
+## 12. LeetCode 490
 
 ```c++
 
