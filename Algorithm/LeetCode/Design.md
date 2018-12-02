@@ -243,6 +243,92 @@ private:
 
 
 
+## 4. LeetCode 460
+
+### (1) Hashmap + Balanced Search Tree(Set in C++) (O(logk) + O(logk))
+
+```c++
+struct CacheNode {
+    int key;
+    int val;
+    int freq;
+    long tick;
+    
+    bool operator <(const CacheNode &rhs) const {
+        if (freq < rhs.freq) {
+            return true;
+        } else if (freq == rhs.freq) {
+            return tick < rhs.tick;
+        } else {
+            return false;
+        }
+    }
+};
+
+class LFUCache {
+public:
+    LFUCache(int capacity) : _capacity(capacity), _tick(0) {}
+    
+    int get(int key) {
+        auto it = _mp.find(key);
+        if (it == _mp.end()) return -1;
+        use(it->second);
+        return it->second.val;
+    }
+    
+    void put(int key, int value) {
+        if (_capacity == 0) return;
+        
+        auto it = _mp.find(key);
+        if (it != _mp.end()) {
+            it->second.val = value;
+            use(it->second);
+            return;
+        } else {
+            if (_cache.size() == _capacity) {
+                const CacheNode &lfu = *_cache.cbegin();
+                _mp.erase(lfu.key);
+                _cache.erase(lfu);
+            }
+            
+            CacheNode node{key, value, 1, ++_tick};
+            _mp[key] = node;
+            _cache.insert(node);
+        }
+    }
+
+private:
+    void use(CacheNode &node) {
+        _cache.erase(node);
+        node.freq++;
+        node.tick = ++_tick;
+        _cache.insert(node);
+    }
+    
+    unordered_map<int, CacheNode> _mp; // key <=> Node
+    set<CacheNode> _cache; // used for sorting the nodes
+    
+    long _tick; // time counter
+    int _capacity; // capacity
+};
+/**
+ * Your LFUCache object will be instantiated and called as such:
+ * LFUCache obj = new LFUCache(capacity);
+ * int param_1 = obj.get(key);
+ * obj.put(key,value);
+ */
+```
+
+[solution](https://leetcode.com/problems/lfu-cache/discuss/94516/Concise-C%2B%2B-O(1)-solution-using-3-hash-maps-with-explanation)
+
+
+
+### (2) Hashmap + Doubly-linked List (O(1) + O(1))
+
+```c++
+
+```
+
 
 
 

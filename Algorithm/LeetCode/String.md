@@ -722,10 +722,36 @@ public:
 
 
 
-## 11. LeetCode 567
+## 11. LeetCode 567 [Permutation in String](https://leetcode.com/problems/permutation-in-string/)
 
 ```c++
-
+class Solution {
+public:
+    bool checkInclusion(string s1, string s2) {
+        int l1 = s1.length();
+        int l2 = s2.length();
+        if (l1 > l2) return false;
+        vector<int> mp(26, 0);
+        for (auto &c : s1) {
+            mp[c - 'a']++;
+        }
+        
+        int l = 0, r = 0, cnt = l1;
+        
+        while (r < l2) {
+            if (mp[s2[r++] - 'a']-- > 0) {
+                cnt--;
+                if (cnt == 0) return true;
+            } else {
+                while (mp[s2[l++] - 'a']++ != -1) {
+                    cnt++;
+                }
+            }
+        }
+        
+        return false;
+    }
+};
 ```
 
 
@@ -1420,6 +1446,112 @@ public:
 ```
 
 
+
+## 11. LeetCode 44 [Wildcard Matching](https://leetcode.com/problems/wildcard-matching/)
+
+### (1) Greedy
+
+### Analysis:
+
+For each element in s
+
+If *s==*p or *p == ? which means this is a match, then goes to next element s++ p++.
+
+If p=='*', this is also a match, but one or many chars may be available, so let us save this *'s position and the matched s position.
+
+If not match, then we check if there is a * previously showed up,
+
+​       if there is no *,  return false;
+
+​       if there is an *,  we set current p to the next element of *, and set current s to the next saved s position.
+
+e.g.
+
+abed
+
+?b*d**
+
+a=?, go on, b=b, go on,
+
+e=*, save * position star=3, save s position ss = 3, p++
+
+e!=d,  check if there was a *, yes, ss++, s=ss; p=star+1
+
+d=d, go on, meet the end.
+
+check the rest element in p, if all are *, true, else false;
+
+```c++
+class Solution {
+public:
+    bool isMatch(string s, string p) {
+        int prevStar = -1; // last position of '*'
+        int ss = -1; // last saved position of s (candidate for matching the '*')
+        int si = 0; // use for s pointer
+        int pi = 0; // use for p pointer
+        int ls = s.length();
+        int lp = p.length();
+        
+        while (si < ls) {
+            if (s[si] == p[pi] || p[pi] == '?') {
+                si++;
+                pi++;
+            } else if (p[pi] == '*') {
+                prevStar = pi++;
+                ss = si;
+            } else if (prevStar != -1) {
+                pi = prevStar + 1;
+                si = ++ss;
+            } else {
+                return false;
+            }
+        }
+        
+        while (pi < lp && p[pi] == '*') pi++;
+        return pi == lp;
+    }
+};
+```
+
+[solution](http://yucoding.blogspot.com/2013/02/leetcode-question-123-wildcard-matching.html)
+
+
+
+### (2) DP
+
+Let's briefly summarize the idea of DP. We define the state `P[i][j]` to be whether `s[0..i)` matches `p[0..j)`. The state equations are as follows:
+
+1. `P[i][j] = P[i - 1][j - 1] && (s[i - 1] == p[j - 1] || p[j - 1] == '?')`, if `p[j - 1] != '*'`;
+2. `P[i][j] = P[i][j - 1] || P[i - 1][j]`, if `p[j - 1] == '*'`.
+
+```c++
+class Solution {
+public:
+    bool isMatch(string s, string p) {
+        int lenS = s.length();
+        int lenP = p.length();
+        vector<vector<bool>> d(lenS+1, vector<bool>(lenP+1, false));
+        d[0][0] = true;
+        for(int i=1; i<=lenP; i++) {
+            d[0][i] = (p[i-1] == '*') ? d[0][i-1] : false;
+        }
+        
+        for(int i=1; i<=lenS; i++) {
+            for(int j=1; j<=lenP; j++) {
+                if(p[j-1] == '*') {
+                    d[i][j] = d[i-1][j] || d[i][j-1];
+                } else {
+                    d[i][j] = (s[i-1] == p[j-1] || p[j-1] == '?') && d[i-1][j-1];
+                }
+            }
+        }
+        
+        return d[lenS][lenP];
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/wildcard-matching/discuss/17833/Accepted-C%2B%2B-DP-Solution-with-a-Trick)
 
 
 
