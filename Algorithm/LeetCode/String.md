@@ -725,6 +725,9 @@ public:
 ## 11. LeetCode 567 [Permutation in String](https://leetcode.com/problems/permutation-in-string/)
 
 ```c++
+// Time Complexity: O(n) n: length of l2
+// Space Complexity: O(1)
+
 class Solution {
 public:
     bool checkInclusion(string s1, string s2) {
@@ -752,6 +755,14 @@ public:
         return false;
     }
 };
+```
+
+
+
+## 12. LeetCode 
+
+```c++
+
 ```
 
 
@@ -1554,6 +1565,80 @@ public:
 [solution](https://leetcode.com/problems/wildcard-matching/discuss/17833/Accepted-C%2B%2B-DP-Solution-with-a-Trick)
 
 
+
+## 12. LeetCode 49 [Group Anagrams](https://leetcode.com/problems/group-anagrams/)
+
+### Hash Table
+
+### (1) Categorize by Sorted String
+
+```c++
+// Time Complexity: O(NKlogK)
+// Space Complexity: O(NK)
+// where N is the length of strs, and K is the maximum length of a string in strs. 
+
+class Solution {
+public:
+    vector<vector<string>> groupAnagrams(vector<string>& strs) {
+        if (strs.empty()) return {};
+        vector<vector<string>> res;
+        
+        unordered_map<string, vector<string>> mp;
+        for (auto &s : strs) {
+            auto key = s;
+            sort(key.begin(), key.end());
+            mp[key].push_back(s);
+        }
+        
+        for (auto &p : mp) {
+            res.push_back(p.second);
+        }
+        
+        return res;
+    }
+};
+```
+
+
+
+### (2) Categorize by Count String
+
+```c++
+// Time Complexity: O(NK)
+// Space Complexity: O(NK)
+// Time Complexity: O(NK), where N is the length of strs, and K is the maximum length of a
+// string in strs. Counting each string is linear in the size of the string, and we count
+// every string.
+
+class Solution {
+public:
+    vector<vector<string>> groupAnagrams(vector<string>& strs) {
+        if (strs.empty()) return {};
+        vector<vector<string>> res;
+        
+        unordered_map<string, vector<string>> mp;
+        for (auto &s : strs) {
+            string key = "";
+            vector<int> cnts(26, 0);
+            for (auto &c : s) {
+                cnts[c - 'a']++;
+            }
+            
+            for (int i=0; i<26; i++) {
+                key += ("#" + to_string(cnts[i]));
+            }
+            
+            mp[key].push_back(s);
+        }
+        
+        for (auto &p : mp) {
+            res.push_back(p.second);
+        }
+        
+        return res;
+    }
+};
+```
 
 
 

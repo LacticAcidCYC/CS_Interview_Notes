@@ -986,6 +986,29 @@ public:
 
 
 
+## 18. LeetCode 674 [Longest Continuous Increasing Subsequence](https://leetcode.com/problems/longest-continuous-increasing-subsequence/)
+
+```c++
+class Solution {
+public:
+    int findLengthOfLCIS(vector<int>& nums) {
+        if (nums.empty()) return 0;
+        int n = nums.size();
+        int res = 1, len_lcis = 1;
+        for (int i = 1; i < n; ++i) {
+            if (nums[i] > nums[i-1]) {
+                len_lcis++;
+                res = max(res, len_lcis);
+            } else {
+                len_lcis = 1;
+            }
+        }
+        
+        return res;
+    }
+};
+```
+
 
 
 

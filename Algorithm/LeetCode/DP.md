@@ -1767,7 +1767,7 @@ public:
 
 ### Similar to LeetCode 300
 
-Suppose for sequences ending at nums[i], we know the length lenght[i] of the longest subsequence, and the number count[i] of such sequences with that length.
+Suppose for sequences ending at nums[i], we know the length length[i] of the longest subsequence, and the number count[i] of such sequences with that length.
 
 For every `j < i` with `A[j] < A[i]`, we might append `A[i]` to a longest subsequence ending at `A[j]`. It means that we have demonstrated `count[j]` subsequences of length `length[j] + 1`.
 
@@ -2007,13 +2007,55 @@ public:
 
 
 
-## 32. LeetCode 764
+## 32. LeetCode 764 [Largest Plus Sign](https://leetcode.com/problems/largest-plus-sign/)
+
+**Algorithms**: For each position `(i, j)` of the `grid` matrix, we try to extend in each of the four directions (left, right, up, down) as long as possible, then take the minimum length of `1`'s out of the four directions as the order of the largest axis-aligned plus sign centered at position `(i, j)`.
+
+**Optimizations**: Normally we would need a total of five matrices to make the above idea work -- one matrix for the `grid` itself and four more matrices for each of the four directions. However, these five matrices can be combined into one using two simple tricks:
+
+1. For each position `(i, j)`, we are only concerned with the minimum length of `1`'s out of the four directions. This implies we may combine the four matrices into one by only keeping tracking of the minimum length.
+
+2. For each position `(i, j)`, the order of the largest axis-aligned plus sign centered at it will be `0` if and only if `grid[i][j] == 0`. This implies we may further combine the `grid` matrix with the one obtained above.
+
+**Implementations**:
+
+1. Create an `N-by-N` matrix `grid`, with all elements initialized with value `N`.
+2. Reset those elements to `0` whose positions are in the `mines` list.
+3. For each position `(i, j)`, find the maximum length of `1`'s in each of the four directions and set `grid[i][j]` to the minimum of these four lengths. Note that there is a simple recurrence relation relating the maximum length of `1`'s at current position with previous position for each of the four directions (labeled as `l`, `r`, `u`, `d`).
+4. Loop through the `grid` matrix and choose the maximum element which will be the largest axis-aligned plus sign of `1`'s contained in the grid.
 
 ```c++
-
+class Solution {
+public:
+    int orderOfLargestPlusSign(int N, vector<vector<int>>& mines) {
+        vector<vector<int>> dp(N, vector<int>(N, N));
+        
+        for (auto &mine : mines) {
+            dp[mine[0]][mine[1]] = 0;
+        }
+        
+        for (int i = 0; i < N; ++i) {
+            for (int j = 0, k = N - 1, l = 0, r = 0, u = 0, d = 0; j < N; ++j, --k) {
+                dp[i][j] = min(dp[i][j], l = (dp[i][j] == 0 ? 0 : l + 1));
+                dp[i][k] = min(dp[i][k], r = (dp[i][k] == 0 ? 0 : r + 1));
+                dp[j][i] = min(dp[j][i], u = (dp[j][i] == 0 ? 0 : u + 1));
+                dp[k][i] = min(dp[k][i], d = (dp[k][i] == 0 ? 0 : d + 1));
+            }
+        }
+        
+        int res = INT_MIN;
+        for (int i = 0; i < N; ++i) {
+            for (int j = 0; j < N; ++j) {
+                res = max(res, dp[i][j]);
+            }
+        }
+        
+        return res;
+    }
+};
 ```
 
-
+[solution](https://leetcode.com/problems/largest-plus-sign/discuss/113314/JavaC%2B%2BPython-O(N2)-solution-using-only-one-grid-matrix)
 
 
 

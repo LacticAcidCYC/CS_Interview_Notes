@@ -243,7 +243,9 @@ private:
 
 
 
-## 4. LeetCode 460
+## 4. LeetCode 460 [LFU Cache](https://leetcode.com/problems/lfu-cache/)
+
+[huahua-video](https://zxi.mytechroad.com/blog/hashtable/leetcode-460-lfu-cache/)
 
 ### (1) Hashmap + Balanced Search Tree(Set in C++) (O(logk) + O(logk))
 
@@ -271,7 +273,7 @@ public:
     
     int get(int key) {
         auto it = _mp.find(key);
-        if (it == _mp.end()) return -1;
+        if (it == _mp.cend()) return -1;
         use(it->second);
         return it->second.val;
     }
@@ -280,7 +282,7 @@ public:
         if (_capacity == 0) return;
         
         auto it = _mp.find(key);
-        if (it != _mp.end()) {
+        if (it != _mp.cend()) {
             it->second.val = value;
             use(it->second);
             return;
@@ -326,7 +328,95 @@ private:
 ### (2) Hashmap + Doubly-linked List (O(1) + O(1))
 
 ```c++
+struct CacheNode {
+    int key;
+    int val;
+    int freq;
+    
+    // pointer to the node in the list
+    list<int>::const_iterator it;
+};
 
+class LFUCache {
+public:
+    LFUCache(int capacity) : _capacity(capacity), _min_freq(0) {}
+    
+    int get(int key) {
+        auto it = _mp.find(key);
+        if (it == _mp.cend()) return -1;
+        use(it->second);
+        return it->second.val;
+    }
+    
+    void put(int key, int value) {
+        if (_capacity == 0) return;
+        
+        auto it = _mp.find(key);
+        if (it != _mp.cend()) {
+            // key already exists, update the value and call use()
+            it->second.val = value;
+            use(it->second);
+            return;
+        }
+        
+        if (_mp.size() == _capacity) {
+            // reach capacity, need to remove a node which
+            // (1) has the lowest freq
+            // (2) least recently used if there are multiple ones
+            
+            const int key_to_remove = _freqMP[_min_freq].back();
+            _freqMP[_min_freq].pop_back();
+            _mp.erase(key_to_remove);
+        }
+        
+        // new item has freq of 1, thus _min_freq needs to be set to 1
+        const int freq = 1;
+        _min_freq = freq;
+        
+        // Add the key to freq list
+        _freqMP[freq].push_front(key);
+        
+        // create a new node
+        _mp[key] = {key, value, freq, _freqMP[freq].cbegin()};
+    }
+    
+private:
+    void use(CacheNode& node) {
+        // update the frequency
+        const int prev_freq = node.freq;
+        const int cur_freq = ++(node.freq);
+        
+        // remove the entry from old freq list
+        _freqMP[prev_freq].erase(node.it);
+        
+        if (_freqMP[prev_freq].empty() && prev_freq == _min_freq) {
+            _min_freq++;
+        }
+        
+        // insert the key into the front of the new freq list
+        _freqMP[cur_freq].push_front(node.key);
+        
+        // update the pointer of node
+        node.it = _freqMP[cur_freq].cbegin();
+    }
+    
+    int _capacity;
+    int _min_freq;
+    
+    // key -> CacheNode
+    unordered_map<int, CacheNode> _mp;
+    
+    // freq -> keys with freq
+    unordered_map<int, list<int>> _freqMP;
+    
+};
+
+/**
+ * Your LFUCache object will be instantiated and called as such:
+ * LFUCache obj = new LFUCache(capacity);
+ * int param_1 = obj.get(key);
+ * obj.put(key,value);
+ */
 ```
 
 
