@@ -632,6 +632,9 @@ public:
 ## 9. LeetCode 713 [Subarray Product Less Than K](https://leetcode.com/problems/subarray-product-less-than-k/)
 
 ```c++
+// Time Complexity: O(n)
+// Space Complexity: O(n)
+
 class Solution {
 public:
     int numSubarrayProductLessThanK(vector<int>& nums, int k) {
@@ -661,6 +664,9 @@ public:
 ### (1) Sliding Window
 
 ```c++
+// Time Complexity: O(n)
+// Space Complexity: O(n)
+
 class Solution {
 public:
     int totalFruit(vector<int>& tree) {
@@ -759,10 +765,50 @@ public:
 
 
 
-## 12. LeetCode 
+## 12. LeetCode 438 [Find All Anagrams in a String](https://leetcode.com/problems/find-all-anagrams-in-a-string/)
 
 ```c++
+// Time Complexity: O(n) n: length of string s
+// Space Complexity: O(1)
 
+class Solution {
+public:
+    vector<int> findAnagrams(string s, string p) {
+        vector<int> res;
+        int ls = s.length();
+        int lp = p.length();
+        if (lp > ls) return {};
+        
+        vector<int> mp(26); // hashmap
+        for (auto &c : p) {
+            mp[c - 'a']++;
+        }
+        
+        int cnt = lp, l = 0, r = 0;
+        
+        while (r < ls) {
+            if (mp[s[r++] - 'a']-- > 0) {
+                // if current character is in p and not reach its limit
+                // move right pointer and expand the window
+                // decrease cnt variable
+                cnt--;
+            } else {
+                // if current character is not in p or reach its limit in p
+                // now the substring in the window is invalid
+                // we try to increase left pointer to contract the window
+                while (mp[s[l++] - 'a']++ >= 0) {
+                    cnt++;
+                }
+            }
+            // if cnt == 0, now the substring in the window match our requirement
+            if (cnt == 0) {
+                res.push_back(l);
+            }
+        }
+        
+        return res;
+    }
+};
 ```
 
 

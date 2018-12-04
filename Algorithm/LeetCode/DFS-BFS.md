@@ -727,7 +727,102 @@ private:
 
 
 
+## 11. LeetCode 79 [Word Search](https://leetcode.com/problems/word-search/)
 
+```c++
+// m,n : board
+// k: length of word
+// Time Complexity: O(mn * 3^k) or O(m^2n^2)
+// Space Complexity: O(4mn)
+
+class Solution {
+public:
+    bool exist(vector<vector<char>>& board, string word) {
+        if (board.empty() || board[0].empty()) return false;
+        if (word.empty()) return true;
+        
+        int m = board.size();
+        int n = board[0].size();
+        
+        for (int i=0; i<m; i++) {
+            for (int j=0; j<n; j++) {
+                if (dfs(i, j, board, word, 0)) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+    
+private:
+    bool dfs(int x, int y, vector<vector<char>> &board, string &word, int index) {
+        if (index == word.size()) return true;
+        if (x < 0 || x >= board.size() || y < 0 || y >= board[0].size() || board[x][y] != word[index]) {
+            return false;
+        }
+        
+        board[x][y] = '.';
+        
+        if (dfs(x+1, y, board, word, index+1) || dfs(x-1, y, board, word, index+1)
+           || dfs(x, y+1, board, word, index+1) || dfs(x, y-1, board, word, index+1)) {
+            return true;
+        }
+        
+        board[x][y] = word[index];
+        
+        return false;
+    }
+};
+
+// original
+class Solution {
+public:
+    bool exist(vector<vector<char>>& board, string word) {
+        if (board.empty() || board[0].empty()) return false;
+        if (word.empty()) return true;
+        
+        int m = board.size();
+        int n = board[0].size();
+        
+        for (int i=0; i<m; i++) {
+            for (int j=0; j<n; j++) {
+                if (dfs(i, j, board, word, 0)) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+    
+private:
+    bool dfs(int x, int y, vector<vector<char>> &board, string &word, int index) {
+        if (index == word.size()) return true;
+        if (x < 0 || x >= board.size() || y < 0 || y >= board[0].size() || board[x][y] != word[index]) {
+            return false;
+        }
+        
+        board[x][y] = '.';
+        
+        const vector<vector<int>> dirs = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
+        
+        for (int k=0; k<4; k++) {
+            int nx = x + dirs[k][0];
+            int ny = y + dirs[k][1];
+            if (dfs(nx, ny, board, word, index+1)) {
+                return true;
+            }
+        }
+        
+        board[x][y] = word[index];
+        
+        return false;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/word-search/discuss/27658/Accepted-very-short-Java-solution.-No-additional-space.)
 
 
 

@@ -178,7 +178,71 @@ public:
 ### HashTable + Sliding Window
 
 ```c++
+class Solution {
+public:
+    vector<int> findAnagrams(string s, string p) {
+        vector<int> res;
+        int ls = s.length();
+        int lp = p.length();
+        if (lp > ls) return {};
+        
+        vector<int> mp(26);
+        for (auto &c : p) {
+            mp[c - 'a']++;
+        }
+        
+        int cnt = lp, l = 0, r = 0;
+        
+        while (r < ls) {
+            if (mp[s[r++] - 'a']-- > 0) {
+                cnt--;
+            } else {
+                while (mp[s[l++] - 'a']++ >= 0) {
+                    cnt++;
+                }
+            }
+            if (cnt == 0) {
+                res.push_back(l);
+            }
+        }
+        
+        return res;
+    }
+};
+```
 
+
+
+## 6. LeetCode 734 [Sentence Similarity](https://leetcode.com/problems/sentence-similarity/)
+
+```c++
+// N : length of words1(words2)
+// P : length of pairs
+// Time Complexity: O(N + P)
+// Space Complexity: O(P)
+
+class Solution {
+public:
+    bool areSentencesSimilar(vector<string>& words1, vector<string>& words2, vector<pair<string, string>> pairs) {
+        int l1 = words1.size();
+        int l2 = words2.size();
+        if (l1 != l2) return false;
+        
+        unordered_map<string, unordered_set<string>> mp;
+        for (auto &p : pairs) {
+            mp[p.first].insert(p.second);
+            mp[p.second].insert(p.first);
+        }
+        
+        for (int i=0; i<l1; i++) {
+            if (words1[i] != words2[i] && !mp[words1[i]].count(words2[i])) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+};
 ```
 
 
