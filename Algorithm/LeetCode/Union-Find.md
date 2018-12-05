@@ -36,69 +36,67 @@ rank by 1;
 
 ## 1. LeetCode 399 [Evaluate Division](https://leetcode.com/problems/evaluate-division/)
 
+[huahua](http://zxi.mytechroad.com/blog/graph/leetcode-399-evaluate-division/)
+
 ```c++
+// E: number of edges(equations)
+// Q: number of queries
+// Time Complexity: O(E + Q)
+// Space Complexity: O(E)
+
 class Solution {
 public:
     vector<double> calcEquation(vector<pair<string, string>> equations, vector<double>& values, vector<pair<string, string>> queries) {
-        unordered_map<string, Node*> mp; // <string, corresponding Node>
-        vector<double> res;
+        unordered_map<string, pair<string, double>> parents;
         
-        int n = equations.size();
-        for (int i=0; i<n; i++) {
-            auto s1 = equations[i].first;
-            auto s2 = equations[i].second;
+        for (int i=0; i<equations.size(); i++) {
+            const string& A = equations[i].first;
+            const string& B = equations[i].second;
+            const double k = values[i];
             
-            if (mp.count(s1) && mp.count(s2)) {
-                unionNode(mp[s1], mp[s2], values[i], mp);
-            } else if (mp.count(s1)) {
-                mp[s2] = new Node(mp[s1]->val / values[i]);
-                mp[s2]->parent = mp[s1];
-            } else if (mp.count(s2)) {
-                mp[s1] = new Node(mp[s2]->val * values[i]);
-                mp[s1]->parent = mp[s2];
+            if (parents.count(A) && parents.count(B)) {
+                auto& rA = find(A, parents);
+                auto& rB = find(B, parents);
+                parents[rA.first] = {rB.first, k * rB.second / rA.second}; 
+            } else if (parents.count(A)) {
+                parents[B] = {A, 1.0 / k};
+            } else if (parents.count(B)) {
+                parents[A] = {B, k};
             } else {
-                mp[s1] = new Node(values[i]);
-                mp[s2] = new Node(1);
-                mp[s1]->parent = mp[s2];
+                parents[A] = {B, k};
+                parents[B] = {B, 1.0};
             }
         }
         
-        for (auto &q : queries) {
-            if (!mp.count(q.first) || !mp.count(q.second) || findParent(mp[q.first]) != findParent(mp[q.second])) {
-                res.push_back(-1);
+        vector<double> ans;
+        for (const auto& query : queries) {
+            const string& X = query.first;
+            const string& Y = query.second;
+            if (!parents.count(X) || !parents.count(Y)) {
+                ans.push_back(-1.0);
+                continue;
+            }
+            
+            auto& rX = find(X, parents);
+            auto& rY = find(Y, parents);
+            if (rX.first != rY.first) {
+                ans.push_back(-1.0);
             } else {
-                res.push_back(mp[q.first]->val / mp[q.second]->val);
+                ans.push_back(rX.second / rY.second);
             }
         }
         
-        return res;
+        return ans;
     }
     
 private:
-    struct Node {
-        Node* parent;
-        double val = 0.0;
-        Node(double x) : val(x), parent(this) {}
-    };
-    
-    void unionNode(Node* n1, Node* n2, double value, unordered_map<string, Node*> &mp) {
-        Node *p1 = findParent(n1), *p2 = findParent(n2);
-        if (p1 != p2) {
-            double radio = value * n2->val / n1->val;
-            for (auto &pair : mp) {
-                if (pair.second->parent == p1) {
-                    pair.second->val *= radio;
-                }
-            }
-            p1->parent = p2;
+    pair<string, double>& find(const string& X, unordered_map<string, pair<string, double>> &parents) {
+        if (X != parents[X].first) {
+            const auto& p = find(parents[X].first, parents);
+            parents[X].first = p.first;
+            parents[X].second *= p.second;
         }
-    }
-    
-    Node* findParent(Node* node) {
-        if (node->parent != node) {
-            node->parent = findParent(node->parent);
-        }
-        return node->parent;
+        return parents[X];
     }
 };
 ```

@@ -826,6 +826,68 @@ private:
 
 
 
+## 12. LeetCode 399 [Evaluate Division](https://leetcode.com/problems/evaluate-division/)
+
+```c++
+// E: number of edges(equations)
+// Q: number of queries
+// Time Complexity: O(E + E*Q)
+// Space Complexity: O(E)
+
+class Solution {
+public:
+    vector<double> calcEquation(vector<pair<string, string>> equations, vector<double>& values, vector<pair<string, string>> queries) {
+        unordered_map<string, unordered_map<string, double>> graph;
+        vector<double> ans;
+        int n = equations.size();
+        
+        for (int i=0; i<n; i++) {
+            const string& A = equations[i].first;
+            const string& B = equations[i].second;
+            const double& k = values[i];
+            graph[A][B] = k;
+            if (k != 0) {
+                graph[B][A] = 1.0 / k;
+            }
+        }
+        
+        for (const auto& query : queries) {
+            const string &X = query.first;
+            const string &Y = query.second;
+            if (!graph.count(X) || !graph.count(Y)) {
+                ans.push_back(-1.0);
+                continue;
+            }
+            unordered_set<string> visited;
+            ans.push_back(dfs(graph, X, Y, visited));
+        }
+        
+        return ans;
+    }
+    
+private:
+    double dfs(unordered_map<string, unordered_map<string, double>> &graph, 
+               const string &X, const string &Y, unordered_set<string> &visited) {
+        if (X == Y) return 1.0;
+        visited.insert(X);
+        
+        for (const auto& pair : graph[X]) {
+            const string& Z = pair.first;
+            if (!visited.count(Z)) {
+                double d = dfs(graph, Z, Y, visited);
+                if (d >= 0) {
+                    return d * pair.second;
+                }
+            }
+        }
+        
+        return -1.0;
+    }
+};
+```
+
+
+
 
 
 

@@ -316,9 +316,10 @@ public:
 ### (1) DFS
 
 ```c++
-// N: number of equations; M: number of queries
-// Time Complexity: O(NM)
-// Space Complexity: O(N)
+// E: number of edges(equations)
+// Q: number of queries
+// Time Complexity: O(E + E*Q)
+// Space Complexity: O(E)
 
 class Solution {
 public:
@@ -447,6 +448,75 @@ private:
 ```
 
 [union-find](https://leetcode.com/problems/evaluate-division/discuss/88170/0ms-C%2B%2B-Union-Find-Solution-EASY-to-UNDERSTAND)
+
+
+
+### Improved Union-Find
+
+```c++
+// E: number of edges(equations)
+// Q: number of queries
+// Time Complexity: O(E + Q)
+// Space Complexity: O(E)
+
+class Solution {
+public:
+    vector<double> calcEquation(vector<pair<string, string>> equations, vector<double>& values, vector<pair<string, string>> queries) {
+        unordered_map<string, pair<string, double>> parents;
+        
+        for (int i=0; i<equations.size(); i++) {
+            const string& A = equations[i].first;
+            const string& B = equations[i].second;
+            const double k = values[i];
+            
+            if (parents.count(A) && parents.count(B)) {
+                auto& rA = find(A, parents);
+                auto& rB = find(B, parents);
+                parents[rA.first] = {rB.first, k * rB.second / rA.second}; 
+            } else if (parents.count(A)) {
+                parents[B] = {A, 1.0 / k};
+            } else if (parents.count(B)) {
+                parents[A] = {B, k};
+            } else {
+                parents[A] = {B, k};
+                parents[B] = {B, 1.0};
+            }
+        }
+        
+        vector<double> ans;
+        for (const auto& query : queries) {
+            const string& X = query.first;
+            const string& Y = query.second;
+            if (!parents.count(X) || !parents.count(Y)) {
+                ans.push_back(-1.0);
+                continue;
+            }
+            
+            auto& rX = find(X, parents);
+            auto& rY = find(Y, parents);
+            if (rX.first != rY.first) {
+                ans.push_back(-1.0);
+            } else {
+                ans.push_back(rX.second / rY.second);
+            }
+        }
+        
+        return ans;
+    }
+    
+private:
+    pair<string, double>& find(const string& X, unordered_map<string, pair<string, double>> &parents) {
+        if (X != parents[X].first) {
+            const auto& p = find(parents[X].first, parents);
+            parents[X].first = p.first;
+            parents[X].second *= p.second;
+        }
+        return parents[X];
+    }
+};
+```
+
+
 
 
 
