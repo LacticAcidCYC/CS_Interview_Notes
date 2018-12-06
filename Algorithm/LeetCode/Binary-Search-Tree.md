@@ -297,3 +297,76 @@ public:
 };
 ```
 
+
+
+## 5. LeetCode 853 [Car Fleet](https://leetcode.com/problems/car-fleet/)
+
+### (1) TreeMap
+
+```c++
+// Time Complexity: O(nlogn)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    int carFleet(int target, vector<int>& position, vector<int>& speed) {
+        map<int, double, greater<int>> mp;
+        int n = position.size();
+        for (int i=0; i<n; i++) {
+            mp[position[i]] =  (double)(target - position[i]) / speed[i];
+        }
+        
+        int ans = 0;
+        double cur_lowest = 0;
+        for (auto &p : mp) {
+            if (p.second > cur_lowest) {
+                cur_lowest = p.second;
+                ans++;
+            }
+        }
+        
+        return ans;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/car-fleet/discuss/139850/C%2B%2BJavaPython-Straight-Forward)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

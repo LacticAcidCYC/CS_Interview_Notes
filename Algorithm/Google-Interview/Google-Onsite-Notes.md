@@ -741,7 +741,7 @@ public:
 
 
 
-## 9. LeetCode 359
+## 9. LeetCode 359 
 
 ```c++
 
@@ -749,10 +749,69 @@ public:
 
 
 
-## 10. LeetCode 399
+## 10. LeetCode 399 [Evaluate Division](https://leetcode.com/problems/evaluate-division/)
 
 ```c++
+// E: number of edges(equations)
+// Q: number of queries
+// Time Complexity: O(E + Q)
+// Space Complexity: O(E)
 
+class Solution {
+public:
+    vector<double> calcEquation(vector<pair<string, string>> equations, vector<double>& values, vector<pair<string, string>> queries) {
+        unordered_map<string, pair<string, double>> parents;
+        
+        for (int i=0; i<equations.size(); i++) {
+            const string& A = equations[i].first;
+            const string& B = equations[i].second;
+            const double k = values[i];
+            
+            if (parents.count(A) && parents.count(B)) {
+                auto& rA = find(A, parents);
+                auto& rB = find(B, parents);
+                parents[rA.first] = {rB.first, k * rB.second / rA.second}; 
+            } else if (parents.count(A)) {
+                parents[B] = {A, 1.0 / k};
+            } else if (parents.count(B)) {
+                parents[A] = {B, k};
+            } else {
+                parents[A] = {B, k};
+                parents[B] = {B, 1.0};
+            }
+        }
+        
+        vector<double> ans;
+        for (const auto& query : queries) {
+            const string& X = query.first;
+            const string& Y = query.second;
+            if (!parents.count(X) || !parents.count(Y)) {
+                ans.push_back(-1.0);
+                continue;
+            }
+            
+            auto& rX = find(X, parents);
+            auto& rY = find(Y, parents);
+            if (rX.first != rY.first) {
+                ans.push_back(-1.0);
+            } else {
+                ans.push_back(rX.second / rY.second);
+            }
+        }
+        
+        return ans;
+    }
+    
+private:
+    pair<string, double>& find(const string& X, unordered_map<string, pair<string, double>> &parents) {
+        if (X != parents[X].first) {
+            const auto& p = find(parents[X].first, parents);
+            parents[X].first = p.first;
+            parents[X].second *= p.second;
+        }
+        return parents[X];
+    }
+};
 ```
 
 
@@ -765,7 +824,7 @@ public:
 
 
 
-## 12. LeetCode 490
+## 12. LeetCode 490 
 
 ```c++
 
@@ -773,7 +832,7 @@ public:
 
 
 
-## 13. LeetCode 674
+## 13. LeetCode 674 
 
 ```c++
 
@@ -781,23 +840,188 @@ public:
 
 
 
-## 14. LeetCode 684
+## 14. LeetCode 684 [Redundant Connection](https://leetcode.com/problems/redundant-connection/)
 
 ```c++
+class UnionFindSet {
+public:
+    UnionFindSet(int n) {
+        _parent = vector<int>(n+1, 0);
+        _rank = vector<int>(n+1, 0);
+        
+        for (int i=1; i<=n; i++) {
+            _parent[i] = i;
+        }
+    }
+    
+    bool Union(int x, int y) {
+        int rx = Find(x);
+        int ry = Find(y);
+        
+        if (rx == ry) return false;
+        if (_rank[rx] > _rank[ry]) {
+            _parent[ry] = rx;
+        } else {
+            _parent[rx] = ry;
+            if (_rank[rx] == _rank[ry]) {
+                _rank[ry]++;
+            }
+        }
+        
+        return true;
+    }
+    
+    int Find(int x) {
+        if (_parent[x] != x) {
+            _parent[x] = Find(_parent[x]);
+        }
+        return _parent[x];
+    }
+    
+private:
+    vector<int> _parent;
+    vector<int> _rank;
+};
 
+class Solution {
+public:
+    vector<int> findRedundantConnection(vector<vector<int>>& edges) {
+        int n = edges.size();
+        UnionFindSet ufs(n);
+        vector<int> ans;
+        
+        for (int i=0; i<n; i++) {
+            if (!ufs.Union(edges[i][0], edges[i][1])) {
+                ans = {edges[i][0], edges[i][1]};
+                break;
+            }
+        }
+        
+        return ans;
+    }
+};
 ```
 
 
 
-## 15. LeetCode 685
+## 15. LeetCode 685 [Redundant Connection II](https://leetcode.com/problems/redundant-connection-ii/)
 
 ```c++
-
+class Solution {
+    vector<int> parent;
+public:
+    vector<int> findRedundantDirectedConnection(vector<vector<int>>& edges) {
+        parent = vector<int>(edges.size()+1, 0);
+        vector<int> doubleParentA, doubleParentB;
+        
+        for(vector<int> &edge : edges) {
+            if(!parent[edge[1]])
+                parent[edge[1]] = edge[0];
+            else {
+                //two parent (candidates)
+                doubleParentA = {parent[edge[1]], edge[1]};
+                doubleParentB = edge;
+                edge[1] = 0;
+            }
+        }
+        
+        for(int i=0; i<parent.size(); i++) parent[i] = i;
+        
+        for(vector<int> &edge : edges) {
+            int a = edge[0];
+            int b = edge[1];
+            int v = find(a);
+            if(b == 0) continue;
+            if(v == b) {
+                if(doubleParentA.empty()) {
+                    return edge;
+                }
+                else return doubleParentA;
+            }
+            parent[b] = v;
+        }
+        return doubleParentB;
+    }
+    
+    int find(int x) {
+        int root = parent[x];
+        if(x != root) {
+            root = find(root);
+        }
+        return root;
+    }
+};
 ```
 
 
 
+## 16. LeetCode 853 [Car Fleet](https://leetcode.com/problems/car-fleet/)
 
+### Recent Problem!!!(12.5)
+
+### (1) TreeMap
+
+```c++
+// n : number of cars
+// Time Complexity: O(nlogn)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    int carFleet(int target, vector<int>& position, vector<int>& speed) {
+        map<int, double, greater<int>> mp;
+        int n = position.size();
+        for (int i=0; i<n; i++) {
+            mp[position[i]] =  (double)(target - position[i]) / speed[i];
+        }
+        
+        int ans = 0;
+        double cur_lowest = 0;
+        for (auto &p : mp) {
+            if (p.second > cur_lowest) {
+                cur_lowest = p.second;
+                ans++;
+            }
+        }
+        
+        return ans;
+    }
+};
+```
+
+
+
+### (2) Bucket sort / Counting sort
+
+```c++
+// Time Complexity: O(target)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    int carFleet(int target, vector<int>& position, vector<int>& speed) {
+        vector<double> buckets(target+1, -1);
+        int ans = 0;
+        int n = position.size();
+        
+        for (int i=0; i<n; i++) {
+            buckets[position[i]] = (double) (target - position[i]) / speed[i];
+        }
+        
+        double max_time = 0;
+        for (int i=target; i>=0; i--) {
+            if (buckets[i] > max_time) {
+                max_time = buckets[i];
+                ans++;
+            }
+        }
+        
+        return ans;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/car-fleet/discuss/140782/Java-O(N)-without-sorting)
 
 
 

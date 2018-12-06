@@ -286,6 +286,8 @@ public:
 };
 ```
 
+[solution](https://leetcode.com/problems/redundant-connection-ii/discuss/108045/C%2B%2BJava-Union-Find-with-explanation-O(n))
+
 
 
 ## 5. LeetCode 952 [Largest Component Size by Common Factor](https://leetcode.com/problems/largest-component-size-by-common-factor/)
