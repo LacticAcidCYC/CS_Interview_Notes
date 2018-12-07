@@ -1025,6 +1025,97 @@ public:
 
 
 
+## 17. LeetCode 723 
+
+```c++
+
+```
+
+
+
+## 18. LeetCode 739 
+
+### Related LeetCode 496
+
+Monotone Stack
+
+```c++
+
+```
+
+
+
+## 19. LeetCode 135 [Candy](https://leetcode.com/problems/candy/)
+
+First, satisfy left-neighbor relationship, then right, finally combine.
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(n)
+
+// two-array for extra space
+class Solution {
+public:
+    int candy(vector<int>& ratings) {
+        int n = ratings.size();
+        if (n == 1) return 1;
+        
+        vector<int> left2right(n, 1);
+        vector<int> right2left(n, 1);
+        
+        for (int i=1; i<n; i++) {
+            if (ratings[i] > ratings[i-1]) {
+                left2right[i] = left2right[i-1] + 1;
+            }
+        }
+        
+        for (int i=n-2; i>=0; i--) {
+            if (ratings[i] > ratings[i+1]) {
+                right2left[i] = right2left[i+1] + 1;
+            }
+        }
+        
+        int res = 0;
+        
+        for (int i=0; i<n; i++) {
+            res += max(left2right[i], right2left[i]);
+        }
+        
+        return res;
+    }
+};
+
+// improved
+// one-array for extra space
+class Solution {
+public:
+    int candy(vector<int>& ratings) {
+        int n = ratings.size();
+        if (n == 1) return 1;
+        
+        vector<int> candies(n, 1);
+        
+        for (int i=1; i<n; i++) {
+            if (ratings[i] > ratings[i-1]) {
+                candies[i] = candies[i-1] + 1;
+            }
+        }
+        
+        int res = candies[n-1];
+        for (int i=n-2; i>=0; i--) {
+            if (ratings[i] > ratings[i+1]) {
+                candies[i] = max(candies[i] ,candies[i+1] + 1);
+            }
+            res += candies[i];
+        }
+        
+        return res;
+    }
+};
+```
+
+[solution](https://leetcode.com/articles/candy/)
+
 
 
 

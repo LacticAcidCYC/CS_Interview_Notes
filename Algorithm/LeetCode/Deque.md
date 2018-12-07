@@ -38,6 +38,8 @@ dq.pop_front(); // delete first element
 
 
 
+### (1) Deque Solution
+
 ```c++
 // Time Complexity: O(n) (n = length of nums)
 // every number is inserted and deleted once at most, so the time complexity is O(2n)=>O(n)
@@ -64,4 +66,36 @@ public:
     }
 };
 ```
+
+
+
+### (2) Two Pass + Window (Greedy?)
+
+```c++
+
+```
+
+[solution](https://leetcode.com/problems/sliding-window-maximum/discuss/65881/O(n)-solution-in-Java-with-two-simple-pass-in-the-array)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

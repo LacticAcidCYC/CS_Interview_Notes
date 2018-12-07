@@ -4,9 +4,12 @@
 
 ## 1. LeetCode 200 [Number of Islands](https://leetcode.com/problems/number-of-islands/)
 
-BFS:
+### (1) BFS
 
 ```c++
+// Time Complexity: O(mn)
+// Space Complexity: O(mn)
+
 class Solution {
 public:
     const vector<vector<int>> dirs = {{0, 1}, {0,-1}, {1,0}, {-1,0}};
@@ -20,7 +23,7 @@ public:
             for (int j=0; j<n; j++) {
                 if (grid[i][j] == '1') {
                     cnt++;
-                    // queue is better, but here stack is OK
+                    // queue is common, but here stack is OK
                     stack<pair<int,int>> st;
                     st.push(make_pair(i,j));
                     grid[i][j] = '0';
@@ -42,6 +45,50 @@ public:
             }
         }
         return cnt;
+    }
+};
+```
+
+
+
+### (2) DFS
+
+```c++
+// Time Complexity: O(mn)
+// Space Complexity: O(mn)
+
+class Solution {
+public:
+    int numIslands(vector<vector<char>>& grid) {
+        if (grid.empty() || grid[0].empty()) return 0;
+        
+        int m = grid.size();
+        int n = grid[0].size();
+        int cnt = 0;
+        
+        for (int i=0; i<m; i++) {
+            for (int j=0; j<n; j++) {
+                if (grid[i][j] == '1') {
+                    cnt++;
+                    dfs(grid, i, j, m, n);
+                }
+            }
+        }
+        
+        return cnt;
+    }
+    
+private:
+    void dfs(vector<vector<char>>& grid, int i, int j, int &m, int &n) {
+        if (i < 0 || i >= m || j < 0 || j >= n || grid[i][j] == '0') {
+            return;
+        }
+        
+        grid[i][j] = '0';
+        dfs(grid, i-1, j, m, n);
+        dfs(grid, i, j+1, m, n);
+        dfs(grid, i+1, j, m, n);
+        dfs(grid, i, j-1, m, n);
     }
 };
 ```

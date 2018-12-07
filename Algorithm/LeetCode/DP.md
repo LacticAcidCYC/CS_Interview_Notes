@@ -2059,7 +2059,7 @@ public:
 
 
 
-## 33. LeetCode 312 
+## 33. LeetCode 312 [Burst Balloons](https://leetcode.com/problems/burst-balloons/)
 
 ### Intuition
 
@@ -2105,6 +2105,8 @@ Then ans = c(1, n)
 
 
 
+[huahua](https://www.youtube.com/watch?v=z3hu2Be92UA)
+
 ### (1) Recursive method with memorization
 
 ```c++
@@ -2145,7 +2147,76 @@ private:
 
 
 
-### (2) DP
+### (2) DP (corresponding to the recursive method)
+
+```c++
+// Time Complexity: O(n^3)
+// Space Complexity: O(n^2)
+
+class Solution {
+public:
+    int maxCoins(vector<int>& nums) {
+        if (nums.empty()) return 0;
+        int n = nums.size();
+        vector<int> nums_(n+2);
+        
+        for (int i=1; i<=n; i++) {
+            nums_[i] = nums[i-1];
+        }
+        nums_[0] = nums_[n+1] = 1;
+        
+        vector<vector<int>> dp(n+2, vector<int>(n+2, 0));
+        
+        for (int l=3; l<=n+2; l++) {
+            for (int i=0; i<=n+2-l; i++) {
+                int j = i + l - 1;
+                for (int k=i+1; k<j; k++) {
+                    dp[i][j] = max(dp[i][j], nums_[i] * nums_[k] * nums_[j] + dp[i][k] + dp[k][j]);
+                }
+            }
+        }
+        
+        return dp[0][n+1];
+    }
+};
+```
+
+
+
+### (3) DP-2
+
+```c++
+// Time Complexity: O(n^3)
+// Space Complexity: O(n^2)
+
+class Solution {
+public:
+    int maxCoins(vector<int>& nums) {
+        if (nums.empty()) return 0;
+        int n = nums.size();
+        nums.insert(nums.begin(), 1);
+        nums.push_back(1);
+        
+        // dp[i][j] = maxCoins(nums[i] ~ nums[j])
+        vector<vector<int>> dp(n+2, vector<int>(n+2, 0));
+        
+        for (int l=1; l<=n; l++) {
+            for (int i=1; i<=n+1-l; i++) {
+                int j = i + l - 1;
+                for (int k=i; k<=j; k++) {
+                    dp[i][j] = max(dp[i][j], dp[i][k-1] + nums[i-1] * nums[k] * nums[j+1] + dp[k+1][j]);
+                }
+            }
+        }
+        
+        return dp[1][n];
+    }
+};
+```
+
+
+
+## 34. LeetCode 416 
 
 ```c++
 
