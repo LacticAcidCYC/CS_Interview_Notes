@@ -1118,19 +1118,44 @@ public:
 
 
 
-## 20. LeetCode 849 
+## 20. LeetCode 849 [Maximize Distance to Closest Person](https://leetcode.com/problems/maximize-distance-to-closest-person/)
+
+```c++
+class Solution {
+public:
+    int maxDistToClosest(vector<int>& seats) {
+        int leftP = -1;
+        int n = seats.size();
+        int max_dist = 0;
+        
+        for (int i=0; i<n; i++) {
+            if (seats[i] == 1) {
+                if (leftP == -1) {
+                    max_dist = i - leftP - 1;
+                } else {
+                    max_dist = max(max_dist, (i - leftP) / 2);
+                }
+                leftP = i;
+            }
+        }
+        
+        max_dist = max(max_dist, n - leftP - 1);
+        return max_dist;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/maximize-distance-to-closest-person/discuss/137912/C%2B%2BJava-1-Pass-Solution)
+
+
+
+## 21. LeetCode 562 [Longest Line of Consecutive One in Matrix](https://leetcode.com/problems/longest-line-of-consecutive-one-in-matrix/)
 
 ```c++
 
 ```
 
-
-
-## 21. LeetCode 562 
-
-```c++
-
-```
+[solution](https://leetcode.com/problems/longest-line-of-consecutive-one-in-matrix/discuss/102266/Java-O(nm)-Time-DP-Solution)
 
 
 
@@ -1139,6 +1164,30 @@ public:
 ```c++
 
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

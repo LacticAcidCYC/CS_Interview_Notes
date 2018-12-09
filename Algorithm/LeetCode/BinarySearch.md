@@ -21,7 +21,9 @@ left = mid;
 right = mid - 1;
 
 => while condition: left < right
-mid = left + (right - left) / 2 + 1;
+mid = left + (right - left + 1) / 2;
+or
+mid = right - (right - left) / 2;
 ```
 
 
@@ -33,7 +35,7 @@ left = mid + 1;
 right = mid - 1;
 
 => while condition: left <= right
-mid = left + (right - left) / 2; OR mid = left + (right - left) / 2 + 1;
+mid = left + (right - left) / 2; OR mid = left + (right - left + 1) / 2;
 ```
 
 
@@ -69,7 +71,7 @@ public:
         j = n-1;  // We don't have to set i to 0 the second time.
         while (i < j)
         {
-            int mid = i + (j - i) / 2 + 1;	// Make mid biased to the right
+            int mid = i + (j - i + 1) / 2;	// Make mid biased to the right
             if (A[mid] > target) j = mid - 1;  
             else i = mid;				// So that this won't make the search range stuck.
         }
@@ -170,12 +172,13 @@ public:
 
 ## 4. LeetCode 162 [Find Peak Element](https://leetcode.com/problems/find-peak-element/)
 
-
+### (1) My First Solution
 
 ```c++
 // Time Complexity: O(logn)
 // Space Complexity: O(1)
 
+// original
 class Solution {
 public:
     int findPeakElement(vector<int>& nums) {
@@ -202,6 +205,86 @@ public:
     }
 };
 ```
+
+
+
+### (2) Recursive Binary Search
+
+```c++
+// Time Complexity: O(logn)
+// Space Complexity: O(1)
+
+class Solution {
+public:
+    int findPeakElement(vector<int>& nums) {
+        return bs(nums, 0, nums.size()-1);
+    }
+    
+    int bs(vector<int> &nums, int l, int r) {
+        if (l == r) return l;
+        
+        int mid = l + (r - l) / 2;
+        if (nums[mid] > nums[mid+1]) {
+            return bs(nums, l, mid);
+        } else {
+            return bs(nums, mid+1, r);
+        }
+    }
+};
+```
+
+
+
+### (3) Iterative Binary Search
+
+```c++
+// Time Complexity: O(logn)
+// Space Complexity: O(1)
+
+class Solution {
+public:
+    int findPeakElement(vector<int>& nums) {
+        int n = nums.size();
+        int l = 0, r = n - 1;
+        while (l < r) {
+            int mid = l + (r - l) / 2;
+            if (nums[mid] > nums[mid+1]) {
+                r = mid;
+            } else {
+                l = mid + 1;
+            }
+        }
+        
+        return l;
+    }
+};
+```
+
+
+
+### (4) Sequential Search
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(1)
+
+class Solution {
+public:
+    int findPeakElement(vector<int>& nums) {
+        int n = nums.size();
+        
+        for (int i=1; i<n; i++) {
+            if (nums[i] < nums[i-1]) {
+                return i-1;
+            }
+        }
+        
+        return n-1;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/find-peak-element/discuss/50232/Find-the-maximum-by-binary-search-(recursion-and-iteration))
 
 
 
@@ -590,7 +673,7 @@ bool searchMatrix(vector<vector<int>>& matrix, int target) {
     int l = 0, r = m-1;
     // column bs: find the row that may contain the target number
     while (l < r) {
-        int mid = l + (r - l) / 2 + 1;
+        int mid = l + (r - l + 1) / 2;
         if (matrix[mid][0] == target) { return true;}
         if (matrix[mid][0] > target) {
             r = mid - 1;
@@ -919,7 +1002,87 @@ public:
 
 
 
+## 17. LeetCode 658 [Find K Closest Elements](https://leetcode.com/problems/find-k-closest-elements/)
 
+### (1) Binary Search + two pointer
+
+```c++
+// Time Complexity: O(logn + k)
+// Space Complexity: O(1)
+
+class Solution {
+public:
+    vector<int> findClosestElements(vector<int>& arr, int k, int x) {
+        const int n = arr.size();
+        
+        int l = 0, r = n - 1, x_pos = -1;
+        while (l < r) {
+            int mid = l + (r - l) / 2;
+            if (arr[mid] == x) {
+                x_pos = mid;
+                break;
+            } else if (arr[mid] > x) {
+                r = mid - 1;
+            } else {
+                l = mid + 1;
+            }
+        }
+        
+        if (x_pos == -1) {
+            x_pos = l;
+        }
+        
+        int start = x_pos, end = x_pos;
+        
+        while (k--) {
+            if (start-1 < 0) end++;
+            else if (end >= n) start--;
+            else if (x - arr[start-1] <= arr[end] - x) {
+                start--;
+            } else {
+                end++;
+            }
+        }
+        
+        return vector<int>(arr.begin()+start, arr.begin()+end);
+    }
+};
+
+// improved version 
+// using templateIII of binary search
+// add preprocessing of second part
+// easier to implement
+
+```
+
+
+
+### (2) One Pass Binary Search
+
+```c++
+// Time Complexity: O(logn)
+// Space Complexity: O(1)
+
+class Solution {
+public:
+    vector<int> findClosestElements(vector<int>& arr, int k, int x) {
+        int n = arr.size();
+        int l = 0, r = n - k;
+        while (l < r) {
+            int mid = l + (r - l) / 2;
+            if (x - arr[mid] > arr[mid+k] - x) {
+                l = mid + 1;
+            } else {
+                r = mid;
+            }
+        }
+        
+        return vector<int>(arr.begin()+l, arr.begin()+l+k);
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/find-k-closest-elements/discuss/106419/O(log-n)-Java-1-line-O(log(n)-%2B-k-Ruby)
 
 
 
