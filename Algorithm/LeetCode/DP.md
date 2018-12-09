@@ -404,6 +404,16 @@ public:
 
 ### (2) DP
 
+Dp: represents the length of longest valid substring ending at ith index.
+
+**If s[i] == ')' and s[i-1] == '('** 
+
+=> dp[i] = dp[i-2] + 2 (if i-2 >= 0)
+
+**If s[i] == ')' and s[i-dp[i-1]-1] == '('** 
+
+=> dp[i] = dp[i-1] + 2 + dp[i-dp[i-1]-2] if (i - dp[i-1] - 2 >= 0)
+
 ```c++
 // Time Complexity: O(n)
 // Space Complexity: O(n)

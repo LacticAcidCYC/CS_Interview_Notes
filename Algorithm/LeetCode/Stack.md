@@ -324,7 +324,176 @@ public:
 
 
 
+## 4. LeetCode 20 [Valid Parentheses](https://leetcode.com/problems/valid-parentheses/)
 
+### 12.7 Google-Mock-Problem
+
+### (1) Intuitive
+
+Only push the open brackets into the stack, and check whether every closing brackets are matched with former open brackets.
+
+If stack is empty and current visited character is close brackets, then return false. 
+
+Finally, check if the stack is empty, if so, return true!
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    bool isValid(string s) {
+        if (s.empty()) return true;
+        
+        stack<char> st;
+        for (auto c : s) {
+            if (st.empty() && (c == ')' || c == ']' || c == '}')) {
+                return false;
+            }
+            if (st.empty() || c == '(' || c == '[' || c == '{') {
+                st.push(c);
+            } else {
+                if (isMatch(st.top(), c)) {
+                    st.pop();
+                } else {
+                    return false;
+                } 
+            }
+        }
+        return st.empty();
+    }
+    
+    bool isMatch(char a, char b) {
+        if (a == '(') {
+            return b == ')';
+        } else if (a == '[') {
+            return b == ']';
+        } else if (a == '{') {
+            return b == '}';
+        }
+        return false;
+    }
+};
+```
+
+
+
+### (2) Better
+
+When visiting open brackets, push its closing pair into the stack;
+
+If stack is empty and current visited character is close bracket, return false;
+
+If current visited character is not equal to the top character in stack, return false;
+
+Otherwise, pop the top character.
+
+Finally, check if the stack is empty, if so, return true!
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    bool isValid(string s) {
+        if (s.empty()) return true;
+        stack<char> st;
+        
+        for (auto const &c : s) {
+            if (c == '(') {
+                st.push(')');
+            } else if (c == '{') {
+                st.push('}');
+            } else if (c == '[') {
+                st.push(']');
+            } else {
+                if (st.empty() || c != st.top()) {
+                    return false;
+                }
+                st.pop();
+            }
+        }
+        
+        return st.empty();
+    }
+};
+```
+
+
+
+## 5. LeetCode 32 [Longest Valid Parentheses](https://leetcode.com/problems/longest-valid-parentheses/)
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    int longestValidParentheses(string s) {
+        int n = s.length();
+        stack<int> st; // store the index
+        
+        for (int i=0; i<n; i++) {
+            if (s[i] == '(') {
+                st.push(i);
+            } else {
+                if (st.empty() || s[st.top()] == ')') {
+                    st.push(i);
+                } else {
+                    st.pop();
+                }
+            }
+        }
+        // now the stack only contains the unmatched chars' indexes
+        if (st.empty()) {
+            // all characters are matched
+            return n;
+        }
+        
+        int r = n, l = 0, max_len = -1;
+        while (!st.empty()) {
+            l = st.top();
+            st.pop();
+            max_len = max(max_len, r-l-1);
+            r = l;
+        }
+        // make sure not missing the front
+        max_len = max(max_len, r);
+        return max_len;
+    }
+};
+
+// calculate when building the stack
+class Solution {
+public:
+    int longestValidParentheses(string s) {
+        stack<int> stk; // idx
+        
+        int res =0, max_len = 0;
+        int left_most = -1;
+        for (int i=0; i < s.size(); i++) {
+            if (s[i] == '(') {
+                stk.push(i);
+            } else {
+                if (stk.empty()) {
+                    left_most = i;
+                } else {
+                    stk.pop();
+                    if (stk.empty()) {
+                        max_len = max(max_len, i - left_most);
+                    } else {
+                        max_len = max(max_len, i - stk.top());
+                    }
+                }
+            }
+        }
+        return max_len;
+    }
+};
+```
+
+[stack-solution](https://leetcode.com/problems/longest-valid-parentheses/discuss/14126/My-O(n)-solution-using-a-stack)
 
 
 

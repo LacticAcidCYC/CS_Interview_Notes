@@ -2018,6 +2018,76 @@ private:
 
 [solution](https://leetcode.com/problems/serialize-and-deserialize-binary-tree/discuss/74259/Recursive-preorder-Python-and-C%2B%2B-O(n))
 
+### Related:
+
+### LeetCode 449 [Serialize and Deserialize BST](https://leetcode.com/problems/serialize-and-deserialize-bst/)
+
+The encoding schema is preorder of BST, and to decode this we can use the same preorder traversal to do it in one pass with recursion in O(n) time.
+
+To minimize the memory, I used binary format instead of ascii format for each integer, just burn those int into 4 chars will save you a lot!!!
+
+Really if using ASCII numbers you are paying a lot of penalty memory for integers over 4 digit long and parsing comma is just as painful.
+
+[memcpy](http://www.cplusplus.com/reference/cstring/memcpy/)
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Codec {
+public:
+
+    // Encodes a tree to a single string.
+    string serialize(TreeNode* root) {
+        string order;
+        preorderDFS(root, order);
+        return order;
+    }
+    
+    void preorderDFS(TreeNode* root, string& order) {
+        if(!root) return;
+        char buffer[sizeof(int)];
+        memcpy(buffer, &(root->val), sizeof(int));
+        for(int i=0; i<sizeof(int); i++)
+            order.push_back(buffer[i]);
+        preorderDFS(root->left, order);
+        preorderDFS(root->right, order);
+    }
+
+    // Decodes your encoded data to tree.
+    TreeNode* deserialize(string data) {
+        int pos = 0;
+        return reconstructBST(data, pos, INT_MIN, INT_MAX);
+    }
+    
+    TreeNode* reconstructBST(const string& buffer, int& pos, int minValue, int maxValue) {
+        if(pos >= (int)buffer.size()) return NULL;
+        
+        int curVal;
+        memcpy(&curVal, &buffer[pos], sizeof(int));
+        if(curVal < minValue || curVal > maxValue) return NULL;
+        
+        TreeNode* node = new TreeNode(curVal);
+        pos += sizeof(int);
+        node->left = reconstructBST(buffer, pos, minValue, curVal);
+        node->right = reconstructBST(buffer, pos, curVal, maxValue);
+        return node;
+    }
+};
+
+// Your Codec object will be instantiated and called as such:
+// Codec codec;
+// codec.deserialize(codec.serialize(root));
+```
+
+[solution](https://leetcode.com/problems/serialize-and-deserialize-bst/discuss/93167/Concise-C%2B%2B-19ms-solution-beating-99.4)
+
 
 
 ## 25. LeetCode 404 [Sum of Left Leaves](https://leetcode.com/problems/sum-of-left-leaves/)
@@ -2302,6 +2372,411 @@ public:
         res = max(res, asc + dsc - 1);
         return {asc, dsc};
     } 
+};
+```
+
+
+
+## 29. LeetCode 105 [Construct Binary Tree from Preorder and Inorder Traversal](https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/)
+
+### (1) Recursive
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder) {
+        return helper(preorder, inorder, 0, preorder.size()-1, 0, inorder.size()-1);
+    }
+    
+    TreeNode* helper(vector<int>& preorder, vector<int>& inorder, int pstart, int pend, int istart, int iend) {
+        if(pstart > pend) return NULL;
+        TreeNode* node = new TreeNode(preorder[pstart]);
+        int pos;
+        for(int i=istart; i<=iend; i++) {
+            if(inorder[i] == node->val) {
+                pos = i;
+                break;
+            }
+        }
+        node->left = helper(preorder, inorder, pstart+1, pstart + pos - istart, istart, pos - 1);
+        node->right = helper(preorder, inorder, pend - iend + pos + 1, pend, pos + 1, iend);
+        return node;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/discuss/34538/My-Accepted-Java-Solution)
+
+
+
+### (2) Iterative
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder) {
+        if(preorder.size() == 0) return NULL; 
+        int pp = 0, pi = 0;
+        TreeNode *root = new TreeNode(preorder[pp++]);
+        TreeNode *p = root;
+        stack<TreeNode *> stack;
+        stack.push(root);
+        int size = (int)preorder.size();
+        
+        while(pp < size) {
+            if(inorder[pi] == stack.top()->val) {
+                while(stack.size() && inorder[pi] == stack.top()->val) {
+                    p = stack.top();
+                    stack.pop();
+                    pi++;
+                }
+                p->right = new TreeNode(preorder[pp++]);
+                stack.push(p->right);
+            } else {
+                p = new TreeNode(preorder[pp++]);
+                stack.top()->left = p;
+                stack.push(p);
+            }
+        }
+        return root;
+    }
+};
+```
+
+
+
+
+
+## 30. LeetCode 106 [Construct Binary Tree from Inorder and Postorder Traversal](https://leetcode.com/problems/construct-binary-tree-from-inorder-and-postorder-traversal/)
+
+[solution](https://leetcode.com/problems/construct-binary-tree-from-inorder-and-postorder-traversal/discuss/34782/My-recursive-Java-code-with-O(n)-time-and-O(n)-space)
+
+### (1) Recursive
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* buildTree(vector<int>& inorder, vector<int>& postorder) {
+        reverse(inorder.begin(), inorder.end());
+        reverse(postorder.begin(), postorder.end());
+        return helper(inorder, postorder, 0, inorder.size()-1, 0, postorder.size()-1);
+    }
+    
+    TreeNode* helper(vector<int>& inorder, vector<int>& postorder, int istart, int iend, int pstart, int pend) {
+        if(pstart > pend) {
+            return NULL;
+        }
+        TreeNode* node = new TreeNode(postorder[pstart]);
+        int pos;
+        for(int i=istart; i<=iend; i++) {
+            if(inorder[i] == node->val) {
+                pos = i;
+                break;
+            }
+        }
+        node->right = helper(inorder, postorder, istart, pos - 1, pstart+1, pstart + pos - istart);
+        node->left = helper(inorder, postorder, pos + 1, iend, pend - iend + pos + 1, pend);
+        return node;
+    }
+};
+```
+
+
+
+### (2) Iterative
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* buildTree(vector<int>& inorder, vector<int>& postorder) {
+        if(postorder.size() == 0) return NULL;
+        reverse(inorder.begin(), inorder.end());
+        reverse(postorder.begin(), postorder.end());
+        int pp = 0, pi = 0;
+        TreeNode *root = new TreeNode(postorder[pp++]);
+        TreeNode *p = root;
+        stack<TreeNode *> stack;
+        stack.push(root);
+        int size = (int)postorder.size();
+        
+        while(pp < size) {
+            if(inorder[pi] == stack.top()->val) {
+                while(stack.size() && inorder[pi] == stack.top()->val) {
+                    p = stack.top();
+                    stack.pop();
+                    pi++;
+                }
+                p->left = new TreeNode(postorder[pp++]);
+                stack.push(p->left);
+            } else {
+                p = new TreeNode(postorder[pp++]);
+                stack.top()->right = p;
+                stack.push(p);
+            }
+        }
+        return root;
+    }
+};
+```
+
+
+
+## 31. LeetCode 222 [Count Complete Tree Nodes](https://leetcode.com/problems/count-complete-tree-nodes/)
+
+```c++
+// Time Complexity: O((logn)^2)
+// Space Complexity: O(1)
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    int countNodes(TreeNode* root) {
+        if (!root) {
+            return 0;
+        }
+        TreeNode *left = root, *right = root;
+        int level = 1;
+        while (right->right) {
+            level++;
+            left = left->left;
+            right = right->right;
+        }
+        if (!left) {
+            return (1 << level) - 1;
+        }
+        return 1 + countNodes(root->left) + countNodes(root->right);
+    }
+};
+
+// Explanation
+
+The height of a tree can be found by just going left. Let a single node tree have height 0. Find the height h of the whole tree. If the whole tree is empty, i.e., has height -1, there are 0 nodes.
+
+Otherwise check whether the height of the right subtree is just one less than that of the whole tree, meaning left and right subtree have the same height.
+
+If yes, then the last node on the last tree row is in the right subtree and the left subtree is a full tree of height h-1. So we take the 2^h-1 nodes of the left subtree plus the 1 root node plus recursively the number of nodes in the right subtree.
+If no, then the last node on the last tree row is in the left subtree and the right subtree is a full tree of height h-2. So we take the 2^(h-1)-1 nodes of the right subtree plus the 1 root node plus recursively the number of nodes in the left subtree.
+Since I halve the tree in every recursive step, I have O(log(n)) steps. Finding a height costs O(log(n)). So overall O(log(n)^2).
+```
+
+[reference1]()
+
+[reference2](https://leetcode.com/problems/count-complete-tree-nodes/discuss/61977/Accepted-clean-Java-solution)
+
+
+
+## 32. LeetCode 285 
+
+### Similar to LeetCode 173
+
+### Clarification
+
+A. Is it possible that p is not in the tree?
+
+B. Is it possible that there are duplicates in the tree?
+
+GOAL: Find smallest key greater than the key of input node
+
+### (1) Iterative
+
+```c++
+// if tree is balanced, h = O(logn)
+// if tree looks like a long line, h = O(n)
+// Time Complexity: O(h)
+// Space Complexity: O(1)
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* inorderSuccessor(TreeNode* root, TreeNode* p) {
+        if (!root) return NULL;
+        
+        TreeNode* it = root;
+        TreeNode* succ = NULL;
+        
+        while (it) {
+            int val = it->val;
+            if (val > p->val) {
+                succ = it;
+                it = it->left;
+            } else {
+                it = it->right;
+            }
+        }
+        
+        return succ;
+    }
+};
+```
+
+
+
+### Divided into two cases
+
+```c++
+// Time Complexity: O(h)
+// Space Complexity: O(1)
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* inorderSuccessor(TreeNode* root, TreeNode* p) {
+        if (!root) return NULL;
+        
+        TreeNode* succ = NULL;
+        
+        // Case 1: p->right exists, then the successor of p is the leftmost child of 
+        // p->right or p->right (p->right doesn't have childs)
+        if (p->right != NULL) {
+            succ = p->right;
+            // loop down to find the leftmost leaf
+            while (succ->left) {
+                succ = succ->left;
+            }
+            return succ;
+        }
+        
+        TreeNode* it = root;
+        
+        // Case 2: Right tree empty. Now Start from root and search for successor down the tree
+        while (it) {
+            int val = it->val;
+            if (val > p->val) {
+                succ = it;
+                it = it->left;
+            } else {
+                it = it->right;
+            }
+        }
+        
+        return succ;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/inorder-successor-in-bst/discuss/72671/C%2B%2B-O(h)-solution-in-one-pass)
+
+
+
+### (2) Recursive
+
+```c++
+// Time Complexity: O(h)
+// Space Complexity: O(1)
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* inorderSuccessor(TreeNode* root, TreeNode* p) {
+        if(root == NULL) return NULL;
+        if(root->val <= p->val) {
+            return inorderSuccessor(root->right, p);
+        } else {
+            TreeNode *left = inorderSuccessor(root->left, p);
+            return left != NULL ? left : root;
+        }
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/inorder-successor-in-bst/discuss/72653/Share-my-Java-recursive-solution)
+
+
+
+### Predecessor
+
+```c++
+// Time Complexity: O(h)
+// Space Complexity: O(1)
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* inorderPredecessor(TreeNode* root, TreeNode* p) {
+        if(root == NULL) return NULL;
+        if(root->val >= p->val) {
+            return inorderPredecessor(root->left, p);
+        } else {
+            TreeNode *right = inorderSuccessor(root->right, p);
+            return right != NULL ? right : root;
+        }
+    }
 };
 ```
 

@@ -935,6 +935,195 @@ private:
 
 
 
+## 13. LeetCode 22 [Generate Parentheses](https://leetcode.com/problems/generate-parentheses/)
+
+[solution](https://leetcode.com/problems/generate-parentheses/discuss/10100/Easy-to-understand-Java-backtracking-solution)
+
+[catalan-number](https://zh.wikipedia.org/wiki/%E5%8D%A1%E5%A1%94%E5%85%B0%E6%95%B0)
+
+### (1) backtracking-1
+
+```c++
+// Time Complexity: O(4^n / n ^ 0.5)
+// Space Complexity: O(4^n / n ^ 0.5)
+
+class Solution {
+public:
+    vector<string> generateParenthesis(int n) {
+        if (n <= 0) return {};
+        vector<string> res;
+        
+        string g_str = "";
+        backtrack(res, g_str, 0, 0, n);
+        
+        return res;
+    }
+    
+    void backtrack(vector<string> &res, string &str, int l_cnt, int r_cnt, int &max) {
+        if (l_cnt == max && r_cnt == max) {
+            res.push_back(str);
+            return;
+        }
+        
+        if (l_cnt < max) {
+            str += '(';
+            backtrack(res, str, l_cnt+1, r_cnt, max);
+            str.pop_back();
+        }
+        if (r_cnt < l_cnt) {
+            str += ')';
+            backtrack(res, str, l_cnt, r_cnt+1, max);
+            str.pop_back();
+        }
+    }
+};
+```
+
+
+
+### (2) backtracking-2 (Different Initialization and end condition)
+
+```c++
+// Time Complexity: O(4^n / n ^ 0.5)
+// Space Complexity: O(4^n / n ^ 0.5)
+
+class Solution {
+public:
+    vector<string> generateParenthesis(int n) {
+        if (n <= 0) return {};
+        vector<string> res;
+        
+        string g_str = "";
+        backtrack(res, g_str, n, 0);
+        
+        return res;
+    }
+    
+    void backtrack(vector<string> &res, string &str, int l_cnt, int r_cnt) {
+        if (l_cnt == 0 && r_cnt == 0) {
+            res.push_back(str);
+            return;
+        }
+        
+        if (l_cnt > 0) {
+            str += '(';
+            backtrack(res, str, l_cnt-1, r_cnt+1);
+            str.pop_back();
+        }
+        if (r_cnt > 0) {
+            str += ')';
+            backtrack(res, str, l_cnt, r_cnt-1);
+            str.pop_back();
+        }
+    }
+};
+```
+
+
+
+## 14. LeetCode 78 [Subsets](https://leetcode.com/problems/subsets/)
+
+### (1) Recursive
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> subsets(vector<int>& nums) {
+        vector<vector<int>> subs;
+        vector<int> sub;
+        addSubset(nums, 0, sub, subs);
+        return subs;
+    }
+    
+    void addSubset(vector<int>& nums, int start, vector<int> sub, vector<vector<int>>& subs) {
+        subs.push_back(sub);
+        for(int i=start; i<nums.size(); i++) {
+            sub.push_back(nums[i]);
+            addSubset(nums, i+1, sub, subs);
+            sub.pop_back();
+        }
+    }
+};
+```
+
+
+
+### (2) Iterative
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> subsets(vector<int>& nums) {
+        sort(nums.begin(), nums.end());
+        int n = (int) nums.size();
+        vector<vector<int>> subs(1, vector<int>());
+        for(int i=0; i<n; i++) {
+            int m = subs.size();
+            for(int j=0; j<m; j++) {
+                subs.push_back(subs[j]);
+                subs.back().push_back(nums[i]);
+            }
+        }
+        return subs;
+    }
+};
+```
+
+
+
+### (3) Bit Manipulation
+
+```c++
+// Time Complexity: O(n*2^n)
+// Space Complexity: O(1)
+
+class Solution {
+public:
+    vector<vector<int>> subsets(vector<int>& nums) {
+        int n = (int)nums.size();
+        int m = (int)pow(2,n);
+        vector<vector<int>> subs(m, vector<int>());
+        for(int i=0,q=1; i<n; i++,q<<=1) {
+            for(int j=q; j<m; j+=q) {
+                for(int k=0; k<q; k++) {
+                    subs[j++].push_back(nums[i]);
+                }
+            }
+        }
+        return subs;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/subsets/discuss/27278/C%2B%2B-RecursiveIterativeBit-Manipulation)
+
+
+
+## 15. LeetCode 90 [Subsets II](https://leetcode.com/problems/subsets-ii/)
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> subsetsWithDup(vector<int>& nums) {
+        sort(nums.begin(), nums.end());
+        vector<vector<int>> res;
+        backtrack(res, nums, {}, 0);
+        return res;
+    }
+    
+    void backtrack(vector<vector<int>>& res, vector<int>& nums, vector<int> sub, int begin) {
+        res.push_back(sub);
+        for (int i=begin; i<nums.size(); i++) {
+            if (i == begin || nums[i] != nums[i-1]) {
+                sub.push_back(nums[i]);
+                backtrack(res, nums, sub, i+1);
+                sub.pop_back();
+            }
+        }
+    }
+};
+```
+
 
 
 
