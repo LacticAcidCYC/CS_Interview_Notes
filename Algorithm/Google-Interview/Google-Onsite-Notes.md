@@ -1152,20 +1152,114 @@ public:
 ## 21. LeetCode 562 [Longest Line of Consecutive One in Matrix](https://leetcode.com/problems/longest-line-of-consecutive-one-in-matrix/)
 
 ```c++
+// Time Complexity: O(4mn)
+// Space Complexity: O(4mn)
 
+class Solution {
+public:
+    int longestLine(vector<vector<int>>& M) {
+        if (M.empty() || M[0].empty()) return 0;
+        int m = M.size();
+        int n = M[0].size();
+        
+        vector<vector<vector<int>>> dp(m, vector<vector<int>>(n, vector<int>(4)));
+        int longest = 0;
+        for (int i=0; i<m; i++) {
+            for (int j=0; j<n; j++) {
+                if (M[i][j] == 1) {
+                    for (int k=0; k<4; k++) {
+                        dp[i][j][k] = 1;
+                    }
+                    // horizontal (0, -1)
+                    if (j - 1 >= 0 && dp[i][j-1][0] > 0) {
+                        dp[i][j][0] += dp[i][j-1][0];
+                    }
+                    
+                    // vertical (-1, 0)
+                    if (i - 1 >= 0 && dp[i-1][j][1] > 0) {
+                        dp[i][j][1] += dp[i-1][j][1];
+                    }
+                    
+                    // diagonal (-1,-1)
+                    if (j - 1 >= 0 && i - 1 >= 0 && dp[i-1][j-1][2] > 0) {
+                        dp[i][j][2] += dp[i-1][j-1][2];
+                    }
+                    
+                    // anti-diagonal (-1,+1)
+                    if (j + 1 < n && i - 1 >= 0 && dp[i-1][j+1][3] > 0) {
+                        dp[i][j][3] += dp[i-1][j+1][3];
+                    }
+                    
+                    longest = max(longest, dp[i][j][0]);
+                    longest = max(longest, dp[i][j][1]);
+                    longest = max(longest, dp[i][j][2]);
+                    longest = max(longest, dp[i][j][3]);
+                }
+            }
+        }
+        
+        return longest;
+    }
+};
 ```
 
 [solution](https://leetcode.com/problems/longest-line-of-consecutive-one-in-matrix/discuss/102266/Java-O(nm)-Time-DP-Solution)
 
 
 
-## 22. LeetCode 947 
+## 22. LeetCode 947 [Most Stones Removed with Same Row or Column](https://leetcode.com/problems/most-stones-removed-with-same-row-or-column/)
+
+### (1) Union-Find
+
+```c++
+// Time Complexity: O(nlogn)
+// Space Complexity: O(nlogn)
+
+// without union by rank
+class Solution {
+public:
+    int removeStones(vector<vector<int>>& stones) {
+        int n = stones.size();
+        for (int i=0; i<n; i++) {
+            Union(stones[i][0], stones[i][1] + 10000);
+        }
+        return n - islands;
+    }
+    
+private:
+    void Union(int x, int y) {
+        int rx = Find(x);
+        int ry = Find(y);
+        if (rx != ry) {
+            _parents[rx] = ry;
+            islands--;
+        }
+    }
+    
+    int Find(int x) {
+        if (!_parents.count(x)) {
+            _parents[x] = x;
+            islands++;
+        } else if (_parents[x] != x) {
+            _parents[x] = Find(_parents[x]);
+        }
+        return _parents[x];
+    }
+    
+    unordered_map<int, int> _parents;
+    int islands = 0;
+};
+```
+
+[solution](https://leetcode.com/problems/most-stones-removed-with-same-row-or-column/discuss/197668/Count-the-Number-of-Islands-O(N))
+
+
+
+### (2) Union-Find with Full Optimization
 
 ```c++
 
 ```
-
-
 
 
 

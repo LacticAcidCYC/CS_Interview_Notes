@@ -2609,7 +2609,7 @@ Since I halve the tree in every recursive step, I have O(log(n)) steps. Finding 
 
 
 
-## 32. LeetCode 285 
+## 32. LeetCode 285 [Inorder Successor in BST](https://leetcode.com/problems/inorder-successor-in-bst/)
 
 ### Similar to LeetCode 173
 
@@ -2782,7 +2782,13 @@ public:
 
 
 
+## 33. LeetCode 314 
 
+```c++
+
+```
+
+[geeksforgeeks](https://www.geeksforgeeks.org/print-a-binary-tree-in-vertical-order-set-3-using-level-order-traversal/)
 
 
 

@@ -241,10 +241,10 @@ int backpack(vector<int> nums) {
     vector<vector<int>> dp(n+1, vector<int>(m+1, 0));
     for (int i=1; i<=n; i++) {
         for (int j=1; j<=m; j++) {
-            if (nums[i] > j) {
+            if (nums[i-1] > j) {
                 dp[i][j] = dp[i-1][j];
             } else {
-                dp[i][j] = max(dp[i-1][j], dp[i-1][j-nums[i]]+nums[i]);
+                dp[i][j] = max(dp[i-1][j], dp[i-1][j-nums[i-1]]+nums[i-1]);
             }
         }
     }
@@ -2226,15 +2226,341 @@ public:
 
 
 
-## 34. LeetCode 416 
+## 34. LeetCode 416 [Partition Equal Subset Sum](https://leetcode.com/problems/partition-equal-subset-sum/)
+
+### Just like 平分背包(0/1 knapsack problem)
+
+### (1) DP
 
 ```c++
+// Time Complexity: O(nW)
+// Space Complexity: O(nW)
 
+class Solution {
+public:
+    bool canPartition(vector<int>& nums) {
+        const int n = nums.size();
+        int sum = 0;
+        for (auto const &i : nums) {
+            sum += i;
+        }
+        
+        if (sum % 2) {
+            return false;
+        }
+        
+        int W = sum / 2;
+        vector<vector<bool>> dp(n+1, vector<bool>(W+1, 0));
+        for (int i=0; i<=n; i++) {
+            dp[i][0] = true;
+        }
+        
+        for (int i=1; i<=n; i++) {
+            for (int j=1; j<=W; j++) {
+                if (nums[i-1] > j) {
+                    dp[i][j] = dp[i-1][j];
+                } else {
+                    dp[i][j] = dp[i-1][j] || dp[i-1][j-nums[i-1]];
+                }
+            }
+        }
+        
+        return dp[n][W];
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/partition-equal-subset-sum/discuss/90592/01-knapsack-detailed-explanation)
+
+
+
+### (2) DP + Space Optimization
+
+```c++
+// Time Complexity: O(nW)
+// Space Complexity: O(W)
+
+class Solution {
+public:
+    bool canPartition(vector<int>& nums) {
+        const int n = nums.size();
+        int sum = 0;
+        for (auto const &i : nums) {
+            sum += i;
+        }
+        
+        if (sum % 2) {
+            return false;
+        }
+        
+        int W = sum / 2;
+        vector<bool> dp(W+1, false);
+        dp[0] = true;
+        
+        for (int i=0; i<n; i++) {
+            // Key!! Traverse from W to nums[i] here to make sure
+            // we use the old values to update the new values
+            // which means one element cannot be used more than once
+            for (int j=W; j>=nums[i]; j--) {
+                dp[j] = dp[j] || dp[j-nums[i]];
+            }
+        }
+        
+        return dp[W];
+    }
+};
 ```
 
 
 
+### (3) Backtracking + Pruning
 
+```c++
+// Time Complexity: O(2^n)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    bool canPartition(vector<int>& nums) {
+        const int n = nums.size();
+        int sum = 0;
+        for (auto const &i : nums) {
+            sum += i;
+        }
+        
+        if (sum % 2) {
+            return false;
+        }
+        
+        int W = sum / 2;
+        sort(nums.begin(), nums.end(), greater<int>());
+        return backtrack(nums, W, 0);
+    }
+    
+private:
+    bool backtrack(vector<int> &nums, int sum, int start) {
+        if (sum == 0) return true;
+        
+        for (int i=start; i<nums.size(); i++) {
+            if (nums[i] > sum) continue;
+            if (backtrack(nums, sum-nums[i], i+1)) return true;
+            while (i+1 < nums.size() && nums[i] == nums[i+1]) i++;
+        }
+        
+        return false;
+    }
+};
+```
+
+
+
+### (4) Bit Manipulation
+
+```c++
+class Solution {
+public:
+    bool canPartition(vector<int>& nums) {
+        int sum = accumulate(nums.begin(), nums.end(), 0);
+        if (sum % 2) return false;
+        const int MAX_NUM = 100;
+        const int MAX_ARRAY_SIZE = 200;
+        bitset<MAX_NUM * MAX_ARRAY_SIZE / 2 + 1> bits(1);
+        for (auto const &i : nums) {
+            bits |= bits << i;
+        }
+        
+        return bits[sum / 2];
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/partition-equal-subset-sum/discuss/90590/Simple-C%2B%2B-4-line-solution-using-a-bitset)
+
+
+
+## 35. LeetCode 562 [Longest Line of Consecutive One in Matrix](https://leetcode.com/problems/longest-line-of-consecutive-one-in-matrix/)
+
+```c++
+// Time Complexity: O(4mn)
+// Space Complexity: O(4mn)
+
+class Solution {
+public:
+    int longestLine(vector<vector<int>>& M) {
+        if (M.empty() || M[0].empty()) return 0;
+        int m = M.size();
+        int n = M[0].size();
+        
+        vector<vector<vector<int>>> dp(m, vector<vector<int>>(n, vector<int>(4)));
+        int longest = 0;
+        for (int i=0; i<m; i++) {
+            for (int j=0; j<n; j++) {
+                if (M[i][j] == 1) {
+                    for (int k=0; k<4; k++) {
+                        dp[i][j][k] = 1;
+                    }
+                    // horizontal (0, -1)
+                    if (j - 1 >= 0 && dp[i][j-1][0] > 0) {
+                        dp[i][j][0] += dp[i][j-1][0];
+                    }
+                    
+                    // vertical (-1, 0)
+                    if (i - 1 >= 0 && dp[i-1][j][1] > 0) {
+                        dp[i][j][1] += dp[i-1][j][1];
+                    }
+                    
+                    // diagonal (-1,-1)
+                    if (j - 1 >= 0 && i - 1 >= 0 && dp[i-1][j-1][2] > 0) {
+                        dp[i][j][2] += dp[i-1][j-1][2];
+                    }
+                    
+                    // anti-diagonal (-1,+1)
+                    if (j + 1 < n && i - 1 >= 0 && dp[i-1][j+1][3] > 0) {
+                        dp[i][j][3] += dp[i-1][j+1][3];
+                    }
+                    
+                    longest = max(longest, dp[i][j][0]);
+                    longest = max(longest, dp[i][j][1]);
+                    longest = max(longest, dp[i][j][2]);
+                    longest = max(longest, dp[i][j][3]);
+                }
+            }
+        }
+        
+        return longest;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/longest-line-of-consecutive-one-in-matrix/discuss/102266/Java-O(nm)-Time-DP-Solution)
+
+
+
+## 36. LeetCode 698 [Partition to K Equal Sum Subsets](https://leetcode.com/problems/partition-to-k-equal-sum-subsets/)
+
+### (1) Recursive (Simulation)
+
+```c++
+// Time Complexity: O(k*2^n)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    bool canPartitionKSubsets(vector<int>& nums, int k) {
+        int n = nums.size();
+        
+        // If k is 1, then complete array will be our answer
+        if (k == 1) return true;
+        // If total number of partitions are more than n, then 
+        // division is not possible 
+        if (k > n) return false;
+        
+        // if array sum is not divisible by k then we can't divide 
+        // array into k partitions 
+        int sum = accumulate(nums.begin(), nums.end(), 0);
+        if (sum % k) return false;
+        
+        // the sum of each subset should be subset (= sum / K) 
+        int subset = sum / k;
+        vector<int> subsetSum(k, 0);
+        vector<int> visited(n, 0);
+        
+        return isKPartitionPossibleRec(nums, subsetSum, visited, subset, k, n, 0, n-1);
+    }
+    
+private:
+    bool isKPartitionPossibleRec(vector<int> &nums, vector<int> &subsetSum, vector<int> &visited, int &subset, int &k, int &n, int curIdx, int limitedIdx) {
+        /*  current index (K - 2) represents (K - 1) subsets of equal 
+            sum last partition will already remain with sum 'subset'*/
+        if (subsetSum[curIdx] == subset) {
+            if (curIdx == k - 2) return true;
+            // recursive call for next subsetition 
+            return isKPartitionPossibleRec(nums, subsetSum, visited, subset, k, n, curIdx+1, n-1);
+        }
+        
+        for (int i=limitedIdx; i>=0; i--) {
+            //  if already visited, continue 
+            if (visited[i]) continue;
+            int tmp = subsetSum[curIdx] + nums[i];
+            
+            // if temp is less than subset then only include the element 
+            // and call recursively
+            if (tmp <= subset) {
+                //  mark the element and include into current partition sum
+                visited[i] = 1;
+                subsetSum[curIdx] += nums[i];
+                
+                if (isKPartitionPossibleRec(nums, subsetSum, visited, subset, k, n, curIdx, i-1)) {
+                    return true;
+                }
+                // after recursive call unmark the element and remove from 
+            	// subsetition sum 
+                visited[i] = 0;
+                subsetSum[curIdx] -= nums[i];
+            }
+        }
+        
+        return false;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/partition-to-k-equal-sum-subsets/discuss/108741/Cpp-solution-with-explanation-in-details)
+
+[geeksforgeeks](https://www.geeksforgeeks.org/partition-set-k-subsets-equal-sum/)
+
+
+
+### (2) Another Simulation Solution
+
+```c++
+// N is the length of nums, and k is as given
+// Time Complexity: O(k^(N-k)*k!) without trick => O(k^N)
+// Space Complexity: O(N)
+// As we skip additional zeroes in groups, naively we will make O(k!) calls to search, then 
+// additional O(k^(N−k)) calls after every element of groups is nonzero.
+
+class Solution {
+public:
+    bool canPartitionKSubsets(vector<int>& nums, int k) {
+        int n = nums.size();
+        if (k == 1) return true;
+        if (k > n) return false;
+        
+        int sum = accumulate(nums.begin(), nums.end(), 0);
+        if (sum % k) return false;
+        
+        int target = sum / k;
+        int limitedIdx = n - 1;
+        
+        sort(nums.begin(), nums.end());
+        if (nums[limitedIdx] > target) return false;
+        while (limitedIdx >= 0 && nums[limitedIdx] == target) {
+            limitedIdx--;
+            k--;
+        }
+        vector<int> subsetSum(k, 0);
+        return search(subsetSum, limitedIdx, nums, target);
+    }
+    
+private:
+    bool search(vector<int> &subsetSum, int limitedIdx, vector<int> &nums, int &target) {
+        if (limitedIdx < 0) return true;
+        for (int i=0; i<subsetSum.size(); i++) {
+            int curVal = nums[limitedIdx];
+            if (subsetSum[i] + curVal <= target) {
+                subsetSum[i] += curVal;
+                limitedIdx--;
+                if (search(subsetSum, limitedIdx, nums, target)) return true;
+                subsetSum[i] -= curVal;
+                limitedIdx++;
+            }
+            if (subsetSum[i] == 0) break;
+        }
+        return false;
+    }
+};
+```
 
 
 

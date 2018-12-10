@@ -1006,6 +1006,20 @@ public:
 
 ### (1) Binary Search + two pointer
 
+Binary-searching x and get its position or inserting position;
+
+Then using two pointers(start and end) to expand to the left and right => [start, end)
+
+=> make sure start pointer points to the start position of target subarray and end pointer points to the end(next position of last element) 
+
+=> initialize:
+
+start = x_pos
+
+end = x_pos
+
+Compare arr[start-1] and arr[end] each time in the while loop for k times
+
 ```c++
 // Time Complexity: O(logn + k)
 // Space Complexity: O(1)
@@ -1048,19 +1062,62 @@ public:
     }
 };
 
-// improved version 
+// another version 
 // using templateIII of binary search
 // add preprocessing of second part
-// easier to implement
-
+class Solution {
+public:
+    vector<int> findClosestElements(vector<int>& arr, int k, int x) {
+        // find the closest element and expand the range
+        const int n = arr.size();
+        int l = 0, r = n-1, x_pos = -1;
+        // another version of binary search(l and r are 2 candidates)
+        while (l + 1 < r) {
+            int mid = l + (r - l) / 2;
+            if (arr[mid] > x) {
+                r = mid;
+            } else {
+                l = mid;
+            }
+        }
+        
+        // get the closest element's position
+        if (x_pos == -1) {
+            x_pos = abs(arr[l] - x) <= abs(arr[r] - x) ? l : r;
+        }
+        
+        int start = x_pos;
+        int end = x_pos;
+        while (--k) { // start - end + 1 < k
+            if (start-1 < 0) end++;
+            else if (end+1 >= n) start--;
+            else if (x - arr[start-1] <= arr[end+1] - x) start--;
+            else end++;
+        }
+        
+        return vector<int>(arr.begin()+start, arr.begin()+end+1);
+    }
+};
 ```
 
 
 
 ### (2) One Pass Binary Search
 
+Binary-searching for where the resulting array start in the arr.
+
+It's the first index `i` so that `arr[i]` is better than `arr[i+k]` (with "better" meaning closer to or equally close to `x`). Then I just return the `k` elements starting there.
+
+Consider three kind of position of mid during binary search:
+
+x....mid....mid+k => r = mid
+
+mid....mid+k....x => l = mid + 1
+
+mid....x....mid+k => check `x - arr[mid]` and `arr[mid+k] - x`
+
 ```c++
-// Time Complexity: O(logn)
+// Time Complexity: O(log(n-k))
 // Space Complexity: O(1)
 
 class Solution {

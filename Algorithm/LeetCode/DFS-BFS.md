@@ -1026,6 +1026,9 @@ public:
 ### (1) Recursive
 
 ```c++
+// Time Complexity: O(2^n)
+// Space Complexity: O(1)
+
 class Solution {
 public:
     vector<vector<int>> subsets(vector<int>& nums) {
@@ -1051,6 +1054,9 @@ public:
 ### (2) Iterative
 
 ```c++
+// Time Complexity: O(2^n)
+// Space Complexity: O(1)
+
 class Solution {
 public:
     vector<vector<int>> subsets(vector<int>& nums) {
