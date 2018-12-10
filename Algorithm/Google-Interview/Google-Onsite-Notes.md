@@ -1209,6 +1209,69 @@ public:
 
 ## 22. LeetCode 947 [Most Stones Removed with Same Row or Column](https://leetcode.com/problems/most-stones-removed-with-same-row-or-column/)
 
+**Thanks for [lee215](https://leetcode.com/problems/most-stones-removed-with-same-row-or-column/discuss/197668/Count-the-Number-of-Islands-O(N))'s Explanation as below**
+
+**Problem:**
+we can remove a stone if and only if,
+there is another stone in the same column OR row.
+We try to remove as many as stones as possible.
+
+Find more details in chinese on the [jianshu](https://www.jianshu.com/p/30d2058db7f7)
+
+**One sentence to solve:**
+Connected stones can be reduced to 1 stone,
+the maximum stones can be removed = stones number - islands number.
+so just count the number of "islands".
+
+### **Count the number of islands**
+
+We call a connected graph as an island.
+One island must have at least one stone left.
+The maximum stones can be removed = stones number - islands number
+
+The whole problem is transferred to:
+What is the number of islands?
+
+You can show all your skills on a DFS implementation,
+and solve this problem as a normal one.
+
+### **Unify index**
+
+Struggle between rows and cols?
+You may duplicate your codes when you try to the same thing on rows and cols.
+In fact, no logical difference between col index and rows index.
+
+An easy trick is that, add 10000 to col index.
+So we use 0 ~ 9999 for row index and 10000 ~ 19999 for col.
+
+### **Search on the index, not the points**
+
+When we search on points,
+we alternately change our view on a row and on a col.
+
+We think:
+a row index, connect two stones on this row
+a col index, connect two stones on this col.
+
+In another view：
+A stone, connect a row index and col.
+
+Have this idea in mind, the solution can be much simpler.
+The number of islands of *points*,
+is the same as the number of islands of *indexes*.
+
+### **Union-Find**
+
+I use union find to solve this problem.
+As I mentioned, the elements are not the points, but the indexes.
+
+1. for each point, union two indexes.
+2. return points number - union number
+
+Copy a template of union-find,
+write 2 lines above,
+you can solve this problem in several minutes.
+
 ### (1) Union-Find
 
 ```c++
@@ -1251,17 +1314,194 @@ private:
 };
 ```
 
-[solution](https://leetcode.com/problems/most-stones-removed-with-same-row-or-column/discuss/197668/Count-the-Number-of-Islands-O(N))
-
 
 
 ### (2) Union-Find with Full Optimization
 
 ```c++
+// Time Complexity: O(n)
+// Space Complexity: O(n + 20000)
 
+class UnionFindSet {
+public:
+    UnionFindSet(int n) {
+        _parents.resize(n);
+        _ranks.resize(n);
+        
+        for (int i=0; i<n; i++) {
+            _parents[i] = i;
+        }
+    }
+    
+    bool Union(int x, int y) {
+        int rx = Find(x);
+        int ry = Find(y);
+        if (rx == ry) return false;
+        if (_ranks[rx] > _ranks[ry]) {
+            _parents[ry] = rx;
+        } else {
+            _parents[rx] = ry;
+            if (_ranks[rx] == _ranks[ry]) {
+                _ranks[ry]++;
+            }
+        }
+        return true;
+    }
+    
+    int Find(int x) {
+        if (_parents[x] != x) {
+            // path compression
+            _parents[x] = Find(_parents[x]);
+        }
+        return _parents[x];
+    }
+    
+private:
+    vector<int> _parents;
+    vector<int> _ranks;
+};
+
+class Solution {
+public:
+    int removeStones(vector<vector<int>>& stones) {
+        int n = stones.size();
+        UnionFindSet ufs(20000);
+        
+        for (int i=0; i<n; i++) {
+            ufs.Union(stones[i][0], stones[i][1]+10000);
+        }
+        
+        unordered_set<int> components;
+        for (int i=0; i<n; i++) {
+            components.insert(ufs.Find(stones[i][0]));
+        }
+        
+        return n - (int)components.size();
+    }
+};
 ```
 
 
+
+### (3) Union-Find (Union the index of the stone in array, not the point index)
+
+```c++
+// Time Complexity: O(n^2)
+// Space Complexity: O(n)
+
+class UnionFindSet {
+public:
+    UnionFindSet(int n) {
+        _parents.resize(n);
+        _ranks.resize(n);
+        count = n;
+        
+        for (int i=0; i<n; i++) {
+            _parents[i] = i;
+        }
+    }
+    
+    bool Union(int x, int y) {
+        int rx = Find(x);
+        int ry = Find(y);
+        if (rx == ry) return false;
+        if (_ranks[rx] > _ranks[ry]) {
+            _parents[ry] = rx;
+        } else {
+            _parents[rx] = ry;
+            if (_ranks[rx] == _ranks[ry]) {
+                _ranks[ry]++;
+            }
+        }
+        count--;
+        return true;
+    }
+    
+    int Find(int x) {
+        if (_parents[x] != x) {
+            // path compression
+            _parents[x] = Find(_parents[x]);
+        }
+        return _parents[x];
+    }
+    
+    int getCount() {
+        return count;
+    }
+    
+private:
+    vector<int> _parents;
+    vector<int> _ranks;
+    int count;
+};
+
+class Solution {
+public:
+    int removeStones(vector<vector<int>>& stones) {
+        int n = stones.size();
+        UnionFindSet ufs(n);
+        
+        for (int i=0; i<n; i++) {
+            for (int j=i+1; j<n; j++) {
+                if (stones[i][0] == stones[j][0] || stones[i][1] == stones[j][1]) {
+                    ufs.Union(i, j);
+                }
+            }
+        }
+        
+        return n - ufs.getCount();
+    }
+};
+```
+
+
+
+### (4) DFS
+
+Using hashmaps of vectors to quickly access all occupied columns for each row, and all occupied rows for each column. Then use DFS to group all rows connected by columns, counting the number of stones in that group.
+
+```c++
+// Time Complexity: O(n^2)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    int removeStones(vector<vector<int>>& stones) {
+        int ans = 0;
+        
+        for (auto stone : stones) {
+            rows[stone[0]].push_back(stone[1]);
+            cols[stone[1]].push_back(stone[0]);
+        }
+        
+        for (auto row : rows) {
+            ans += max(0, dfs(row.first) - 1);
+        }
+        
+        return ans;
+    }
+    
+private:
+    int dfs(int row) {
+        int ans = 0;
+        if (_rowsSet.insert(row).second) {
+            ans += rows[row].size();
+            for (auto c : rows[row]) {
+                for (auto r : cols[c]) {
+                    ans += dfs(r);
+                }
+            }
+        }
+        
+        return ans;
+    }
+    
+    unordered_map<int, vector<int>> rows, cols; // map between row and col
+    unordered_set<int> _rowsSet; // use for counting groups in dfs
+};
+```
+
+[solution](https://leetcode.com/problems/most-stones-removed-with-same-row-or-column/discuss/197851/C%2B%2B-20-ms-DFS)
 
 
 

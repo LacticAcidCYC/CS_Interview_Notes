@@ -1,6 +1,9 @@
 ## 1. LeetCode 208 [Implement Trie (Prefix Tree)](https://leetcode.com/problems/implement-trie-prefix-tree/)
 
+### (1) Former Solution
+
 ```c++
+// original solution
 class TrieNode {
 public:
     TrieNode() {
@@ -93,7 +96,86 @@ private:
 
 
 
+### (2) Clearer and Updated Solution (C++11)
+
+[unique_ptr](http://www.cplusplus.com/reference/memory/unique_ptr/)
+
+[nullptr-vs-NULL](https://www.google.com/search?q=nullptr+vs+NULL+c%2B%2B&oq=nullptr+vs+NULL+c%2B%2B&aqs=chrome..69i57j0.5029j0j7&sourceid=chrome&ie=UTF-8)
+
+[huahua](https://www.youtube.com/watch?v=f48wGD-MuQw)
+
+```c++
+class Trie {
+public:
+    /** Initialize your data structure here. */
+    Trie() : _root(new TrieNode()) {}
+    
+    /** Inserts a word into the trie. */
+    void insert(string word) {
+        TrieNode* p = _root.get(); // Returns the stored pointer.
+        for (const char c : word) {
+            if (!p->children[c - 'a']) {
+                p->children[c - 'a'] = new TrieNode();
+            }
+            p = p->children[c - 'a'];
+        }
+        p->is_word = true;
+    }
+    
+    /** Returns if the word is in the trie. */
+    bool search(string word) const {
+        const auto p = find(word);
+        return p != nullptr && p->is_word;
+    }
+    
+    /** Returns if there is any word in the trie that starts with the given prefix. */
+    bool startsWith(string prefix) const {
+        return find(prefix) != nullptr;
+    }
+    
+private:
+    struct TrieNode {
+        TrieNode() : is_word(false), children(26, nullptr) {}
+        
+        // important! avoid memory leak!
+        ~TrieNode() {
+            for (TrieNode* child : children) {
+                if (child) delete child;
+            }
+        }
+        
+        vector<TrieNode*> children;
+        bool is_word;
+    };
+    
+    const TrieNode* find(const string &prefix) const {        
+        const TrieNode* p = _root.get();
+        for (const char c : prefix) {
+            p = p->children[c - 'a'];
+            if (p == nullptr) break;
+        }
+        return p;
+    }
+    
+    unique_ptr<TrieNode> _root;
+};
+
+/**
+ * Your Trie object will be instantiated and called as such:
+ * Trie obj = new Trie();
+ * obj.insert(word);
+ * bool param_2 = obj.search(word);
+ * bool param_3 = obj.startsWith(prefix);
+ */
+```
+
+
+
+
+
 ## 2. LeetCode 211 [Add and Search Word - Data structure design](https://leetcode.com/problems/add-and-search-word-data-structure-design/)
+
+### (1) Former Solution
 
 ```c++
 class TrieNode {
@@ -185,6 +267,8 @@ private:
 
 
 
+### (2) Former Solution2 using Hashmap
+
 ```c++
 class WordDictionary {
 public:
@@ -234,9 +318,66 @@ public:
 
 
 
+### (3) Rewrited Trie Solution
+
+```c++
+
+```
+
+
+
 ## 3. LeetCode 212
 
 ```c++
 
+```
+
+
+
+## 4. LeetCode 677 [Map Sum Pairs](https://leetcode.com/problems/map-sum-pairs/)
+
+### (1) Trie
+
+```c++
+
+```
+
+
+
+### (2) Hashmap (Simulating Trie)
+
+```c++
+class MapSum {
+public:
+    /** Initialize your data structure here. */
+    MapSum() {}
+    
+    void insert(string key, int val) {
+        int inc = val;
+        if (_vals.count(key)) {
+            inc -= _vals[key];
+        }
+        
+        _vals[key] = val;
+        for (int i=1; i<=key.size(); i++) {
+            _sums[key.substr(0, i)] += inc;
+        }
+    }
+    
+    int sum(string prefix) {
+        return _sums[prefix];
+    }
+    
+private:
+    unordered_map<string, int> _vals;
+    unordered_map<string, int> _sums;
+};
+
+/**
+ * Your MapSum object will be instantiated and called as such:
+ * MapSum obj = new MapSum();
+ * obj.insert(key,val);
+ * int param_2 = obj.sum(prefix);
+ */
 ```
 

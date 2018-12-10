@@ -2782,13 +2782,148 @@ public:
 
 
 
-## 33. LeetCode 314 
+## 33. LeetCode 314 [Binary Tree Vertical Order Traversal](https://leetcode.com/problems/binary-tree-vertical-order-traversal/)
+
+Example:
+
+```
+          1
+        /    \
+       2      3
+      / \    / \
+     4   5  6   7
+             \   \
+              8   9 
+```
+
+### (1) Brute Force
+
+The idea is to traverse the tree once and get the minimum and maximum horizontal distance with respect to root. For the tree shown above, minimum distance is -2 (for node with value 4) and maximum distance is 3 (For node with value 9).
+Once we have maximum and minimum distances from root, we iterate for each vertical line at distance minimum to maximum from root, and for each vertical line traverse the tree and print the nodes which lie on that vertical line.
+
+Time complexity of above algorithm is O(w*n) where w is width of Binary Tree and n is number of nodes in Binary Tree.  In worst case, the value of w can be O(n) (consider a complete tree for example) and time complexity can become O(n^2).
+
+**Time Complexity: O(n^2)**
+**Space Complexity: O(n)**
+
+### (2) Map-based Method + Preorder Traversal
+
+**Time Complexity: O(nlogn)**
+**Space Complexity: O(n)**
+
+**Note that this solution may not print nodes in same vertical order as they appear in tree.**
+
+### (3) Map-based Method + Level-Order Traversal
 
 ```c++
+// Time Complexity: O(nlogn)
+// Space Complexity: O(n)
+// can be optimized by using a hashmap(unordered_map)
 
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<vector<int>> verticalOrder(TreeNode* root) {
+        if (!root) return {};
+        vector<vector<int>> res;
+        map<int, vector<int>> orders; // store vertical order traversal number
+        auto it = root;
+        queue<pair<TreeNode*, int>> q;
+        q.push({root, 0});
+        while (!q.empty()) {
+            int n = q.size();
+            
+            for (int i=0; i<n; i++) {
+                auto cur = q.front();
+                q.pop();
+                orders[cur.second].push_back(cur.first->val);
+                
+                if (cur.first->left) {
+                    q.push({cur.first->left, cur.second-1});
+                }
+                
+                if (cur.first->right) {
+                    q.push({cur.first->right, cur.second+1});
+                }
+            }
+        }
+        
+        for (auto const& order : orders) {
+            res.push_back(order.second);
+        }
+        
+        return res;
+    }
+};
 ```
 
 [geeksforgeeks](https://www.geeksforgeeks.org/print-a-binary-tree-in-vertical-order-set-3-using-level-order-traversal/)
+
+
+
+### Using unordered_map + min_hd&max_hd
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(n)
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<vector<int>> verticalOrder(TreeNode* root) {
+        if (!root) return {};
+        vector<vector<int>> res;
+        unordered_map<int, vector<int>> orders; // store vertical order traversal number
+        int min_hd = INT_MAX, max_hd = INT_MIN;
+        
+        auto it = root;
+        queue<pair<TreeNode*, int>> q;
+        q.push({root, 0});
+        
+        while (!q.empty()) {
+            int n = q.size();
+            
+            for (int i=0; i<n; i++) {
+                auto cur = q.front();
+                q.pop();
+                min_hd = min(min_hd, cur.second);
+                max_hd = max(max_hd, cur.second);
+                orders[cur.second].push_back(cur.first->val);
+                
+                if (cur.first->left) {
+                    q.push({cur.first->left, cur.second-1});
+                }
+                
+                if (cur.first->right) {
+                    q.push({cur.first->right, cur.second+1});
+                }
+            }
+        }
+        
+        for (int i=min_hd; i<=max_hd; i++) {
+            res.push_back(orders[i]);
+        }
+        
+        return res;
+    }
+};
+```
 
 
 

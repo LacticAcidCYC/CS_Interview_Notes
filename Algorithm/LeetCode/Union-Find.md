@@ -356,10 +356,115 @@ public:
 
 
 
-## 6. LeetCode 737 
+## 6. LeetCode 737 [Sentence Similarity II](https://leetcode.com/problems/sentence-similarity-ii/)
+
+### Similar to LeetCode 399
+
+[huahua](http://zxi.mytechroad.com/blog/hashtable/leetcode-737-sentence-similarity-ii/)
+
+### (1) DFS (without and with optimization using hashmap)
+
+### (2) Union-Find
 
 ```c++
+// Time Complexity: O(|pairs| + |words1|)
+// Space Complexity: O(|pairs|)
 
+class UnionFindSet {
+public:
+    UnionFindSet(int n) {
+        _parents.resize(n);
+        _ranks.resize(n);
+        
+        for (int i=0; i<n; i++) {
+            _parents[i] = i;
+        }
+    }
+    
+    bool Union(int x, int y) {
+        int rx = Find(x);
+        int ry = Find(y);
+        
+        if (rx == ry) return false;
+        if (_ranks[rx] > _ranks[ry]) {
+            _parents[ry] = rx;
+        } else {
+            _parents[rx] = ry;
+            if (_ranks[rx] == _ranks[ry]) {
+                _ranks[ry]++;
+            }
+        }
+        
+        return true;
+    }
+    
+    int Find(int x) {
+        if (_parents[x] != x) {
+            _parents[x] = Find(_parents[x]);
+        }
+        return _parents[x];
+    }
+    
+private:
+    vector<int> _parents;
+    vector<int> _ranks;
+};
+
+class Solution {
+public:
+    bool areSentencesSimilarTwo(vector<string>& words1, vector<string>& words2, vector<pair<string, string>> pairs) {
+        int l1 = words1.size();
+        int l2 = words2.size();
+        if (l1 != l2) return false;
+        
+        int n = pairs.size();
+        UnionFindSet ufs(n*2);
+        
+        for (int i=0; i<n; i++) {
+            int idx1 = getIndex(pairs[i].first);
+            int idx2 = getIndex(pairs[i].second);
+            ufs.Union(idx1, idx2);
+        }
+        
+        for (int i=0; i<l1; i++) {
+            if (words1[i] == words2[i]) continue;
+            
+            int idx1 = getIndex(words1[i], true);
+            int idx2 = getIndex(words2[i], true);
+            if (idx1 == -1 || idx2 == -1) return false;
+            
+            int r1 = ufs.Find(idx1);
+            int r2 = ufs.Find(idx2);
+            if (r1 != r2) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+private:
+    int getIndex(string word, bool created = false) {
+        if (!dictionary.count(word)) {
+            if (created) return -1;
+            int i = dictionary.size();
+            return dictionary[word] = i;
+        }
+        
+        return dictionary[word];
+        /*if (!created) {
+            if (dictionary.count(word)) return dictionary[word];
+            int i = dictionary.size();
+            dictionary[word] = i;
+        }
+        
+        if (!dictionary.count(word)) return -1;
+        
+        return dictionary[word];*/
+    }
+    
+    unordered_map<string, int> dictionary;
+};
 ```
 
 
@@ -461,11 +566,72 @@ public:
 
 
 
-## 8. LeetCode 947 
+## 8. LeetCode 947 [Most Stones Removed with Same Row or Column](https://leetcode.com/problems/most-stones-removed-with-same-row-or-column/)
 
 ```c++
+// Time Complexity: O(n)
+// Space Complexity: O(n + 20000)
 
+class UnionFindSet {
+public:
+    UnionFindSet(int n) {
+        _parents.resize(n);
+        _ranks.resize(n);
+        
+        for (int i=0; i<n; i++) {
+            _parents[i] = i;
+        }
+    }
+    
+    bool Union(int x, int y) {
+        int rx = Find(x);
+        int ry = Find(y);
+        if (rx == ry) return false;
+        if (_ranks[rx] > _ranks[ry]) {
+            _parents[ry] = rx;
+        } else {
+            _parents[rx] = ry;
+            if (_ranks[rx] == _ranks[ry]) {
+                _ranks[ry]++;
+            }
+        }
+        return true;
+    }
+    
+    int Find(int x) {
+        if (_parents[x] != x) {
+            // path compression
+            _parents[x] = Find(_parents[x]);
+        }
+        return _parents[x];
+    }
+    
+private:
+    vector<int> _parents;
+    vector<int> _ranks;
+};
+
+class Solution {
+public:
+    int removeStones(vector<vector<int>>& stones) {
+        int n = stones.size();
+        UnionFindSet ufs(20000);
+        
+        for (int i=0; i<n; i++) {
+            ufs.Union(stones[i][0], stones[i][1]+10000);
+        }
+        
+        unordered_set<int> components;
+        for (int i=0; i<n; i++) {
+            components.insert(ufs.Find(stones[i][0]));
+        }
+        
+        return n - (int)components.size();
+    }
+};
 ```
+
+[union-find-solution](https://leetcode.com/problems/most-stones-removed-with-same-row-or-column/discuss/197668/Count-the-Number-of-Islands-O(N))
 
 
 

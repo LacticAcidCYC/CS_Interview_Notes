@@ -326,6 +326,8 @@ int search(vector<int>& nums, int target) {
 
 ## 6. LeetCode 153 [Find Minimum in Rotated Sorted Array](https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/)
 
+### (1) Binary Search
+
 ```c++
 // Time Complexity: O(logn)
 // Space Complexity: O(1)
@@ -339,6 +341,8 @@ public:
             // If already in the right part or original array is in ascending order
             if (nums[r] > nums[l]) return nums[l];
             int mid = l + (r - l) / 2;
+            // Wrong!!! there may stackoverflow here!! consider case: 3,2
+            // then mid-1 = -1
             if (nums[mid] < nums[mid-1] && nums[mid] < nums[mid+1]) return nums[mid];
             else if (nums[mid] >= nums[l]) {
                 l = mid + 1;
@@ -351,12 +355,117 @@ public:
 };
 
 // consider corner case:
+// n = 2
 // n = 1
 // n = 0
 // array is in ascending order
+
+// Correct Solution
+class Solution {
+public:
+    int findMin(vector<int>& nums) {
+        int n = (int) nums.size();
+        int l = 0, r = n - 1;
+        while (l < r) {
+            if (nums[r] > nums[l]) return nums[l];
+            int mid = l + (r - l) / 2;
+            if (nums[mid] >= nums[l]) {
+                l = mid + 1;
+            } else {
+                r = mid;
+            }
+        }
+        return nums[l];
+    }
+};
 ```
 
 
+
+### (2) Binary Search + Compare with the left/leftmost/right/rightmost element
+
+```c++
+// Time Complexity: O(logn)
+// Space Complexity: O(1)
+
+class Solution {
+public:
+    int findMin(vector<int>& nums) {
+        int n = (int) nums.size();
+        int l = 0, r = n - 1;
+        while (l < r) {
+            if (nums[r] > nums[l]) return nums[l];
+            int mid = l + (r - l) / 2;
+            if (nums[mid] >= nums[l]) {
+                l = mid + 1;
+            } else {
+                r = mid;
+            }
+        }
+        return nums[l];
+    }
+};
+
+class Solution {
+public:
+    int findMin(vector<int>& nums) {
+        int n = (int) nums.size();
+        int l = 0, r = n - 1;
+        if (nums[r] > nums[l]) return nums[l];
+        
+        while (l < r) {
+            //if (nums[r] > nums[l]) return nums[l];
+            int mid = l + (r - l) / 2;
+            if (nums[mid] >= nums[0]) {
+                l = mid + 1;
+            } else {
+                r = mid;
+            }
+        }
+        return nums[l];
+    }
+};
+
+class Solution {
+public:
+    int findMin(vector<int>& nums) {
+        int n = (int) nums.size();
+        int l = 0, r = n - 1;
+        while (l < r) {
+            if (nums[r] > nums[l]) return nums[l];
+            int mid = l + (r - l) / 2;
+            if (nums[mid] <= nums[r]) {
+                r = mid;
+            } else {
+                l = mid + 1;
+            }
+        }
+        return nums[l];
+    }
+};
+
+class Solution {
+public:
+    int findMin(vector<int>& nums) {
+        int n = (int) nums.size();
+        int l = 0, r = n - 1;
+        while (l < r) {
+            //if (nums[r] > nums[l]) return nums[l];
+            int mid = l + (r - l) / 2;
+            if (nums[mid] <= nums[n-1]) {
+                r = mid;
+            } else {
+                l = mid + 1;
+            }
+        }
+        return nums[l];
+    }
+};
+```
+
+
+
+### (3) Another Solution
 
 ```c++
 // Time Complexity: O(logn)
@@ -1143,7 +1252,143 @@ public:
 
 
 
+## 18. LeetCode 367 [Valid Perfect Square](https://leetcode.com/problems/valid-perfect-square/)
 
+### (1) Squares = 1 + 3 + 5 +...
+
+```c++
+// Time Complexity: O(sqrt(n))
+// Space Complexity: O(1)
+
+class Solution {
+public:
+    bool isPerfectSquare(int num) {
+        int i = 1;
+        while (num > 0) {
+            num -= i;
+            i += 2;
+        }
+        return num == 0;
+    }
+};
+```
+
+
+
+### (2) Binary Search
+
+```c++
+// Time Complexity: O(logn)
+// Space Complexity: O(1)
+
+class Solution {
+public:
+    bool isPerfectSquare(int num) {
+        if (num == 1) return true;
+        int l = 0, r = num;
+        
+        while (l <= r) {
+            int mid = l + (r - l) / 2;
+            // avoid mid * mid overflow
+            if (num % mid == 0 && mid == num / mid) {
+                return true;
+            } else if (mid <= num / mid) {
+                l = mid + 1;
+            } else {
+                r = mid - 1;
+            }
+        }
+        return false;
+    }
+};
+
+// another version
+class Solution {
+public:
+    bool isPerfectSquare(int num) {
+        if (num == 1) return true;
+        long l = 0, r = num;
+        
+        while (l <= r) {
+            // avoid mid * mid overflow
+            long mid = l + (r - l) / 2;
+            
+            if (mid * mid == num) {
+                return true;
+            } else if (mid * mid < num) {
+                l = mid + 1;
+            } else {
+                r = mid - 1;
+            }
+        }
+        return false;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/valid-perfect-square/discuss/83874/A-square-number-is-1%2B3%2B5%2B7%2B...-JAVA-code)
+
+
+
+## 19. LeetCode 154 [Find Minimum in Rotated Sorted Array II](https://leetcode.com/problems/find-minimum-in-rotated-sorted-array-ii/)
+
+**Note:**
+
+- This is a follow up problem to [Find Minimum in Rotated Sorted Array](https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/description/).
+- Would allow duplicates affect the run-time complexity? How and why?
+
+Yes. The worse case should be O(n).
+
+```c++
+// Time Complexity: O(logn)
+// Space Complexity: O(1)
+
+// compare with the left element
+class Solution {
+public:
+    int findMin(vector<int>& nums) {
+        // if (nums.empty() || nums == NULL) throw exception;
+        int n = nums.size();
+        int l = 0, r = n - 1;
+        while (l < r) {
+            if (nums[l] < nums[r]) return nums[l];
+            int mid = l + (r - l) / 2;
+            if (nums[mid] > nums[l]) {
+                l = mid + 1;
+            } else if (nums[mid] < nums[l]) {
+                r = mid;
+            } else {
+                l++;
+            }
+        }
+        
+        return nums[l];
+    }
+};
+
+// compare with the right element
+class Solution {
+public:
+    int findMin(vector<int>& nums) {
+        // if (nums.empty() || nums == NULL) throw exception;
+        int n = nums.size();
+        int l = 0, r = n - 1;
+        while (l < r) {
+            if (nums[l] < nums[r]) return nums[l]; // works if delete, but for prunning
+            int mid = l + (r - l) / 2;
+            if (nums[mid] < nums[r]) {
+                r = mid;
+            } else if (nums[mid] > nums[r]) {
+                l = mid + 1;
+            } else {
+                r--;
+            }
+        }
+        
+        return nums[l];
+    }
+};
+```
 
 
 
