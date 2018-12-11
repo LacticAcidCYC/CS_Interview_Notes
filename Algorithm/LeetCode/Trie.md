@@ -751,3 +751,209 @@ private:
  */
 ```
 
+
+
+## 5. leetCode 745 [Prefix and Suffix Search](https://leetcode.com/problems/prefix-and-suffix-search/)
+
+[huahua](https://www.youtube.com/watch?v=a-4WbFqalIA)
+
+### (1) Hashmap
+
+If query is more frequent than WordFilter():
+
+```c++
+// Time Complexity: O(N*l^3) + O(Ql)
+// Space Complexity: O(N*l^3)
+
+class WordFilter {
+public:
+    // O(N*l^3)
+    WordFilter(vector<string> words) {
+        int index = 0;
+        for (const auto &word : words) { // N
+            int l = word.length();
+            vector<string> prefixes(l+1, "");
+            vector<string> suffixes(l+1, "");
+            
+            for (int i=0; i<l; i++) {
+                prefixes[i+1] = prefixes[i] + word[i];
+                suffixes[i+1] = word[l-1-i] + suffixes[i];
+            }
+            
+            for (const string &prefix : prefixes) {
+                for (const string &suffix : suffixes) {
+                    _filtermap[prefix+'#'+suffix] = index;
+                }
+            }
+            
+            index++;
+        }
+    }
+    
+    // O(l)
+    int f(string prefix, string suffix) {
+        const string key = prefix + '#' + suffix;
+        auto it = _filtermap.find(key);
+        if (it == _filtermap.end()) return -1;
+        return it->second;
+    }
+    
+private:
+    unordered_map<string, int> _filtermap; // prefex + '#' + suffix -> weight
+};
+
+/**
+ * Your WordFilter object will be instantiated and called as such:
+ * WordFilter obj = new WordFilter(words);
+ * int param_1 = obj.f(prefix,suffix);
+ */
+```
+
+[solution](https://leetcode.com/problems/prefix-and-suffix-search/discuss/110044/Three-ways-to-solve-this-problem-in-Java)
+
+
+
+### (2) Trie
+
+Trick: Use '{' as split character, because its ASCII number is next to character 'z'
+
+```c++
+// Time Complexity: O(N*l^2) + O(Ql)
+// Space Complexity: O(N*l^2)
+
+class Trie {
+public:
+    /** Initialize your data structure here. */
+    Trie() : _root(new TrieNode()) {}
+    
+    /** Inserts a word into the trie. */
+    void insert(const string &word, int index) {
+        TrieNode* p = _root.get();
+        for (const char &c : word) {
+            int i = c - 'a';
+            if (!p->children[i]) {
+                p->children[i] = new TrieNode();
+            }
+            p = p->children[i];
+            p->index = index;
+        }
+    }
+    
+    /** Returns the index of word that starts with the given prefix. */
+    int startsWith(const string &prefix) const {
+        auto node = find(prefix);
+        if (!node) return -1;
+        return node->index;
+    }
+    
+private:
+    struct TrieNode {
+        TrieNode() : index(-1), children(27, nullptr) {}
+        
+        ~TrieNode() {
+            for (TrieNode* child : children) {
+                if (child) delete child;
+            }
+            children.clear();
+        }
+        
+        int index; // weight of node
+        vector<TrieNode*> children; 
+    };
+    
+    const TrieNode* find(const string &prefix) const {
+        const TrieNode* p = _root.get();
+        for (const char &c : prefix) {
+            p = p->children[c - 'a'];
+            if (!p) return nullptr;
+        }
+        return p;
+    }
+    
+    std::unique_ptr<TrieNode> _root;
+};
+
+class WordFilter {
+public:
+    WordFilter(vector<string> words) {
+        int n = words.size();
+        for (int i=0; i<n; i++) {
+            const string& w = words[i];
+            string key = "{" + w;
+            _trie.insert(key, i);
+            for (int j=0; j<w.size(); ++j) {
+                key = w[w.size()-1-j] + key;
+                _trie.insert(key, i);
+            }
+        }
+    }
+    
+    int f(string prefix, string suffix) {
+        return _trie.startsWith(suffix + "{" + prefix);
+    }
+    
+private:
+    Trie _trie;
+};
+
+/**
+ * Your WordFilter object will be instantiated and called as such:
+ * WordFilter obj = new WordFilter(words);
+ * int param_1 = obj.f(prefix,suffix);
+ */
+```
+
+
+
+### (3) Trie + Set Intersection
+
+Use two tries to separately find all words that match the prefix, plus all words that match the suffix. Then, we try to find the highest weight element in the intersection of these sets.
+
+
+
+## 6. LeetCode 676 [Implement Magic Dictionary](https://leetcode.com/problems/implement-magic-dictionary/)
+
+### (1) Brute Force with Bucket-By-Length
+
+```c++
+
+```
+
+
+
+### (2) Trie
+
+```c++
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

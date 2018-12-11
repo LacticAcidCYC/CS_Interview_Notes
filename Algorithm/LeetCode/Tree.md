@@ -2927,6 +2927,318 @@ public:
 
 
 
+## 34. LeetCode 450 [Delete Node in a BST](https://leetcode.com/problems/delete-node-in-a-bst/)
+
+### (1) Recursive
+
+```c++
+// Time Complexity: O(h)
+// Space Complexity: O(h)
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* deleteNode(TreeNode* root, int key) {
+        if(root == NULL) return NULL;
+
+        if(key < root->val) {
+            root->left = deleteNode(root->left, key);
+        } else if(key > root->val) {
+            root->right = deleteNode(root->right, key);
+        } else {
+            if(root->left == NULL) {
+                return root->right;
+            } else if(root->right == NULL) {
+                return root->left;
+            } else {
+                TreeNode* min = findMin(root->right);
+                root->val = min->val;
+                root->right = deleteNode(root->right, root->val);
+            }
+        }
+        return root;
+    }
+
+    TreeNode* findMin(TreeNode* root) {
+        while(root->left != NULL) {
+            root = root->left;
+        }
+        return root;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/delete-node-in-a-bst/discuss/93296/Recursive-Easy-to-Understand-Java-Solution)
+
+
+
+### (2) iterative
+
+```c++
+// Time Complexity: O(h)
+// Space Complexity: O(1)
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* deleteNode(TreeNode* root, int key) {
+        TreeNode* cur = root;
+        TreeNode* pre = NULL;
+        while(cur != NULL && cur->val != key) {
+            pre = cur;
+            if(key < cur->val) {
+                cur = cur->left;
+            } else if(key > cur->val) {
+                cur = cur->right;
+            }
+        }
+        if(pre == NULL) {
+            return deleteRoot(cur);
+        }
+        if(pre->left == cur) {
+            pre->left = deleteRoot(cur);
+        } else {
+            pre->right = deleteRoot(cur);
+        }
+        return root;
+    }
+
+    TreeNode* deleteRoot(TreeNode* root) {
+        if(root == NULL) {
+            return NULL;
+        }
+        if(root->left == NULL) {
+            return root->right;
+        }
+        if(root->right == NULL) {
+            return root->left;
+        }
+        TreeNode* next = root->right;
+        TreeNode* pre = NULL;
+        for(; next->left != NULL; pre = next, next = next->left);
+        next->left = root->left;
+        if(root->right != next) {
+            pre->left = next->right;
+            next->right = root->right;
+        }
+        return next;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/delete-node-in-a-bst/discuss/93298/Iterative-solution-in-Java-O(h)-time-and-O(1)-space)
+
+
+
+## 35. LeetCode 110 [Balanced Binary Tree](https://leetcode.com/problems/balanced-binary-tree/)
+
+### (1) Recursive Solution
+
+```c++
+// T(n) = 2T(n/2) + O(n)
+// Time Complexity: O(nlogn)
+// Space Complexity: O(logn) (recursive stack)
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    bool isBalanced(TreeNode* root) {
+        if(root == NULL) return true;
+        int left = maxDepth(root->left);
+        int right = maxDepth(root->right);
+        return abs(left - right) <= 1 && isBalanced(root->left) && isBalanced(root->right);
+    }
+    
+    int maxDepth(TreeNode* root) {
+        return root == NULL ? 0 : max(maxDepth(root->left), maxDepth(root->right)) + 1;
+    }
+};
+```
+
+
+
+### (2) Recursive + Memorization
+
+```c++
+// Time Complexity: O(2n)
+// Space Complexity: O(n)
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    bool isBalanced(TreeNode* root) {
+        if (!root) return true;
+        
+        if (depths.size() == 0) {
+            maxDepth(root);
+        }
+        
+        int left = depths[root->left];
+        int right = depths[root->right];
+        return abs(left - right) <= 1 && isBalanced(root->left) && isBalanced(root->right);
+    }
+    
+private:
+    unordered_map<TreeNode*, int> depths;
+    
+    int maxDepth(TreeNode* root) {
+        if (!root) {
+            return 0;
+        }
+        int res = max(maxDepth(root->left), maxDepth(root->right)) + 1;
+        depths[root] = res;
+        return res;
+    }
+};
+```
+
+
+
+### (3) Post-Order Traversal Like Solution
+
+### Similar to LeetCode 687, 236, 124, 104
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(logn) (recursive stack)
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    bool isBalanced(TreeNode* root) {
+        if (!root) return true;
+        return maxDepth(root) != -1;
+    }
+    
+private:
+    // unordered_map<TreeNode*, int> depths;
+    
+    int maxDepth(TreeNode* root) {
+        if (!root) { return 0;}
+        
+        int left = maxDepth(root->left);
+        if (left == -1) return -1;
+        int right = maxDepth(root->right);
+        if (right == -1) return -1;
+        
+        if (abs(left - right) > 1) return -1;
+        
+        int res = max(left, right) + 1;
+        return res;
+    }
+};
+```
+
+
+
+## 36. LeetCode 104 [Maximum Depth of Binary Tree](https://leetcode.com/problems/maximum-depth-of-binary-tree/)
+
+### (1) Bottom-Up Recursive
+
+```c++
+// T(n) = 2T(n/2) + O(1)
+// Time Complexity: O(n)
+// Space Complexity: O(1)
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    int maxDepth(TreeNode* root) {
+        return root == NULL ? 0 : max(maxDepth(root->left), maxDepth(root->right)) + 1;
+    }
+};
+```
+
+
+
+### (2) Top-Bottom
+
+While visiting child node, add depth (+1);
+
+When visiting a leaf node, update the max depth (result).
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    int maxDepth(TreeNode* root) {
+        if (!root) return 0;
+        int res = 0;
+        dfs(root, res, 1);
+        return res;
+    }
+    
+private:
+    void dfs(TreeNode* root, int& res, int depth) {
+        if (!root) return;
+        
+        if (!root->left && !root->right) {
+            res = max(res, depth);
+            return;
+        }
+        
+        dfs(root->left, res, depth+1);
+        dfs(root->right, res, depth+1);
+    }
+};
+```
+
 
 
 
