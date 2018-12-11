@@ -278,6 +278,7 @@ public:
         
     }
     
+    // O(1)
     /** Adds a word into the data structure. */
     void addWord(string word) {
         int len = (int)word.size();
@@ -287,7 +288,7 @@ public:
     }
     
     /** Returns if the word is in the data structure. A word could contain the dot character '.' to represent any one letter. */
-    bool search(string word) {
+    /*bool search(string word) {
         int index = word.find_first_of(".", 0);
         int len = (int) word.size();
         if(index == string :: npos) {
@@ -302,6 +303,27 @@ public:
                 }
             }
             if(found) return true;
+        }
+        return false;
+    }*/
+    
+    // O(mn)
+    // m : number of different string
+    // n : length of longest string
+    bool search(string word) {
+        int index = word.find_first_of(".", 0);
+        int len = (int) word.size();
+        if(index == string :: npos) {
+            return wordList[len].count(word) > 0;
+        }
+        for(auto str : wordList[len]) {
+            int i;
+            for(i=0; i<len; i++) {
+                if(word[i] != str[i] && word[i] != '.') {
+                    break;
+                }
+            }
+            if(i == len) return true;
         }
         return false;
     }
@@ -321,25 +343,371 @@ public:
 ### (3) Rewrited Trie Solution
 
 ```c++
+class WordDictionary {
+public:
+    /** Initialize your data structure here. */
+    WordDictionary() : _root(new TrieNode()) {}
+    
+    /** Adds a word into the data structure. */
+    // O(n)
+    // n : length of new word
+    void addWord(string word) {
+        TrieNode* p = _root.get();
+        for (const char &c : word) {
+            if (!p->children[c - 'a']) {
+                p->children[c - 'a'] = new TrieNode();
+            }
+            p = p->children[c - 'a'];
+        }
+        p->is_word = true;
+    }
+    
+    // O(m)
+    // m : total number of character in Trie
+    // worse case: search word only contains '.' except one letter
+    /** Returns if the word is in the data structure. A word could contain the dot character '.' to represent any one letter. */
+    bool search(string word) {
+        return dfs_search(_root.get(), word, 0);
+    }
+    
+private:
+    struct TrieNode {
+        TrieNode() : is_word(false), children(26, nullptr) {}
+        
+        ~TrieNode() {
+            for (TrieNode* child : children) {
+                if (child) delete child;
+            }
+            children.clear();
+        }
+        
+        bool is_word;
+        vector<TrieNode*> children;
+    };
+    
+    bool dfs_search(TrieNode* p, string &word, int idx) {
+        if (idx == word.size()) {
+            return p->is_word;
+        }
+        
+        if (word[idx] == '.') {
+            for (TrieNode* tn : p->children) {
+                if (tn && dfs_search(tn, word, idx+1)) {
+                    return true;
+                }
+            }
+        } else {
+            if (p->children[word[idx] - 'a']) {
+                return dfs_search(p->children[word[idx] - 'a'], word, idx+1);
+            }
+        }
+        return false;
+    }
+    
+    std::unique_ptr<TrieNode> _root;
+};
 
+/**
+ * Your WordDictionary object will be instantiated and called as such:
+ * WordDictionary obj = new WordDictionary();
+ * obj.addWord(word);
+ * bool param_2 = obj.search(word);
+ */
 ```
 
 
 
-## 3. LeetCode 212
+## 3. LeetCode 212 [Word Search II](https://leetcode.com/problems/word-search-ii/)
+
+### (1) Trie + DFS
 
 ```c++
+// If searching word like Word Search I, then time is
+// O(kmn*3^(maxlen(words)))
+// k : number of words
+// m,n : size of board
+// Time Complexity: O(mn*3^(maxlen(words)))
+// Space Complexity: O(k*maxlen(words))
 
+class Solution {
+private:
+    struct TrieNode {
+        TrieNode() : word(""), children(26, nullptr) {}
+        
+        ~TrieNode() {
+            for (TrieNode* child : children) {
+                if (child) delete child;
+                children.clear();
+            }
+        }
+        
+        string word; // replace the boolean value
+        vector<TrieNode*> children;
+    };
+    
+    TrieNode* buildTrie(const vector<string> &words) {
+        TrieNode* root = new TrieNode();
+        for (const string &word : words) {
+            TrieNode* p = root;
+            for (const char &c : word) {
+                int i = c - 'a';
+                if (!p->children[i]) {
+                    p->children[i] = new TrieNode();
+                }
+                p = p->children[i];
+            }
+            p->word = word;
+        }
+        
+        return root;
+    }
+
+public:
+    vector<string> findWords(vector<vector<char>>& board, vector<string>& words) {
+        if (board.empty() || board[0].empty()) return {};
+        int m = board.size();
+        int n = board[0].size();
+        
+        TrieNode* trie_root = buildTrie(words);
+        const vector<vector<int>> dirs = {{0, -1}, {1, 0}, {0, 1}, {-1, 0}};
+        vector<string> res;
+        
+        for (int i=0; i<m; i++) {
+            for (int j=0; j<n; j++) {
+                dfs(board, res, trie_root->children[board[i][j] - 'a'], i, j, dirs);
+            }
+        }
+        
+        return res;
+    }
+    
+    void dfs(vector<vector<char>>& board, vector<string> &res, TrieNode* root, int r, int c, 
+            const vector<vector<int>> &dirs) {
+        if (root == nullptr) return;
+        
+        if (!root->word.empty()) { // find a string
+            res.push_back(root->word);
+            root->word = ""; // deduplicate (or use a hashset for result)
+        }
+        
+        char temp = board[r][c];
+        board[r][c] = '.'; // use for visit flag
+        
+        for (int k=0; k<dirs.size(); k++) {
+            int nr = r + dirs[k][0];
+            int nc = c + dirs[k][1];
+            if (nr >= 0 && nc >= 0 && nr < board.size() && nc < board[0].size() && board[nr][nc] != '.') {
+                dfs(board, res, root->children[board[nr][nc] - 'a'], nr, nc, dirs);
+            }
+        }
+        
+        board[r][c] = temp;
+    }
+};
+```
+
+[solution&explanation](https://leetcode.com/problems/word-search-ii/discuss/59780/Java-15ms-Easiest-Solution-(100.00))
+
+
+
+### (2) Another Version
+
+```c++
+class Solution {
+private:
+    struct TrieNode {
+        TrieNode() : word(""), children(26, nullptr) {}
+        
+        ~TrieNode() {
+            for (TrieNode* child : children) {
+                if (child) delete child;
+                children.clear();
+            }
+        }
+        
+        string word;
+        vector<TrieNode*> children;
+    };
+    
+    TrieNode* buildTrie(const vector<string> &words) {
+        TrieNode* root = new TrieNode();
+        for (const string &word : words) {
+            TrieNode* p = root;
+            for (const char &c : word) {
+                int i = c - 'a';
+                if (!p->children[i]) {
+                    p->children[i] = new TrieNode();
+                }
+                p = p->children[i];
+            }
+            p->word = word;
+        }
+        
+        return root;
+    }
+
+public:
+    vector<string> findWords(vector<vector<char>>& board, vector<string>& words) {
+        if (board.empty() || board[0].empty()) return {};
+        int m = board.size();
+        int n = board[0].size();
+        
+        TrieNode* trie_root = buildTrie(words);
+        vector<string> res;
+        
+        for (int i=0; i<m; i++) {
+            for (int j=0; j<n; j++) {
+                dfs(board, res, trie_root, i, j);
+            }
+        }
+        
+        return res;
+    }
+    
+    void dfs(vector<vector<char>>& board, vector<string> &res, TrieNode* root, int r, int c) {
+        char temp = board[r][c];
+        
+        if (temp == '.' || root->children[temp - 'a'] == nullptr) return;
+        
+        root = root->children[temp - 'a'];
+        if (!root->word.empty()) {
+            res.push_back(root->word);
+            root->word = "";
+        }
+        
+        
+        board[r][c] = '.';
+        
+        if (r > 0) dfs(board, res, root, r-1, c);
+        if (c > 0) dfs(board, res, root, r, c-1);
+        if (r < board.size()-1) dfs(board, res, root, r+1, c);
+        if (c < board[0].size()-1) dfs(board, res, root, r, c+1);
+        
+        board[r][c] = temp;
+    }
+};
 ```
 
 
 
 ## 4. LeetCode 677 [Map Sum Pairs](https://leetcode.com/problems/map-sum-pairs/)
 
+[huahua](http://zxi.mytechroad.com/blog/tree/leetcode-677-map-sum-pairs/)
+
 ### (1) Trie
 
 ```c++
+// string only contains lowercase alphabetic char
+class MapSum {
+public:
+    /** Initialize your data structure here. */
+    MapSum() : _root(new TrieNode()) {}
+    
+    // O(l)
+    void insert(string key, int val) {
+        TrieNode* p = _root.get();
+        int inc = val - _vals[key];
+        _vals[key] = val;
+        for (const char &c : key) {
+            if (!p->children[c - 'a']) {
+                p->children[c - 'a'] = new TrieNode();
+            }
+            p->children[c - 'a']->val += inc;
+            p = p->children[c - 'a'];
+        }
+    }
+    
+    // O(l)
+    int sum(string prefix) const {
+        TrieNode* p = _root.get();
+        for (const char &c : prefix) {
+            p = p->children[c - 'a'];
+            if (p == nullptr) return 0;
+        }
+        
+        return p->val;
+    }
+    
+private:
+    struct TrieNode {
+        TrieNode() : val(0), children(26, nullptr) {}
+        
+        ~TrieNode() {
+            for (TrieNode* child : children) {
+                if (child) delete child;
+            }
+            children.clear();
+        }
+        
+        int val;
+        vector<TrieNode*> children; 
+    };
+    
+    unique_ptr<TrieNode> _root; // dummy root
+    unordered_map<string, int> _vals; // key -> val
+};
 
+// ASCII string
+/**
+ * Your MapSum object will be instantiated and called as such:
+ * MapSum obj = new MapSum();
+ * obj.insert(key,val);
+ * int param_2 = obj.sum(prefix);
+ */
+
+class MapSum {
+public:
+    /** Initialize your data structure here. */
+    MapSum() : _root(new TrieNode()) {}
+    
+    void insert(string key, int val) {
+        TrieNode* p = _root.get();
+        int inc = val - _vals[key];
+        _vals[key] = val;
+        for (const char &c : key) {
+            if (!p->children[c]) {
+                p->children[c] = new TrieNode();
+            }
+            p->children[c]->val += inc;
+            p = p->children[c];
+        }
+    }
+    
+    int sum(string prefix) const {
+        TrieNode* p = _root.get();
+        for (const char &c : prefix) {
+            p = p->children[c];
+            if (p == nullptr) return 0;
+        }
+        
+        return p->val;
+    }
+    
+private:
+    struct TrieNode {
+        TrieNode() : val(0), children(128, nullptr) {}
+        
+        ~TrieNode() {
+            for (TrieNode* child : children) {
+                if (child) delete child;
+            }
+            children.clear();
+        }
+        
+        int val;
+        vector<TrieNode*> children; 
+    };
+    
+    unique_ptr<TrieNode> _root;
+    unordered_map<string, int> _vals;
+};
+
+/**
+ * Your MapSum object will be instantiated and called as such:
+ * MapSum obj = new MapSum();
+ * obj.insert(key,val);
+ * int param_2 = obj.sum(prefix);
+ */
 ```
 
 
@@ -352,6 +720,7 @@ public:
     /** Initialize your data structure here. */
     MapSum() {}
     
+    // O(l) => O(1) or O(l^2)
     void insert(string key, int val) {
         int inc = val;
         if (_vals.count(key)) {
@@ -364,6 +733,7 @@ public:
         }
     }
     
+    // O(1) or O(l) (if length of prefix needs to be considered)
     int sum(string prefix) {
         return _sums[prefix];
     }
