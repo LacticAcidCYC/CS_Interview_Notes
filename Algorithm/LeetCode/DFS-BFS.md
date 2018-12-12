@@ -1132,6 +1132,46 @@ public:
 
 
 
+## 16. LeetCode 140 [Word Break II](https://leetcode.com/problems/word-break-ii/)
+
+### Original 139
+
+```c++
+class Solution {
+public:
+    vector<string> wordBreak(string s, vector<string>& wordDict) {
+        unordered_set<string> hashset(wordDict.begin(), wordDict.end());
+        unordered_map<int, vector<string>> mp;
+        return dfs(s, hashset, 0, mp);
+    }
+    
+    vector<string> dfs(string &s, unordered_set<string> &wordSet, int start, unordered_map<int, vector<string>> &mp) {
+        if (mp.count(start)) {
+            return mp[start];
+        }
+        
+        vector<string> res;
+        int n = s.length();
+        if (start == n) {
+            res.push_back("");
+        }
+        
+        for (int i=start+1; i<=n; i++) {
+            if (wordSet.count(s.substr(start, i-start))) {
+                vector<string> subres = dfs(s, wordSet, i, mp);
+                for (auto ss : subres) {
+                    res.push_back(s.substr(start, i-start) + (ss.empty() ? "" : (" " + ss)));
+                }
+            }
+        }
+        
+        mp[start] = res;
+        
+        return res;
+    }
+};
+```
+
 
 
 

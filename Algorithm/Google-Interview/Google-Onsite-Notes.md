@@ -1505,11 +1505,389 @@ private:
 
 
 
+## 23. LeetCode 911 
+
+```c++
+
+```
 
 
 
+## 24. LeetCode 277 
+
+```c++
+
+```
 
 
+
+## 25. LeetCode 524 
+
+```c++
+class Solution {
+public:
+    string findLongestWord(string s, vector<string>& d) {
+        string res = "";
+        for (string &word : d) {
+            if (isSubsequence(s, word)) {
+                if (word.length() > res.length() || (word.length() == res.length() && word < res)) {
+                    res = word;
+                }
+            }
+        }
+        return res;
+    }
+    
+private:
+    bool isSubsequence(string &s, string &t) {
+        int ls = s.length();
+        int lt = t.length();
+        int i = 0;
+        int j = 0;
+        
+        while (i < ls && j < lt) {
+            if (s[i] == t[j]) {
+                i++;
+                j++;
+            } else {
+                i++;
+            }
+        }
+        
+        return j == lt;
+    }
+};
+```
+
+
+
+## 26. LeetCode 140 
+
+```c++
+
+```
+
+
+
+## 27. LeetCode 246 | 247 | 248
+
+### 247
+
+```c++
+class Solution {
+public:
+    vector<string> findStrobogrammatic(int n) {
+        if (n == 0) return {};
+        unordered_map<char, char> mp = {
+            {'0', '0'},
+            {'1', '1'},
+            {'6', '9'},
+            {'8', '8'},
+            {'9', '6'}
+        };
+        vector<string> res;
+        string str_left, str_right;
+        generateNumbers(mp, res, n, 0, str_left, str_right);
+        
+        return res;
+    }
+    
+private:
+    void generateNumbers(unordered_map<char, char> &mp, vector<string> &res, int &n, int index, string left, string right) {
+        if (index == n) {
+            res.push_back(left + right);
+        } else if (index == n-1) {
+            res.push_back(left + '0' + right);
+            res.push_back(left + '1' + right);
+            res.push_back(left + '8' + right);
+        } else {
+            if (index == 0) {
+                generateNumbers(mp, res, n, index+2, left+'1', mp['1']+right);
+                generateNumbers(mp, res, n, index+2, left+'6', mp['6']+right);
+                generateNumbers(mp, res, n, index+2, left+'8', mp['8']+right);
+                generateNumbers(mp, res, n, index+2, left+'9', mp['9']+right);
+            } else {
+                generateNumbers(mp, res, n, index+2, left+'0', mp['0']+right);
+                generateNumbers(mp, res, n, index+2, left+'1', mp['1']+right);
+                generateNumbers(mp, res, n, index+2, left+'6', mp['6']+right);
+                generateNumbers(mp, res, n, index+2, left+'8', mp['8']+right);
+                generateNumbers(mp, res, n, index+2, left+'9', mp['9']+right);
+            }
+        }
+    }
+};
+```
+
+
+
+## 28. LeetCode 777 [Swap Adjacent in LR String](https://leetcode.com/problems/swap-adjacent-in-lr-string/)
+
+```c++
+class Solution {
+public:
+    bool canTransform(string start, string end) {
+        vector<pair<char, int>> vs;
+        vector<pair<char, int>> ve;
+        
+        for (int i=0; i<start.size(); i++) {
+            if (start[i] == 'R' || start[i] == 'L') {
+                vs.push_back({start[i], i});
+            }
+        }
+        
+        for (int i=0; i<end.size(); i++) {
+            if (end[i] == 'R' || end[i] == 'L') {
+                ve.push_back({end[i], i});
+            }
+        }
+        
+        if (vs.size() != ve.size()) return false;
+        for (int i=0; i<vs.size(); i++) {
+            if (vs[i].first != ve[i].first) return false;
+            if (vs[i].first == ve[i].first) {
+                if (vs[i].first == 'R' && vs[i].second > ve[i].second) {
+                    return false;
+                }
+                if (vs[i].first == 'L' && vs[i].second < ve[i].second) {
+                    return false;
+                }
+            }
+        }
+        
+        return true;
+    }
+};
+```
+
+
+
+## 29. LeetCode 489 [Robot Room Cleaner](https://leetcode.com/problems/robot-room-cleaner/)
+
+```c++
+/**
+ * // This is the robot's control interface.
+ * // You should not implement it, or speculate about its implementation
+ * class Robot {
+ *   public:
+ *     // Returns true if the cell in front is open and robot moves into the cell.
+ *     // Returns false if the cell in front is blocked and robot stays in the current cell.
+ *     bool move();
+ *
+ *     // Robot will stay in the same cell after calling turnLeft/turnRight.
+ *     // Each turn will be 90 degrees.
+ *     void turnLeft();
+ *     void turnRight();
+ *
+ *     // Clean the current cell.
+ *     void clean();
+ * };
+ */
+class Solution {
+public:
+    void cleanRoom(Robot& robot) {
+        set<pair<int, int>> cleaned;
+        int cur_dir = 0; // 0: up, 1: right, 2: down, 3: left
+        vector<vector<int>> dirs = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
+        dfs(robot, cleaned, 0, 0, cur_dir, dirs);
+    }
+    
+    void dfs(Robot& robot, set<pair<int, int>> &cleaned, int r, int c, int &cur_dir, vector<vector<int>> &dirs) {
+        if (cleaned.count({r, c})) {
+            return;
+        }
+        
+        robot.clean();
+        cleaned.insert({r, c}); // already cleaned
+        
+        for (int i=0; i<4; i++) {
+            // 4 directions
+            if (robot.move()) {
+                dfs(robot, cleaned, r + dirs[cur_dir][0], c + dirs[cur_dir][1], cur_dir, dirs);
+                robot.turnRight();
+                robot.turnRight();
+                robot.move();
+                robot.turnLeft();
+                robot.turnLeft();
+            }
+            robot.turnRight();
+            cur_dir = (cur_dir + 1) % 4;
+        }
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/robot-room-cleaner/discuss/139057/Very-easy-to-understand-Java-solution)
+
+
+
+## 30. LeetCode 163
+
+```c++
+
+```
+
+
+
+## 31. LeetCode 159 
+
+```c++
+
+```
+
+
+
+## 32. LeetCode 295
+
+```c++
+
+```
+
+
+
+## 33. LeetCode 844 [Backspace String Compare](https://leetcode.com/problems/backspace-string-compare/)
+
+### (1) Left-To-Right Visit
+
+```c++
+class Solution {
+public:
+    bool backspaceCompare(string S, string T) {
+        int endS = 0;
+        for (int i=0; i<S.length(); i++) {
+            if (S[i] == '#') {
+                endS = endS == 0 ? 0 : endS - 1;
+            } else {
+                swap(S[i], S[endS++]);
+            }
+        }
+        
+        int endT = 0;
+        for (int i=0; i<T.length(); i++) {
+            if (T[i] == '#') {
+                endT = endT == 0 ? 0 : endT - 1;
+            } else {
+                swap(T[i], T[endT++]);
+            }
+        }
+        
+        if (endS != endT) return false;
+        for (int i=endS-1; i>=0; i--) {
+            if (S[i] != T[i]) return false;
+        }
+        
+        return true;
+    }
+};
+```
+
+
+
+### (2) Right-To-Left Visit
+
+#### Intuition
+
+Get the first valid chracter(not deleted by backspace) in both string, check whether they are the same.
+
+```c++
+
+```
+
+[solution1](https://leetcode.com/problems/backspace-string-compare/discuss/135603/C%2B%2BJavaPython-O(N)-time-and-O(1)-space)
+
+[solution2](https://leetcode.com/problems/backspace-string-compare/discuss/162827/Java-Two-Pointer-With-Explanation-beat-98)
+
+
+
+## 34. LeetCode 133 [Clone Graph](https://leetcode.com/problems/clone-graph/)
+
+```c++
+/**
+ * Definition for undirected graph.
+ * struct UndirectedGraphNode {
+ *     int label;
+ *     vector<UndirectedGraphNode *> neighbors;
+ *     UndirectedGraphNode(int x) : label(x) {};
+ * };
+ */
+class Solution {
+public:
+    UndirectedGraphNode *cloneGraph(UndirectedGraphNode *node) {
+        if (!node) return nullptr;
+        NODEMP mp;
+        return dfs_clone(node, mp);
+    }
+    
+private:
+    typedef unordered_map<UndirectedGraphNode*, UndirectedGraphNode*> NODEMP;
+    
+    UndirectedGraphNode* dfs_clone(UndirectedGraphNode* node, NODEMP &mp) {
+        if (!node) return nullptr;
+        if (!mp.count(node)) {
+            mp[node] = new UndirectedGraphNode(node->label);
+            for (const auto &neigh : node->neighbors) {
+                new_node->neighbors.push_back(dfs_clone(neigh, mp));
+            }
+        }
+        
+        return mp[node];
+    }
+};
+```
+
+
+
+## 35. LeetCode 205 [Isomorphic Strings](https://leetcode.com/problems/isomorphic-strings/)
+
+### (1) Using two char-to-int mapping
+
+```c++
+class Solution {
+public:
+    bool isIsomorphic(string s, string t) {
+        vector<int> mp1(256, -1);
+        vector<int> mp2(256, -1);
+        int n = s.length();
+        
+        for (int i=0; i<n; i++) {
+            if (mp1[s[i]] != mp2[t[i]]) return false;
+            else {
+                mp1[s[i]] = i;
+                mp2[t[i]] = i;
+            }
+        }
+        
+        return true;
+    }
+};
+```
+
+
+
+### (2) Using two char-to-char mapping
+
+```c++
+class Solution {
+public:
+    bool isIsomorphic(string s, string t) {
+        unordered_map<char, char> mp;
+        unordered_map<char, char> reverse_mp;
+        int n = s.length();
+        
+        for (int i=0; i<n; i++) {
+            if (!mp.count(s[i]) && !reverse_mp.count(t[i])) {
+                mp[s[i]] = t[i];
+                reverse_mp[t[i]] = s[i];
+            } else {
+                if (mp[s[i]] != t[i] || reverse_mp[t[i]] != s[i]) {
+                    return false;
+                }
+            }
+        }
+        
+        return true;
+    }
+};
+```
 
 
 

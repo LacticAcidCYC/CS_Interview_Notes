@@ -215,6 +215,8 @@ private:
 
 ### (1) DFS (with memorization)
 
+[article](https://articles.leetcode.com/clone-graph-part-i/)
+
 ```c++
 /**
  * Definition for undirected graph.
@@ -237,10 +239,13 @@ private:
               unordered_map<UndirectedGraphNode*, UndirectedGraphNode*> &mp) {
         if (!node) return NULL;
         if (!mp.count(node)) {
+            // must set mp[node] here!! otherwise it would cause
+            // runtime error (cycle!)
             mp[node] = new UndirectedGraphNode(node->label);
             for (UndirectedGraphNode *neigh : node->neighbors) {
                 mp[node]->neighbors.push_back(dfs_clone(neigh, mp));
             }
+            // don't set mp[node] here
         }
         
         return mp[node];
