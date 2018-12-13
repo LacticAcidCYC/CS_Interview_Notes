@@ -1844,7 +1844,7 @@ private:
 class Solution {
 public:
     bool isIsomorphic(string s, string t) {
-        vector<int> mp1(256, -1);
+        vector<int> mp1(256, -1); // avoid ambiguity; 0 will be used below for mapping
         vector<int> mp2(256, -1);
         int n = s.length();
         
@@ -1891,11 +1891,160 @@ public:
 
 
 
+### FollowUp LeetCode 290 
+
+```c++
+
+```
 
 
 
+## 36. LeetCode 857 
+
+```c++
+
+```
 
 
+
+## 37. LeetCode 271 
+
+```c++
+class Codec {
+public:
+
+    // Encodes a list of strings to a single string.
+    string encode(vector<string>& strs) {
+        string encoded_string = "";
+        for(string &s : strs) {
+            int length = (int)s.length();
+            encoded_string += to_string(length) + "@" + s;
+        }
+        return encoded_string;
+    }
+
+    // Decodes a single string to a list of strings.
+    vector<string> decode(string s) {
+        vector<string> strs;
+        for(int head=0; head < s.size();) {
+            int pos = s.find_first_of("@", head);
+            int length = stoi(s.substr(head, pos-head));
+            head = pos + 1;
+            strs.push_back(s.substr(head, length));
+            head += length;
+        }
+        return strs;
+    }
+};
+
+// Your Codec object will be instantiated and called as such:
+// Codec codec;
+// codec.decode(codec.encode(strs));
+```
+
+[solution1](https://leetcode.com/problems/encode-and-decode-strings/discuss/70412/AC-Java-Solution)
+
+[solution2](https://leetcode.com/problems/encode-and-decode-strings/discuss/70443/Accepted-simple-C%2B%2B-solution)
+
+[solution3](https://leetcode.com/problems/encode-and-decode-strings/discuss/70460/A-solution-without-delimiter)
+
+
+
+## 38. LeetCode 288 [Unique Word Abbreviation](https://leetcode.com/problems/unique-word-abbreviation/)
+
+```c++
+class ValidWordAbbr {
+public:
+    ValidWordAbbr(vector<string> dictionary) {
+        for (const auto &word : dictionary) {
+            int l = word.length();
+            string abbr = l > 2 ? word[0] + to_string(l-2) + word[l-1] : word;
+            abbr_dict[abbr].insert(word);
+        }
+    }
+    
+    bool isUnique(string word) {
+        int l = word.length();
+        string abbr = l > 2 ? word[0] + to_string(l-2) + word[l-1] : word;
+        if (abbr_dict[abbr].empty()) return true;
+        if (abbr_dict[abbr].size() == 1 && abbr_dict[abbr].count(word)) return true;
+        return false;
+    }
+    
+private:
+    unordered_map<string, unordered_set<string>> abbr_dict;
+};
+
+/**
+ * Your ValidWordAbbr object will be instantiated and called as such:
+ * ValidWordAbbr obj = new ValidWordAbbr(dictionary);
+ * bool param_1 = obj.isUnique(word);
+ */
+```
+
+
+
+## 39. LeetCode 460 
+
+```c++
+
+```
+
+
+
+## 40. LeetCode 926 
+
+```c++
+
+```
+
+
+
+## 41. LeetCode 818 
+
+```c++
+class Solution {
+public:
+    int racecar(int target) {
+        queue<pair<int, int>> q;
+        q.push({0, 1});
+        
+        int steps = 0;
+        set<pair<int, int>> visited;
+        visited.insert({0, 1});
+        
+        while (!q.empty()) {
+            int k = q.size();
+            
+            for (int i=0; i<k ; i++) {
+                pair<int, int> last = q.front();
+                q.pop();
+                if (last.first == target) {
+                    return steps;
+                }
+                // A
+                pair<int, int> next = {last.first + last.second, last.second * 2};
+                if (!visited.count(next) && next.first > 0 && next.first < (target << 1)) {
+                    q.push(next);
+                    visited.insert(next);
+                }
+
+                // R
+                next = {last.first, last.second > 0 ? -1 : 1};
+                if (!visited.count(next) && next.first > 0 && next.first < (target << 1)) {
+                    q.push(next);
+                    visited.insert(next);
+                }
+            } 
+            steps++; 
+        }
+        
+        return -1;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/race-car/discuss/124326/Summary-of-the-BFS-and-DP-solutions-with-intuitive-explanation)
 
 
 
