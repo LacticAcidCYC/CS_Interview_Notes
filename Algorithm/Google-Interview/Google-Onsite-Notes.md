@@ -1899,15 +1899,96 @@ public:
 
 
 
-## 36. LeetCode 857 
+## 36. LeetCode 857 [Minimum Cost to Hire K Workers](https://leetcode.com/problems/minimum-cost-to-hire-k-workers/)
 
 ```c++
+// Time Complexity: O(nlogn)
+// Space Complexity: O(n)
 
+class Solution {
+public:
+    double mincostToHireWorkers(vector<int>& quality, vector<int>& wage, int K) {
+        int n = quality.size();
+        vector<pair<double, int>> ratios;
+        
+        // O(n)
+        for (int i=0; i<n; i++) {
+            ratios.push_back({1.0 * wage[i] / quality[i], quality[i]});
+        }
+        
+        // O(nlogn)
+        sort(ratios.begin(), ratios.end(), [](const pair<double, int> &A, const pair<double, int> &B) {
+            return A.first < B.first;
+        });
+        
+        double cost = 0;
+        priority_queue<int, vector<int>> worker_qualities;
+        
+        // O(KlogK)
+        for (int i=0; i<K; i++) {
+            cost += ratios[K-1].first * ratios[i].second;
+            worker_qualities.push(ratios[i].second);
+        }
+        
+        double mincost = cost;
+        
+        // O(nlogK)
+        for (int i=K; i<n; i++) {
+            cost *= ratios[i].first / ratios[i-1].first;
+            cost += ratios[i].first * ratios[i].second;
+            worker_qualities.push(ratios[i].second);
+            int max_q = worker_qualities.top();
+            worker_qualities.pop();
+            cost -= ratios[i].first * max_q;
+            mincost = min(mincost, cost);
+        }
+        
+        return mincost;
+    }
+};
+
+// improved version
+class Solution {
+public:
+    double mincostToHireWorkers(vector<int>& quality, vector<int>& wage, int K) {
+        int n = quality.size();
+        vector<pair<double, int>> ratios;
+        for (int i=0; i<n; i++) {
+            ratios.push_back({1.0 * wage[i] / quality[i], quality[i]});
+        }
+        
+        sort(ratios.begin(), ratios.end(), [](const pair<double, int> &A, const pair<double, int> &B) {
+            return A.first < B.first;
+        });
+        
+        int total_quality = 0;
+        priority_queue<int, vector<int>> worker_qualities;
+        for (int i=0; i<K; i++) {
+            total_quality += ratios[i].second;
+            worker_qualities.push(ratios[i].second);
+        }
+        
+        double mincost = 1.0 * total_quality * ratios[K-1].first;
+        
+        for (int i=K; i<n; i++) {
+            worker_qualities.push(ratios[i].second);
+            int max_q = worker_qualities.top();
+            worker_qualities.pop();
+            
+            total_quality = total_quality + ratios[i].second - max_q;
+            mincost = min(mincost, 1.0 * total_quality * ratios[i].first);
+        }
+        
+        return mincost;
+    }
+};
 ```
 
+[solution](https://leetcode.com/problems/minimum-cost-to-hire-k-workers/discuss/141768/Detailed-explanation-O(NlogN))
 
 
-## 37. LeetCode 271 
+
+## 37. LeetCode 271 [Encode and Decode Strings](https://leetcode.com/problems/encode-and-decode-strings/)
 
 ```c++
 class Codec {
@@ -1969,6 +2050,7 @@ public:
         if (abbr_dict[abbr].empty()) return true;
         if (abbr_dict[abbr].size() == 1 && abbr_dict[abbr].count(word)) return true;
         return false;
+        // return abbr_dict[abbr].size() == abbr_dict[abbr].count(word);
     }
     
 private:
@@ -1984,10 +2066,98 @@ private:
 
 
 
-## 39. LeetCode 460 
+## 39. LeetCode 460 [LFU Cache](https://leetcode.com/problems/lfu-cache/)
 
 ```c++
+struct CacheNode {
+    int key;
+    int val;
+    int freq;
+    
+    // pointer to the node in the list
+    list<int>::const_iterator it;
+};
 
+class LFUCache {
+public:
+    LFUCache(int capacity) : _capacity(capacity), _min_freq(0) {}
+    
+    int get(int key) {
+        auto it = _mp.find(key);
+        if (it == _mp.cend()) return -1;
+        use(it->second);
+        return it->second.val;
+    }
+    
+    void put(int key, int value) {
+        if (_capacity == 0) return;
+        
+        auto it = _mp.find(key);
+        if (it != _mp.cend()) {
+            // key already exists, update the value and call use()
+            it->second.val = value;
+            use(it->second);
+            return;
+        }
+        
+        if (_mp.size() == _capacity) {
+            // reach capacity, need to remove a node which
+            // (1) has the lowest freq
+            // (2) least recently used if there are multiple ones
+            
+            const int key_to_remove = _freqMP[_min_freq].back();
+            _freqMP[_min_freq].pop_back();
+            _mp.erase(key_to_remove);
+        }
+        
+        // new item has freq of 1, thus _min_freq needs to be set to 1
+        const int freq = 1;
+        _min_freq = freq;
+        
+        // Add the key to freq list
+        _freqMP[freq].push_front(key);
+        
+        // create a new node
+        _mp[key] = {key, value, freq, _freqMP[freq].cbegin()};
+    }
+    
+private:
+    void use(CacheNode& node) {
+        // update the frequency
+        const int prev_freq = node.freq;
+        const int cur_freq = ++(node.freq);
+        
+        // remove the entry from old freq list
+        _freqMP[prev_freq].erase(node.it);
+        
+        if (_freqMP[prev_freq].empty() && prev_freq == _min_freq) {
+            _min_freq++;
+        }
+        
+        // insert the key into the front of the new freq list
+        _freqMP[cur_freq].push_front(node.key);
+        
+        // update the pointer of node
+        node.it = _freqMP[cur_freq].cbegin();
+    }
+    
+    int _capacity;
+    int _min_freq;
+    
+    // key -> CacheNode
+    unordered_map<int, CacheNode> _mp;
+    
+    // freq -> keys with freq
+    unordered_map<int, list<int>> _freqMP;
+    
+};
+
+/**
+ * Your LFUCache object will be instantiated and called as such:
+ * LFUCache obj = new LFUCache(capacity);
+ * int param_1 = obj.get(key);
+ * obj.put(key,value);
+ */
 ```
 
 
@@ -2000,7 +2170,7 @@ private:
 
 
 
-## 41. LeetCode 818 
+## 41. LeetCode 818 [Race Car](https://leetcode.com/problems/race-car/)
 
 ```c++
 class Solution {
@@ -2045,6 +2215,8 @@ public:
 ```
 
 [solution](https://leetcode.com/problems/race-car/discuss/124326/Summary-of-the-BFS-and-DP-solutions-with-intuitive-explanation)
+
+[dp-solution]([Race Car](https://leetcode.com/problems/race-car/))
 
 
 
