@@ -2220,7 +2220,152 @@ public:
 
 
 
+## 42. LeetCode 853 [Car Fleet](https://leetcode.com/problems/car-fleet/)
 
+```c++
+// Time Complexity: O(nlogn)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    int carFleet(int target, vector<int>& position, vector<int>& speed) {
+        if (position.empty()) return 0;
+        vector<pair<int, double>> times;
+        
+        int n = position.size();
+        for (int i=0; i<n; i++) {
+            times.push_back({position[i], 1.0 * (target - position[i]) / speed[i]});
+        }
+        
+        sort(times.begin(), times.end(), [](const pair<int, double> &A, const pair<int, double> &B) {
+            return A.first > B.first || (A.first == B.first && A.second < B.second);
+        });
+        
+        int fleets = 1;
+        double max_time = times[0].second;
+        for (int i=1; i<n; i++) {
+            if (times[i].second > max_time) {
+                fleets++;
+                max_time = times[i].second;
+            }
+        }
+        
+        return fleets;
+    }
+};
+```
+
+
+
+## 43. LeetCode 803 
+
+### Union-Find
+
+```c++
+
+```
+
+
+
+## 44. LeetCode 900 [RLE Iterator](https://leetcode.com/problems/rle-iterator/)
+
+### (1) Two Arrays + One pointer
+
+```c++
+// Time Complexity: O(1)
+// Space Complexity: O(2n)
+
+class RLEIterator {
+public:
+    RLEIterator(vector<int> A) : ptr(0) {
+        int n = A.size();
+        for (int i=0; i<n; i+=2) {
+            if (A[i] == 0) continue;
+            counts.push_back(A[i]);
+            numbers.push_back(A[i+1]);
+        } 
+    }
+    
+    int next(int n) {
+        if (ptr == counts.size()) return -1;
+        if (n <= counts[ptr]) {
+            counts[ptr] -= n;
+        } else {
+            while (ptr < counts.size() && n > counts[ptr]) {
+                n -= counts[ptr];
+                ptr++;
+            }
+            if (ptr == counts.size()) return -1;
+            counts[ptr] -= n;
+        }
+        return numbers[ptr];
+    }
+    
+private:
+    vector<int> counts;
+    vector<int> numbers;
+    int ptr;
+};
+
+/**
+ * Your RLEIterator object will be instantiated and called as such:
+ * RLEIterator obj = new RLEIterator(A);
+ * int param_1 = obj.next(n);
+ */
+```
+
+
+
+## 45. LeetCode 843
+
+### Minimax (Read Solution Later)
+
+```c++
+
+```
+
+
+
+## 46. LeetCode 332 [Reconstruct Itinerary](https://leetcode.com/problems/reconstruct-itinerary/)
+
+```c++
+class Solution {
+public:
+    vector<string> findItinerary(vector<pair<string, string>> tickets) {
+        unordered_map<string, deque<string>> graph;
+        for (auto const &ticket : tickets) {
+            graph[ticket.first].push_back(ticket.second);
+        }
+        
+        for (auto &route : graph) {
+            sort(route.second.begin(), route.second.end());
+        }
+        
+        vector<string> res;
+        string from = "JFK";
+        dfs(graph, res, from);
+        return vector<string>(res.rbegin(), res.rend());
+    }
+    
+private:
+    void dfs(unordered_map<string, deque<string>> &graph, vector<string> &res, const string &from) {
+        while (!graph[from].empty()) {
+            string nxt = graph[from].front();
+            graph[from].pop_front();
+            dfs(graph, res, nxt);
+        }
+        res.push_back(from);
+    }
+};
+```
+
+
+
+## 47. LeetCode 
+
+```c++
+
+```
 
 
 
