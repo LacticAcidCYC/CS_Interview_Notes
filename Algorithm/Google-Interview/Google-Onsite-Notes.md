@@ -2361,7 +2361,183 @@ private:
 
 
 
-## 47. LeetCode 
+## 47. LeetCode 269 [Alien Dictionary](https://leetcode.com/problems/alien-dictionary/)
+
+```c++
+class Solution {
+public:
+    string alienOrder(vector<string>& words) {
+        string res = "";
+        if (words.empty()) return res;
+        
+        unordered_map<char, unordered_set<char>> graph;
+        unordered_map<char, int> indegrees;
+        unordered_set<char> alphabet; // can be avoided by initializing the indegrees map
+        
+        for (const string &word : words) {
+            for (const char &c : word) {
+                alphabet.insert(c); // or set indegrees[c] = 0
+            }
+        }
+        
+        // make graph
+        int n = words.size();
+        for (int i=0; i<n-1; i++) {
+            string s1 = words[i];
+            string s2 = words[i+1];
+            int ptr = 0;
+            while (ptr < s1.size() && ptr < s2.size()) {
+                if (s1[ptr] == s2[ptr]) {
+                    ptr++;
+                } else {
+                    // avoid duplicate edges!!!
+                    if (graph[s1[ptr]].insert(s2[ptr]).second) {
+                        indegrees[s2[ptr]]++;
+                    }
+                    break;
+                }
+            }
+        }
+        
+        // topological sort
+        // can use a queue (store all node with indegree 0) to optimize
+        int l = alphabet.size();
+        for (int i=0; i<l; i++) {
+            auto it = alphabet.begin();
+            for (; it != alphabet.end(); it++) {
+                //cout << *it << ": " << indegrees[*it] << endl;
+                if (indegrees[*it] == 0) {
+                    //cout << *it << endl;
+                    break;
+                }
+            }
+            if (it == alphabet.end()) return "";
+            res.push_back(*it);
+            indegrees[*it] = -1;
+            for (const char &c : graph[*it]) {
+                indegrees[c]--;
+            }
+            alphabet.erase(it);
+        }
+        return res;
+    }
+};
+```
+
+
+
+## 48. LeetCode 490 (499, 505)
+
+### Similar to 200 (Number of Islands)
+
+### LeetCode 490 [The Maze](https://leetcode.com/problems/the-maze/)
+
+```c++
+// Time Complexity: O(mn)
+// Space Complexity: O(mn)
+
+// BFS
+class Solution {
+public:
+    bool hasPath(vector<vector<int>>& maze, vector<int>& start, vector<int>& destination) {
+        int m = maze.size();
+        int n = maze[0].size();
+        
+        if (start[0] == destination[0] && start[1] == destination[1]) return true;
+        
+        vector<pair<int,int>> dirs = {
+            {-1, 0},
+            {0, 1},
+            {1, 0},
+            {0, -1}
+        };
+        
+        set<pair<int, int>> visited;
+        queue<pair<int, int>> q;
+        q.push({start[0], start[1]});
+        visited.insert({start[0], start[1]});
+        
+        while (!q.empty()) {
+            auto cur = q.front();
+            q.pop();
+            
+            for (int i=0; i<4; i++) {
+                pair<int, int> nxt = cur;
+                while (nxt.first >= 0 && nxt.second >= 0 && nxt.first < m && nxt.second < n 
+                       && maze[nxt.first][nxt.second] == 0) {
+                    nxt.first += dirs[i].first;
+                    nxt.second += dirs[i].second;
+                }
+                nxt.first -= dirs[i].first;
+                nxt.second -= dirs[i].second;
+                
+                if (visited.count(nxt)) continue;
+                visited.insert(nxt);
+                
+                if (nxt.first == destination[0] && nxt.second == destination[1]) {
+                    return true;
+                }
+                q.push(nxt);
+            }
+        }
+        
+        return false;
+    }
+};
+
+// replace set to vector (visited)
+class Solution {
+public:
+    bool hasPath(vector<vector<int>>& maze, vector<int>& start, vector<int>& destination) {
+        int m = maze.size();
+        int n = maze[0].size();
+        
+        if (start[0] == destination[0] && start[1] == destination[1]) return true;
+        
+        vector<pair<int,int>> dirs = {
+            {-1, 0},
+            {0, 1},
+            {1, 0},
+            {0, -1}
+        };
+        
+        vector<vector<int>> visited(m, vector<int>(n, 0));
+        queue<pair<int, int>> q;
+        q.push({start[0], start[1]});
+        visited[start[0]][start[1]] = 1;
+        
+        while (!q.empty()) {
+            auto cur = q.front();
+            q.pop();
+            
+            for (int i=0; i<4; i++) {
+                pair<int, int> nxt = cur;
+                while (nxt.first >= 0 && nxt.second >= 0 && nxt.first < m && nxt.second < n 
+                       && maze[nxt.first][nxt.second] == 0) {
+                    nxt.first += dirs[i].first;
+                    nxt.second += dirs[i].second;
+                }
+                nxt.first -= dirs[i].first;
+                nxt.second -= dirs[i].second;
+                
+                if (visited[nxt.first][nxt.second]) continue;
+                visited[nxt.first][nxt.second] = 1;
+                
+                if (nxt.first == destination[0] && nxt.second == destination[1]) {
+                    return true;
+                }
+                q.push(nxt);
+            }
+        }
+        
+        return false;
+    }
+};
+```
+
+
+
+### LeetCode 499
 
 ```c++
 
@@ -2369,7 +2545,162 @@ private:
 
 
 
+### LeetCode 505
 
+```c++
+
+```
+
+
+
+## 49. LeetCode 418 [Sentence Screen Fitting](https://leetcode.com/problems/sentence-screen-fitting/)
+
+```c++
+class Solution {
+public:
+    int wordsTyping(vector<string>& sentence, int rows, int cols) {
+        string _sentence = "";
+        for (string &word : sentence) {
+            _sentence += word;
+            _sentence += " ";
+        }
+        //_sentence.pop_back();
+        
+        int start = 0;
+        int l = _sentence.size();
+        int res = 0;
+        
+        while (rows > 0) {
+            rows--;
+            //cout << _sentence[start] << endl;
+            if (start + cols >= l) {
+                res += (start + cols) / l;
+            }
+            start = (start + cols) % l;
+            if (_sentence[start] == ' ') {
+                if (start == l - 1) res++; // if include the last word!!
+                start = (start + 1) % l;
+            } else {
+                while (start >= 0 && _sentence[start] != ' ') {
+                    start--;
+                }
+                start++;
+            }
+        }
+        
+        return res;
+    }
+};
+
+// improved version
+class Solution {
+public:
+    int wordsTyping(vector<string>& sentence, int rows, int cols) {
+        string _sentence = "";
+        for (string &word : sentence) {
+            _sentence += word;
+            _sentence += " ";
+        }
+        
+        int start = 0;
+        int l = _sentence.size();
+        int res = 0;
+        
+        while (rows > 0) {
+            rows--;
+            int nxt = start + cols;
+
+            start = nxt % l;
+            if (_sentence[start] == ' ') {
+                start = (start + 1) % l;
+                nxt++;
+            } else {
+                while (start >= 0 && _sentence[start] != ' ') {
+                    start--;
+                    nxt--;
+                }
+                start++;
+                nxt++;
+            }
+            res += nxt / l;
+        }
+        
+        return res;
+    }
+};
+```
+
+
+
+## 50. LeetCode 359 [Logger Rate Limiter](https://leetcode.com/problems/logger-rate-limiter/)
+
+```c++
+class Logger {
+public:
+    /** Initialize your data structure here. */
+    Logger() {}
+    
+    /** Returns true if the message should be printed in the given timestamp, otherwise returns false.
+        If this method returns false, the message will not be printed.
+        The timestamp is in seconds granularity. */
+    bool shouldPrintMessage(int timestamp, string message) {
+        if (messages.count(message)) {
+            if (timestamp - messages[message] < 10) {
+                return false;
+            }   
+        }
+        messages[message] = timestamp;
+        return true;
+    }
+    
+private:
+    unordered_map<string, int> messages;
+};
+
+/**
+ * Your Logger object will be instantiated and called as such:
+ * Logger obj = new Logger();
+ * bool param_1 = obj.shouldPrintMessage(timestamp,message);
+ */
+```
+
+
+
+## 51. LeetCode 220 [Contains Duplicate III](https://leetcode.com/problems/contains-duplicate-iii/)
+
+```c++
+class Solution {
+public:
+    bool containsNearbyAlmostDuplicate(vector<int>& nums, int k, int t) {
+        set<long> _nums;
+        int n = nums.size();
+        
+        
+        for (int i=0; i<n; i++) {
+            if (_nums.size() == k + 1) {
+                _nums.erase(nums[i-k-1]);
+            }
+            
+            auto it = _nums.lower_bound((long)nums[i] - t);
+            if (it != _nums.end() && *it - nums[i] <= t) {
+                return true;
+            }
+            
+            _nums.insert(nums[i]);
+        }
+        
+        return false;
+    }
+};
+```
+
+
+
+## 52. LeetCode 773 
+
+```c++
+
+```
 
 
 

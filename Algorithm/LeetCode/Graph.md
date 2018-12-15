@@ -191,10 +191,66 @@ private:
 
 
 
-## 3. LeetCode 269
+## 3. LeetCode 269 [Alien Dictionary](https://leetcode.com/problems/alien-dictionary/)
 
 ```c++
-
+class Solution {
+public:
+    string alienOrder(vector<string>& words) {
+        string res = "";
+        if (words.empty()) return res;
+        
+        unordered_map<char, unordered_set<char>> graph;
+        unordered_map<char, int> indegrees;
+        unordered_set<char> alphabet;
+        
+        for (const string &word : words) {
+            for (const char &c : word) {
+                alphabet.insert(c);
+            }
+        }
+        
+        // make graph
+        int n = words.size();
+        for (int i=0; i<n-1; i++) {
+            string s1 = words[i];
+            string s2 = words[i+1];
+            int ptr = 0;
+            while (ptr < s1.size() && ptr < s2.size()) {
+                if (s1[ptr] == s2[ptr]) {
+                    ptr++;
+                } else {
+                    // avoid duplicate edges!!!
+                    if (graph[s1[ptr]].insert(s2[ptr]).second) {
+                        indegrees[s2[ptr]]++;
+                    }
+                    break;
+                }
+            }
+        }
+        
+        // topological sort
+        int l = alphabet.size();
+        for (int i=0; i<l; i++) {
+            auto it = alphabet.begin();
+            for (; it != alphabet.end(); it++) {
+                //cout << *it << ": " << indegrees[*it] << endl;
+                if (indegrees[*it] == 0) {
+                    //cout << *it << endl;
+                    break;
+                }
+            }
+            if (it == alphabet.end()) return "";
+            res.push_back(*it);
+            indegrees[*it] = -1;
+            for (const char &c : graph[*it]) {
+                indegrees[c]--;
+            }
+            alphabet.erase(it);
+        }
+        return res;
+    }
+};
 ```
 
 [solution](https://leetcode.com/problems/alien-dictionary/discuss/70119/Java-AC-solution-using-BFS)
