@@ -2628,6 +2628,40 @@ public:
         return res;
     }
 };
+
+// shorter
+class Solution {
+public:
+    int wordsTyping(vector<string>& sentence, int rows, int cols) {
+        string _sentence = "";
+        for (string &word : sentence) {
+            _sentence += word;
+            _sentence += " ";
+        }
+        
+        int start = 0, nxt;
+        int l = _sentence.size();
+        int res = 0;
+        
+        while (rows > 0) {
+            rows--;
+            nxt = start + cols;
+
+            if (_sentence[nxt % l] == ' ') {
+                nxt++;
+            } else {
+                while (nxt % l >= 0 && _sentence[nxt % l] != ' ') {
+                    nxt--;
+                }
+                nxt++;
+            }
+            res += nxt / l;
+            start = nxt % l;
+        }
+        
+        return res;
+    }
+};
 ```
 
 
@@ -2704,9 +2738,160 @@ public:
 
 
 
+## 53. LeetCode 658 [Find K Closest Elements](https://leetcode.com/problems/find-k-closest-elements/)
+
+```c++
+// O(logn + k)
+class Solution {
+public:
+    vector<int> findClosestElements(vector<int>& arr, int k, int x) {
+        if (arr.empty()) return {};
+        int n = arr.size();
+        int l = 0, r = n - 1;
+        int x_pos = -1;
+        while (l < r) {
+            int mid = l + (r - l) / 2;
+            if (x == arr[mid]) {
+                x_pos = mid;
+                break;
+            } else if (x > arr[mid]) {
+                l = mid + 1;
+            } else {
+                r = mid - 1;
+            }
+        }
+        
+        if (x_pos == -1) {
+            x_pos = l;
+        }
+        
+        int start = x_pos, end = x_pos;
+        while (k--) {
+            if (start == 0) end++;
+            else if (end == n) start--;
+            else if (x - arr[start-1] <= arr[end] - x) {
+                start--;
+            } else {
+                end++;
+            }
+        }
+        
+        return vector<int>(arr.begin()+start, arr.begin()+end);
+    }
+};
+
+// O(log(n-k))
+class Solution {
+public:
+    vector<int> findClosestElements(vector<int>& arr, int k, int x) {
+        int n = arr.size();
+        int l = 0, r = n - k;
+        while (l < r) {
+            int mid = l + (r - l) / 2;
+            if (x - arr[mid] > arr[mid+k] - x) {
+                l = mid + 1;
+            } else {
+                r = mid;
+            }
+        }
+        
+        return vector<int>(arr.begin()+l, arr.begin()+l+k);
+    }
+};
+```
 
 
 
+## 54. LeetCode 894 [All Possible Full Binary Trees](https://leetcode.com/problems/all-possible-full-binary-trees/)
+
+```c++
+// Time Complexity: O(2^n)
+// Space Complexity: O()
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<TreeNode*> allPossibleFBT(int N) {
+        if (N % 2 == 0) return {};
+        return recur(N);
+    }
+    
+private:
+    vector<TreeNode*> recur(int n) {
+        vector<TreeNode*> res;
+        if (n == 1) {
+            TreeNode* root = new TreeNode(0);
+            res.push_back(root);
+            return res;
+        }
+        
+        for (int i=1; i<n; i+=2) {
+            for (TreeNode* tn1 : recur(i)) {
+                for (TreeNode* tn2 : recur(n - i - 1)) {
+                    TreeNode* root = new TreeNode(0);
+                    root->left = tn1;
+                    root->right = tn2;
+                    res.push_back(root);
+                }
+            }
+        }
+        return res;
+    }
+};
+
+// with memo
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<TreeNode*> allPossibleFBT(int N) {
+        if (N % 2 == 0) return {};
+        return recur(N);
+    }
+    
+private:
+    unordered_map<int, vector<TreeNode*>> memo;
+    
+    vector<TreeNode*> recur(int n) {
+        vector<TreeNode*> res;
+        if (memo.count(n)) return memo[n];
+        if (n == 1) {
+            TreeNode* root = new TreeNode(0);
+            res.push_back(root);
+            memo[n] = res;
+            return res;
+        }
+        
+        for (int i=1; i<n; i+=2) {
+            for (TreeNode* tn1 : recur(i)) {
+                for (TreeNode* tn2 : recur(n - i - 1)) {
+                    TreeNode* root = new TreeNode(0);
+                    root->left = tn1;
+                    root->right = tn2;
+                    res.push_back(root);
+                }
+            }
+        }
+        memo[n] = res;
+        return res;
+    }
+};
+```
 
 
 
