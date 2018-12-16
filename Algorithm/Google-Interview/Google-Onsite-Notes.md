@@ -1505,23 +1505,127 @@ private:
 
 
 
-## 23. LeetCode 911 
+## 23. LeetCode 911 [Online Election](https://leetcode.com/problems/online-election/)
 
 ```c++
+class TopVotedCandidate {
+public:
+    // O(nlogn) => O(n)(can be optimized)
+    TopVotedCandidate(vector<int> persons, vector<int> times) {
+        int max_vote = -1;
+        int max_vote_time = -1;
+        int leading_id = -1;
+        int n = persons.size();
+        
+        for (int i=0; i<n; i++) {
+            mp[persons[i]].first++;
+            mp[persons[i]].second = times[i];
+            if (mp[persons[i]].first > max_vote || 
+                (mp[persons[i]].first == max_vote && mp[persons[i]].second > max_vote_time)) {
+                max_vote = mp[persons[i]].first;
+                max_vote_time = mp[persons[i]].second;
+                leading_id = persons[i];
+            }
+            leadings[times[i]] = leading_id;
+        }
+    }
+    
+    // O(logn)
+    int q(int t) {
+        auto it = leadings.lower_bound(t);
+        if (it->first == t) return it->second;
+        if (it == leadings.begin()) return -1;
+        it--;
+        return it->second;
+    }
+    
+private:
+    unordered_map<int, pair<int, int>> mp; // person id => {freq, recent vote time}
+    map<int, int> leadings; // time => leading person id
+};
+
+/**
+ * Your TopVotedCandidate object will be instantiated and called as such:
+ * TopVotedCandidate obj = new TopVotedCandidate(persons, times);
+ * int param_1 = obj.q(t);
+ */
+
+// don't need to record the recent vote time
+class TopVotedCandidate {
+public:
+    TopVotedCandidate(vector<int> persons, vector<int> times) {
+        int max_vote = -1;
+        int leading_id = -1;
+        int n = persons.size();
+        
+        for (int i=0; i<n; i++) {
+            mp[persons[i]]++;
+            if (mp[persons[i]] >= max_vote) {
+                max_vote = mp[persons[i]];
+                leading_id = persons[i];
+            }
+            leadings[times[i]] = leading_id;   
+        }
+    }
+    
+    int q(int t) {
+        auto it = leadings.lower_bound(t);
+        if (it->first == t) return it->second;
+        if (it == leadings.begin()) return -1;
+        it--;
+        return it->second;
+    }
+    
+private:
+    unordered_map<int, int> mp; // person id => freq
+    map<int, int> leadings; // time => leading person id
+};
+
+/**
+ * Your TopVotedCandidate object will be instantiated and called as such:
+ * TopVotedCandidate obj = new TopVotedCandidate(persons, times);
+ * int param_1 = obj.q(t);
+ */
+
+// improved version (use hashmap for leadings and implement binary search in q())
 
 ```
 
 
 
-## 24. LeetCode 277 
+## 24. LeetCode 277 [Find the Celebrity](https://leetcode.com/problems/find-the-celebrity/)
 
 ```c++
+// Time Complexity: O(2n)
+// Space Complexity: O(1)
 
+// Forward declaration of the knows API.
+bool knows(int a, int b);
+
+class Solution {
+public:
+    int findCelebrity(int n) {
+        if (n == 0) return -1;
+        if (n == 1) return 0;
+        int candidate = 0;
+        for (int i=1; i<n; i++) {
+            if (knows(candidate, i)) {
+                candidate = i;
+            }
+        }
+        
+        for (int i=0; i<n; i++) {
+            if (i == candidate) continue;
+            if (knows(candidate, i) || !knows(i, candidate)) return -1;
+        }
+        return candidate;
+    }
+};
 ```
 
 
 
-## 25. LeetCode 524 
+## 25. LeetCode 524 [Longest Word in Dictionary through Deleting](https://leetcode.com/problems/longest-word-in-dictionary-through-deleting/)
 
 ```c++
 class Solution {
@@ -1728,19 +1832,164 @@ public:
 
 
 
-## 31. LeetCode 159 
+## 31. LeetCode 159 [Longest Substring with At Most Two Distinct Characters](https://leetcode.com/problems/longest-substring-with-at-most-two-distinct-characters/)
+
+### (1) Sliding Window
 
 ```c++
-
+class Solution {
+public:
+    int lengthOfLongestSubstringTwoDistinct(string s) {
+        int n = s.length();
+        if (n <= 2) return n;
+        unordered_map<char, int> wordCnts;
+        int l = 0, r = 0, max_len = 0;
+        while (r < n) {
+            wordCnts[s[r++]]++;
+            while (wordCnts.size() > 2) {
+                if (wordCnts[s[l]]-- == 1) {
+                    wordCnts.erase(s[l]);
+                }
+                l++;
+            }
+            max_len = max(max_len, r - l);
+        }
+        return max_len;
+    }
+};
 ```
 
 
 
-## 32. LeetCode 295
+### (2) Other Solution
 
 ```c++
-
+class Solution {
+public:
+    int lengthOfLongestSubstringTwoDistinct(string s) {
+        int n = s.length();
+        if (n <= 2) return n;
+        
+        char first_char = '\0', second_char = '\0';
+        int cur_cnt = 0, total = 0, last_second_cnt = 0;
+        for (auto const &c : s) {
+            if (c == first_char || c == second_char) {
+                cur_cnt++;
+                last_second_cnt = c == second_char ? last_second_cnt+1 : 1;
+            } else {
+                cur_cnt = last_second_cnt + 1;
+                last_second_cnt = 1;
+            }
+            
+            if (c != second_char) {
+                first_char = second_char;
+                second_char = c;
+            }
+            
+            total = max(total, cur_cnt);
+        }
+        
+        return total;
+    }
+};
 ```
+
+
+
+### Follow up
+
+### LeetCode 340 [Longest Substring with At Most K Distinct Characters](https://leetcode.com/problems/longest-substring-with-at-most-k-distinct-characters/)
+
+```c++
+class Solution {
+public:
+    int lengthOfLongestSubstringKDistinct(string s, int k) {
+        int n = s.length();
+        if (n <= k) return n;
+        if (k == 0) return 0;
+        unordered_map<char, int> mp;
+        int l = 0, r = 0, max_len = 0;
+        while (r < n) {
+            mp[s[r++]]++;
+            while (mp.size() > k) {
+                if (mp[s[l]]-- == 1) {
+                    mp.erase(s[l]);
+                }
+                l++;
+            }
+            max_len = max(max_len, r - l);
+        }
+        return max_len;
+    }
+};
+
+// other version
+class Solution {
+public:
+    int lengthOfLongestSubstringKDistinct(string s, int k) {
+        if (s.empty()) return 0;
+        int n = s.length();
+        unordered_map<char, int> mp;
+        int l = 0, r = 0, res = 0, cnt = 0;
+        while (r < n) {
+            if (mp[s[r++]]++ == 0) {
+                cnt++;
+            }
+            
+            while (cnt > k) {
+                if (mp[s[l++]]-- == 1) {
+                    cnt--;
+                }
+            }
+            res = max(res, r-l);
+        }
+        
+        return res;
+    }
+};
+```
+
+
+
+## 32. LeetCode 295 [Find Median from Data Stream](https://leetcode.com/problems/find-median-from-data-stream/)
+
+```c++
+class MedianFinder {
+public:
+    /** initialize your data structure here. */
+    MedianFinder() {}
+    
+    void addNum(int num) {
+        left_half.push(num);
+        right_half.push(left_half.top());
+        left_half.pop();
+        
+        if (right_half.size() > left_half.size()) {
+            left_half.push(right_half.top());
+            right_half.pop();
+        }
+    }
+    
+    double findMedian() {
+        return left_half.size() > right_half.size() ? 
+            left_half.top() : 1.0 * (left_half.top() + right_half.top()) / 2;
+        
+    }
+    
+private:
+    priority_queue<int, vector<int>, less<int>> left_half;
+    priority_queue<int, vector<int>, greater<int>> right_half;
+};
+
+/**
+ * Your MedianFinder object will be instantiated and called as such:
+ * MedianFinder obj = new MedianFinder();
+ * obj.addNum(num);
+ * double param_2 = obj.findMedian();
+ */
+```
+
+[solution](https://leetcode.com/problems/find-median-from-data-stream/solution/)
 
 
 
@@ -1788,8 +2037,51 @@ public:
 
 Get the first valid chracter(not deleted by backspace) in both string, check whether they are the same.
 
-```c++
+Key Test Case:
 
+"nzp#o#g"
+"b#nzp#o#g"
+
+```c++
+class Solution {
+public:
+    bool backspaceCompare(string S, string T) {
+        int ptrS = S.length()-1;
+        int ptrT = T.length()-1;
+        while (ptrS >= 0 && ptrT >= 0) {
+            for (int cnt = 0; ptrS >= 0 && (cnt || S[ptrS] == '#'); ptrS--) {
+                cnt += S[ptrS] == '#' ? 1 : -1;
+            }
+            
+            for (int cnt = 0; ptrT >= 0 && (cnt || T[ptrT] == '#'); ptrT--) {
+                cnt += T[ptrT] == '#' ? 1 : -1;
+            }
+            
+            if (ptrS >= 0 && ptrT >= 0) {
+                if (S[ptrS] == T[ptrT]) {
+                    ptrS--;
+                    ptrT--;
+                } else {
+                    return false;
+                }
+            }
+        }
+        
+        if (ptrS >= 0) {
+            for (int cnt = 0; ptrS >= 0 && (cnt || S[ptrS] == '#'); ptrS--) {
+                cnt += S[ptrS] == '#' ? 1 : -1;
+            }
+        }
+        
+        if (ptrT >= 0) {
+            for (int cnt = 0; ptrT >= 0 && (cnt || T[ptrT] == '#'); ptrT--) {
+                cnt += T[ptrT] == '#' ? 1 : -1;
+            }
+        }
+        
+        return ptrS == -1 && ptrT == -1;
+    }
+};
 ```
 
 [solution1](https://leetcode.com/problems/backspace-string-compare/discuss/135603/C%2B%2BJavaPython-O(N)-time-and-O(1)-space)
