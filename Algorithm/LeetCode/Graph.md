@@ -350,6 +350,44 @@ public:
         return copy;
     }
 };
+
+// improved version with C++ 11
+/**
+ * Definition for undirected graph.
+ * struct UndirectedGraphNode {
+ *     int label;
+ *     vector<UndirectedGraphNode *> neighbors;
+ *     UndirectedGraphNode(int x) : label(x) {};
+ * };
+ */
+class Solution {
+public:
+    UndirectedGraphNode *cloneGraph(UndirectedGraphNode *node) {
+        if (!node) return nullptr;
+        
+        unordered_map<UndirectedGraphNode*, UndirectedGraphNode*> node_mp;
+        queue<UndirectedGraphNode*> q;
+        node_mp.emplace(node, new UndirectedGraphNode(node->label));
+        q.emplace(node);
+        
+        while (!q.empty()) {
+            auto v = q.front();
+            q.pop();
+            
+            for (UndirectedGraphNode* nb : v->neighbors) {
+                // try to copy node nb
+                if (!node_mp.count(nb)) {
+                    node_mp.emplace(nb, new UndirectedGraphNode(nb->label));
+                    q.emplace(nb);
+                }
+                // copy edge v->nb
+                node_mp[v]->neighbors.emplace_back(node_mp[nb]);
+            }
+        }
+        
+        return node_mp[node];
+    }
+};
 ```
 
 

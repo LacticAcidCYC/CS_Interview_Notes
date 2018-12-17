@@ -1824,7 +1824,7 @@ public:
 
 
 
-## 30. LeetCode 163
+## 30. LeetCode 163 [Missing Ranges](https://leetcode.com/problems/missing-ranges/)
 
 ```c++
 
@@ -2186,7 +2186,30 @@ public:
 ### FollowUp LeetCode 290 
 
 ```c++
-
+class Solution {
+public:
+    bool wordPattern(string pattern, string str) {
+        istringstream in(str);
+        
+        unordered_map<char, int> p2i;
+        unordered_map<string, int> s2i;
+        
+        int i = 0, n = pattern.size();
+        
+        for (string word; in >> word; i++) {
+            if (i == n) return false;
+            if (p2i[pattern[i]] != s2i[word]) {
+                return false;
+            } else {
+                p2i[pattern[i]] = i+1;
+                s2i[word] = i+1;
+            }
+            
+        }
+        
+        return i == n;
+    }
+};
 ```
 
 
