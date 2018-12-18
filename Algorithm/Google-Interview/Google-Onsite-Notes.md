@@ -2477,10 +2477,78 @@ private:
 
 
 
-## 40. LeetCode 926 
+## 40. LeetCode 926 [Flip String to Monotone Increasing](https://leetcode.com/problems/flip-string-to-monotone-increasing/)
 
 ```c++
+// Time Complexity: O(n)
+// Space Complexity: O(n)
 
+class Solution {
+public:
+    int minFlipsMonoIncr(string S) {
+        int n = S.length();
+        vector<int> flip_to_zero(n+1, 0);
+        vector<int> flip_to_one(n+1, 0);
+        
+        for (int i=1; i<=n; i++) {
+            flip_to_zero[i] = flip_to_zero[i-1] + S[i-1] - '0';
+        }
+        
+        for (int i=n-1; i>=0; i--) {
+            flip_to_one[i] = flip_to_one[i+1] + '1' - S[i];
+        }
+        
+        int min_flip = INT_MAX;
+        for (int i=0; i<=n; i++) {
+            min_flip = min(min_flip, flip_to_zero[i] + flip_to_one[i]);
+        }
+        
+        return min_flip;
+    }
+};
+
+// dp
+class Solution {
+public:
+    int minFlipsMonoIncr(string S) {
+        int n = S.length();
+        vector<vector<int>> dp(n+1, vector<int>(2, 0)); // n * 2
+        
+        for (int i=1; i<=n; i++) {
+            if (S[i-1] == '0') {
+                dp[i][0] = dp[i-1][0];
+                dp[i][1] = min(dp[i-1][0], dp[i-1][1]) + 1;
+            } else {
+                dp[i][0] = dp[i-1][0] + 1;
+                dp[i][1] = min(dp[i-1][0], dp[i-1][1]);
+            }
+        }
+        
+        return min(dp[n][0], dp[n][1]);
+    }
+};
+
+// improved dp
+class Solution {
+public:
+    int minFlipsMonoIncr(string S) {
+        int n = S.length();
+        //vector<vector<int>> dp(n+1, vector<int>(2, 0)); // n * 2
+        int last_is_zero = 0;
+        int last_is_one = 0;
+        
+        for (int i=0; i<n; i++) {
+            if (S[i] == '0') {
+                last_is_one = min(last_is_zero, last_is_one) + 1;
+            } else {
+                last_is_one = min(last_is_zero, last_is_one);
+                last_is_zero += 1;
+            }
+        }
+        
+        return min(last_is_zero, last_is_one);
+    }
+};
 ```
 
 
