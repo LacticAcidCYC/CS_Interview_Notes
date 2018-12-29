@@ -1011,10 +1011,66 @@ public:
 
 
 
-## 19. LeetCode 277 
+## 19. LeetCode 277 [Find the Celebrity](https://leetcode.com/problems/find-the-celebrity/)
 
 ```c++
+// Time Complexity: O(2n)
+// Space Complexity: O(1)
 
+// Forward declaration of the knows API.
+bool knows(int a, int b);
+
+class Solution {
+public:
+    int findCelebrity(int n) {
+        if (n == 0) return -1;
+        if (n == 1) return 0;
+        int candidate = 0;
+        for (int i=1; i<n; i++) {
+            if (knows(candidate, i)) {
+                candidate = i;
+            }
+        }
+        
+        for (int i=0; i<n; i++) {
+            if (i == candidate) continue;
+            if (knows(candidate, i) || !knows(i, candidate)) return -1;
+        }
+        return candidate;
+    }
+};
+```
+
+
+
+## 20. LeetCode 54 [Spiral Matrix](https://leetcode.com/problems/spiral-matrix/)
+
+```c++
+class Solution {
+public:
+    vector<int> spiralOrder(vector<vector<int>>& matrix) {
+        if(matrix.empty()) return vector<int>();
+        int m = (int)matrix.size();
+        int n = (int)matrix[0].size();
+        vector<int> res;
+        //4 bounds
+        int up = 0, down = m-1, left = 0, right = n-1;
+        while(true) {
+            for(int c=left; c<=right; c++) res.push_back(matrix[up][c]);
+            if(++up > down) break;
+
+            for(int r=up; r<=down; r++) res.push_back(matrix[r][right]);
+            if(--right < left) break;
+
+            for(int c=right; c>=left; c--) res.push_back(matrix[down][c]);
+            if(--down < up) break;
+
+            for(int r=down; r>=up; r--) res.push_back(matrix[r][left]);
+            if(++left > right) break;
+        }
+        return res;
+    }
+};
 ```
 
 
