@@ -148,6 +148,12 @@ public:
 
 ## 5. LeetCode 53 [Maximum Subarray](https://leetcode.com/problems/maximum-subarray/)
 
+### Kadane Algorithm (k = 1 case)
+
+[wiki](https://en.wikipedia.org/wiki/Maximum_subarray_problem)
+
+[geeksforgeeks](https://www.geeksforgeeks.org/largest-sum-contiguous-subarray/)
+
 ### (1) Iterative
 
 ```c++
@@ -226,6 +232,30 @@ private:
 ```
 
 [geeksforgeeks](https://www.geeksforgeeks.org/maximum-subarray-sum-using-divide-and-conquer-algorithm/)
+
+
+
+### (3) Follow Up: What if subarray's length must >= k
+
+### Intuition
+
+Given array: A
+
+(1) Construct dp array: dp (dp[i]: maximum subarray end at i position)
+
+(2) Construct a window of size **k-1** after current visited number;
+
+(3) in the for loop,
+
+int tmp = window_sum + dp[i] (make sure at least k number in subarray)
+
+ans = max(ans, tmp)
+
+
+
+e.g. [-7, -3, 2, 5, -1]
+
+-> dp: [-7, -3, 2, 7, 6]
 
 
 
@@ -1074,6 +1104,115 @@ public:
 ```
 
 
+
+## 21. LeetCode 918 [Maximum Sum Circular Subarray](https://leetcode.com/problems/maximum-sum-circular-subarray/)
+
+### Intuition
+
+LeetCode 53 Maximum Subarray
+
+### (1) normal + circular (Solution 1)
+
+```c++
+// Time Complexity: O(2n)
+// can be optimized to O(n) => just one pass
+
+class Solution {
+public:
+    int maxSubarraySumCircular(vector<int>& A) {
+        int maxSum = maxSubArray(A);
+        int minSum = minSubArray(A);
+        int sum = accumulate(A.begin(), A.end(), 0);
+        
+        if (minSum == sum) {
+            return maxSum;
+        }
+        
+        return max(maxSum, sum - minSum);
+    }
+    
+private:
+    int maxSubArray(vector<int>& nums) {
+        int n = nums.size();
+        int maxSum = INT_MIN;
+        int curSum = 0;
+        
+        for (int i=0; i<n; i++) {
+            curSum += nums[i];
+            maxSum = max(maxSum, curSum);
+            curSum = max(curSum, 0);
+        }
+        
+        return maxSum;
+    }
+    
+    int minSubArray(vector<int>& nums) {
+        int n = nums.size();
+        int minSum = INT_MAX;
+        int curSum = 0;
+        
+        for (int i=0; i<n; i++) {
+            curSum += nums[i];
+            minSum = min(minSum, curSum);
+            curSum = min(curSum, 0);
+        }
+        
+        return minSum;
+    }
+};
+```
+
+
+
+### (2) normal + circular (neglect first and last element)
+
+```c++
+// Time Complexity: O(2n)
+// can be optimized to O(n) => just one pass
+
+class Solution {
+public:
+    int maxSubarraySumCircular(vector<int>& A) {
+        if (A.size() == 1) return A[0];
+        vector<int> A_(A.begin()+1, A.end()-1);
+        
+        int maxSum = maxSubArray(A);
+        int minSum = minSubArray(A_);
+        int sum = accumulate(A.begin(), A.end(), 0);
+        
+        return max(maxSum, sum - minSum);
+    }
+    
+private:
+    int maxSubArray(vector<int>& nums) {
+        int n = nums.size();
+        int maxSum = INT_MIN;
+        int curSum = 0;
+        
+        for (int i=0; i<n; i++) {
+            curSum += nums[i];
+            maxSum = max(maxSum, curSum);
+            curSum = max(curSum, 0);
+        }
+        
+        return maxSum;
+    }
+    
+    int minSubArray(vector<int>& nums) {
+        int n = nums.size();
+        int minSum = INT_MAX;
+        int curSum = 0;
+        
+        for (int i=0; i<n; i++) {
+            curSum += nums[i];
+            minSum = min(minSum, curSum);
+            curSum = min(curSum, 0);
+        }
+        
+        return minSum;
+    }
+};
+```
 
 
 

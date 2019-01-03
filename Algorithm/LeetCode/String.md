@@ -1180,7 +1180,9 @@ public:
 ### Explanation
 
 What I basiclly did here is trying to reverse the whole operations.
-The operation token later will be more apperant than the operation token before. The letters which stamped later will cover the letters stamped before and we really don't care about the letters which are covered.
+The operation token later will be more apparent than the ot
+
+peration token before. The letters which stamped later will cover the letters stamped before and we really don't care about the letters which are covered.
 
 ```latex
  *  *  *  *  *  *  *

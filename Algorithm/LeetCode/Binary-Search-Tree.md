@@ -334,6 +334,45 @@ public:
 
 
 
+## 6. LeetCode 846 [Hand of Straights](https://leetcode.com/problems/hand-of-straights/)
+
+```c++
+class Solution {
+public:
+    bool isNStraightHand(vector<int>& hand, int W) {
+        if (hand.size() % W != 0) return false;
+        
+        map<int, int> cards;
+        
+        for (auto card : hand) {
+            cards[card]++;
+        }
+        
+        for (auto it = cards.begin(); it != cards.end(); ) {
+            if (it->second == 0) {
+                it++;
+                continue;
+            }
+            
+            it->second--;
+            
+            for (int i=1; i<W; i++) {
+                int next = it->first + i;
+                
+                if (cards.find(next) == cards.end() || cards[next] == 0) {
+                    return false;
+                }
+                cards[next]--;
+            }
+        }
+        
+        return true;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/hand-of-straights/discuss/135598/C%2B%2BJavaPython-O(MlogM)-Complexity)
+
 
 
 

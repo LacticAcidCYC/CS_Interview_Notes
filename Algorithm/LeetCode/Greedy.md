@@ -372,6 +372,77 @@ public:
 
 
 
+## 7. LeetCode 936 [Stamping The Sequence](https://leetcode.com/problems/stamping-the-sequence/)
+
+```c++
+class Solution {
+public:
+    vector<int> movesToStamp(string stamp, string target) {
+        vector<int> ans;
+        int len_t = target.length();
+        string questions(len_t, '?');
+        
+        while (target != questions) {
+            int index = match(stamp, target);
+            if (index == len_t) return {};
+            ans.push_back(index);
+        }
+        
+        reverse(ans.begin(), ans.end());
+        return ans;
+    }
+    
+private:
+    int match(string &stamp, string &target) {
+        int len_t = target.length();
+        int len_s = stamp.length();
+        
+        for (int start = 0; start < len_t; start++) {
+            int i = start; // iterator for target
+            int j = 0; // iterator for stamp
+            
+            bool isStamped = false;
+            while (i < len_t && j < len_s && (target[i] == '?' || target[i] == stamp[j])) {
+                if (target[i] == stamp[j]) isStamped = true;
+                i++;
+                j++;
+            }
+            
+            if (j == len_s && isStamped) {
+                for (int k = start; k < start+len_s; k++) {
+                    target[k] = '?';
+                }
+                return start;
+            }
+        }
+        
+        return len_t;
+    }
+};
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
