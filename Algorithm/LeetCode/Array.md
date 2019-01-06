@@ -1216,6 +1216,104 @@ private:
 
 
 
+## 22. LeetCode 845 [Longest Mountain in Array](https://leetcode.com/problems/longest-mountain-in-array/)
+
+```c++
+class Solution {
+public:
+    int longestMountain(vector<int>& A) {
+        int n = A.size();
+        if (n < 3) return 0;
+        
+        int l = 0, r = 0;
+        bool up = false, down = false;
+        int mountain_len = INT_MIN;
+        
+        while (r < n) {
+            while (r < n - 1 && A[r] < A[r + 1]) {
+                r++;
+                up = true;
+            }
+            
+            while (r < n - 1 && A[r] > A[r + 1]) {
+                r++;
+                down = true;
+            }
+            
+            // cout << l << "," << r << endl;
+            // cout << up << "," << down << endl;
+            // cout << endl;
+            
+            if (up && down) {
+                mountain_len = max(mountain_len, r - l + 1);
+            }
+            
+            up = false;
+            down = false;
+            
+            while (r < n - 1 && A[r] == A[r+1]) r++;
+            
+            l = r;
+            if (r == n-1) break;
+        }
+        
+        if (up && down) mountain_len = max(mountain_len, r - l + 1);
+        
+        return mountain_len == INT_MIN ? 0 : mountain_len;
+    }
+};
+
+class Solution {
+public:
+    int longestMountain(vector<int>& A) {
+        int n = A.size();
+        if (n < 3) return 0;
+        
+        int l = 0, r = 0;
+        bool up = false, down = false;
+        int mountain_len = INT_MIN;
+        
+        while (r < n - 1) {
+            while (r < n - 1 && A[r] < A[r + 1]) {
+                r++;
+                up = true;
+            }
+            
+            while (r < n - 1 && A[r] > A[r + 1]) {
+                r++;
+                down = true;
+            }
+            
+            if (up && down) {
+                mountain_len = max(mountain_len, r - l + 1);
+            }
+            
+            up = false;
+            down = false;
+            
+            while (r < n - 1 && A[r] == A[r+1]) r++;
+            
+            l = r;
+            //if (r == n-1) break;
+        }
+        
+        if (up && down) mountain_len = max(mountain_len, r - l + 1);
+        
+        return mountain_len == INT_MIN ? 0 : mountain_len;
+    }
+};
+```
+
+
+
+## 23. LeetCode 723 
+
+```c++
+
+```
+
+[solution](https://leetcode.com/problems/candy-crush/discuss/109221/AC-JAVA-Solution-easy-to-understand)
+
 
 
 

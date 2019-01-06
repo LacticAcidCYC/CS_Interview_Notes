@@ -717,6 +717,86 @@ public:
 
 
 
+## 4. LeetCode 797 [All Paths From Source to Target](https://leetcode.com/problems/all-paths-from-source-to-target/)
+
+### (1) Recursive
+
+```c++
+// Time Complexity: O(2^n*N^2)
+// Space Complexity: O(2^n*N^2)
+
+class Solution {
+public:
+    vector<vector<int>> allPathsSourceTarget(vector<vector<int>>& graph) {
+        return dfs(graph, 0);
+    }
+    
+private:
+    vector<vector<int>> dfs(vector<vector<int>>& graph, int node) {
+        int n = graph.size();
+        vector<vector<int>> ans;
+        if (node == n - 1) {
+            ans.push_back({n-1});
+            return ans;
+        }
+        
+        for (int neigh : graph[node]) {
+            for (vector<int> path : dfs(graph, neigh)) {
+                path.insert(path.begin(), node);
+                ans.push_back(path);
+            }
+        }
+        return ans;
+    }
+};
+```
+
+
+
+### (2) dfs-2
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> allPathsSourceTarget(vector<vector<int>>& graph) {
+        vector<vector<int>> paths;
+        vector<int> path;
+        dfs(graph, paths, path, 0);
+        
+        return paths;
+    }
+    
+private:
+    void dfs(vector<vector<int>>& graph, vector<vector<int>>& paths, vector<int>& path, int node) {
+        path.push_back(node);
+        if (node == graph.size() - 1) {
+            paths.push_back(path);
+            path.pop_back();
+            return;
+        }
+        
+        for (auto neigh : graph[node]) {
+            dfs(graph, paths, path, neigh);
+        }
+        path.pop_back();
+    }
+};
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
