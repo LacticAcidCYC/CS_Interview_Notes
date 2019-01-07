@@ -3241,7 +3241,43 @@ private:
 
 
 
-## 37. LeetCode 863 
+## 37. LeetCode 250 [Count Univalue Subtrees](https://leetcode.com/problems/count-univalue-subtrees/)
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(lgn)
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    int countUnivalSubtrees(TreeNode* root) {
+        int cnt = 0;
+        helper(root, 0, cnt);
+        return cnt;
+    }
+    
+    bool helper(TreeNode* root, int val, int& cnt) {
+        if (!root) { return true;}
+        if (!helper(root->left, root->val, cnt) | !helper(root->right, root->val, cnt)) {
+            return false;
+        }
+        cnt++;
+        return root->val == val;
+    }
+};
+```
+
+
+
+## 38. LeetCode 863 
 
 ```c++
 
@@ -3249,7 +3285,7 @@ private:
 
 
 
-## 38. LeetCode 582 
+## 39. LeetCode 582 
 
 ```c++
 
