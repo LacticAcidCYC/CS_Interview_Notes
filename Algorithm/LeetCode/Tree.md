@@ -465,6 +465,8 @@ public:
 
 ### Similar to LeetCode 687
 
+**3 Variation (path-based)**: (1) any to any; (2) leaf to leaf path; (3) root to leaf
+
 update the maxPath bottom-up
 
 There are three possibilites:
