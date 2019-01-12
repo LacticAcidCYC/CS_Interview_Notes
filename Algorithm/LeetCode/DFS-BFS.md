@@ -1200,7 +1200,128 @@ private:
 
 
 
+## 18. LeetCode 127 [Word Ladder](https://leetcode.com/problems/word-ladder/)
 
+```c++
+class Solution {
+public:
+    int ladderLength(string beginWord, string endWord, vector<string>& wordList) {
+        unordered_set<string> start, end, *pstart, *ptail;
+        unordered_set<string> words;
+        for(auto w : wordList) words.insert(w);
+        start.insert(beginWord);
+        if(words.find(endWord) != words.end()) end.insert(endWord);
+        else return 0;
+        int dist = 2;
+        while(!start.empty() && !end.empty()) {
+            if(start.size() < end.size()) {
+                pstart = &start;
+                ptail = &end;
+            } else {
+                pstart = &end;
+                ptail = &start;
+            }
+            unordered_set<string> temp;
+            for(auto word : *pstart) words.erase(word);
+            for(auto iter = pstart->begin(); iter != pstart->end(); iter++) {
+                string word = *iter;
+                //words.erase(word);
+                for(int i=0; i<word.length(); i++) {
+                    char changeLetter = word[i];
+                    for(int j=0; j<26; j++) {
+                        word[i] = 'a' + j;
+                        if(ptail->find(word) != ptail->end()) {
+                            return dist;
+                        }
+                        if(words.find(word) != words.end()) {
+                            temp.insert(word);
+                            //words.erase(word);
+                        }
+                    }
+                    word[i] = changeLetter;
+                }
+            }
+            dist++;
+            //cout << temp.size() << endl;
+            swap(*pstart, temp);
+        }
+        return 0;
+    }
+};
+```
+
+
+
+## 19. LeetCode 128 [Word Ladder II](https://leetcode.com/problems/word-ladder-ii/)
+
+```c++
+class Solution {
+public:
+    vector<vector<string>> findLadders(string beginWord, string endWord, vector<string>& wordList) {
+        vector<vector<string>> ladders;
+        vector<string> ladder;
+        ladder.push_back(beginWord);
+        unordered_set<string> words(wordList.begin(), wordList.end());
+        unordered_set<string> beginWords, endWords;
+        beginWords.insert(beginWord);
+        if(words.find(endWord) != words.end()) endWords.insert(endWord);
+        else return ladders;
+        unordered_map<string, vector<string>> children;
+        bool forward = true;
+        if(searchLadders(beginWords, endWords, words, children, forward))
+            //cout << "success" << endl;
+            genLadders(beginWord, endWord, children, ladder, ladders);
+        return ladders;
+    }
+private:
+    bool searchLadders(unordered_set<string>& beginWords, unordered_set<string>& endWords,
+                   unordered_set<string>& words, unordered_map<string, vector<string>>& children, bool forward) {
+        //BFS
+        if(beginWords.empty()) return false;
+        if(beginWords.size() > endWords.size()) {
+            return searchLadders(endWords, beginWords, words, children, !forward);
+        }
+        for(string word : beginWords) words.erase(word);
+        for(string word : endWords) words.erase(word);
+        unordered_set<string> intermediate;
+        bool finished = false;
+        for(string word : beginWords) {
+            int n = (int)word.length();
+            string tmp = word;
+            for(int i=0; i<n; i++) {
+                char changeLetter = word[i];
+                for(int j=0; j<26; j++) {
+                    word[i] = 'a' + j;
+                    if(endWords.find(word) != endWords.end()) {
+                        finished = true;
+                        forward ? children[tmp].push_back(word) : children[word].push_back(tmp);
+                    } else if(!finished && words.find(word) != words.end()) {
+                        intermediate.insert(word);
+                        forward ? children[tmp].push_back(word) : children[word].push_back(tmp);
+                    }
+                }
+                word[i] = changeLetter;
+            }
+        }
+        return finished || searchLadders(endWords, intermediate, words, children, !forward);
+    }
+    
+    void genLadders(string& begin, string& end, unordered_map<string, vector<string> >& children,
+                vector<string>& ladder, vector<vector<string>>& ladders) {
+        //DFS
+        if(begin == end) {
+            ladders.push_back(ladder);
+            return;
+        }
+        for(string child : children[begin]) {
+            ladder.push_back(child);
+            genLadders(child, end, children, ladder, ladders);
+            ladder.pop_back();
+        }
+        return;
+    }
+};
+```
 
 
 
