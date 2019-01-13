@@ -1336,6 +1336,33 @@ public:
 
 
 
+## 25. LeetCode 849 [Maximize Distance to Closest Person](https://leetcode.com/problems/maximize-distance-to-closest-person/)
+
+```c++
+class Solution {
+public:
+    int maxDistToClosest(vector<int>& seats) {
+        int leftP = -1;
+        int n = seats.size();
+        int max_dist = 0;
+        
+        for (int i=0; i<n; i++) {
+            if (seats[i] == 1) {
+                if (leftP == -1) {
+                    max_dist = i - leftP - 1;
+                } else {
+                    max_dist = max(max_dist, (i - leftP) / 2);
+                }
+                leftP = i;
+            }
+        }
+        
+        max_dist = max(max_dist, n - leftP - 1);
+        return max_dist;
+    }
+};
+```
+
 
 
 
