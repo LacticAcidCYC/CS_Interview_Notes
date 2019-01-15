@@ -192,9 +192,57 @@ public:
 
 
 
+# <2> General Linked List Problems
 
+## 1. LeetCode 138 [Copy List with Random Pointer](https://leetcode.com/problems/copy-list-with-random-pointer/)
 
-
+```c++
+/**
+ * Definition for singly-linked list with a random pointer.
+ * struct RandomListNode {
+ *     int label;
+ *     RandomListNode *next, *random;
+ *     RandomListNode(int x) : label(x), next(NULL), random(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    RandomListNode *copyRandomList(RandomListNode *head) {
+        if (!head) { return NULL;}
+        RandomListNode* dummy = head;
+        
+        // copy the list
+        while (dummy != NULL) {
+            RandomListNode* copy = new RandomListNode(dummy->label);
+            copy->next = dummy->next;
+            dummy->next = copy;
+            dummy = copy->next;
+        }
+        
+        // assign random pointers for the copy nodes;
+        dummy = head;
+        while (dummy != NULL) {
+            if (dummy->random != NULL) {
+                dummy->next->random = dummy->random->next;
+            }
+            dummy = dummy->next->next;
+        }
+        
+        // restore the original and extract the copy
+        dummy = head;
+        RandomListNode *copyHead = new RandomListNode(0);
+        RandomListNode *copyDummy = copyHead;
+        while (dummy != NULL) {
+            copyDummy->next = dummy->next;
+            copyDummy = copyDummy->next;
+            // restore
+            dummy->next = dummy->next->next;
+            dummy = dummy->next;
+        }
+        return copyHead->next;
+    }
+};
+```
 
 
 
