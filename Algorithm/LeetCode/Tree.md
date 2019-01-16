@@ -3295,6 +3295,54 @@ public:
 
 
 
+## 40. LeetCode 971 [Flip Binary Tree To Match Preorder Traversal](https://leetcode.com/problems/flip-binary-tree-to-match-preorder-traversal/)
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<int> flipMatchVoyage(TreeNode* root, vector<int>& voyage) {
+        vector<int> flippeds;
+        int index = 0;
+        
+        dfs(root, flippeds, voyage, index);
+        if (!flippeds.empty() && flippeds[0] == -1) {
+            return {-1};
+        }
+        
+        return flippeds;
+    }
+    
+private:
+    void dfs(TreeNode* node, vector<int>& flippeds, vector<int>& voyage, int &index) {
+        if (node != nullptr) {
+            if (node->val != voyage[index++]) {
+                flippeds.clear();
+                flippeds.push_back(-1);
+                return;
+            }
+            
+            if (index < voyage.size() && node->left != nullptr && node->left->val != voyage[index]) {
+                flippeds.push_back(node->val);
+                dfs(node->right, flippeds, voyage, index);
+                dfs(node->left, flippeds, voyage, index);
+            } else {
+                dfs(node->left, flippeds, voyage, index);
+                dfs(node->right, flippeds, voyage, index);
+            }
+        }
+    }
+};
+```
+
 
 
 
