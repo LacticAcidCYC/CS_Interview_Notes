@@ -3345,6 +3345,44 @@ private:
 
 
 
+## 41. LeetCode 979 [Distribute Coins in Binary Tree](https://leetcode.com/problems/distribute-coins-in-binary-tree/)
+
+### Similar to LeetCode 124, 687
+
+[huahua](https://www.youtube.com/watch?v=zQqku1AXVF8&t=436s)
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    int distributeCoins(TreeNode* root) {
+        int ans = 0;
+        balance(root, ans);
+        return ans;
+    }
+    
+private:
+    int balance(TreeNode* root, int& ans) {
+        if (!root) return 0;
+        int l = balance(root->left, ans);
+        int r = balance(root->right, ans);
+        ans += abs(l) + abs(r);
+        
+        return root->val + l + r - 1;
+    }
+};
+```
+
+
+
 
 
 
