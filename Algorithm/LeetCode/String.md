@@ -1755,6 +1755,61 @@ private:
 
 
 
+## 15. LeetCode 758 [Bold Words in String](https://leetcode.com/problems/bold-words-in-string/)
+
+### Same as 616
+
+```c++
+class Solution {
+public:
+    string boldWords(vector<string>& words, string S) {
+        // the mask
+        vector<bool> mask(S.size(), false);
+
+        for (const auto& str : words) {
+            // find the occurence and update the mask
+            size_t pos = 0;
+            while ((pos = S.find(str, pos)) != string::npos) {
+                for (int i = 0; i < str.size(); ++i) {
+                    mask[pos + i] = true;
+                }
+
+                pos += 1;
+            }
+            
+        }
+
+        string result;
+        bool status = 0;   // 0 means we are outside of the mask region, 1 means we are inside.
+        for (int i = 0; i < mask.size(); ++i) {
+
+            if (status == 0) {
+                if (mask[i]) {
+                    result += "<b>";
+                    status = 1;
+                }
+
+            } else if (status == 1) {
+                if (!mask[i]) {
+                    result += "</b>";
+                    status = 0;
+                }
+            }
+
+            result += S[i];
+        }
+
+        if (status == 1) {
+            result += "</b>";
+        }
+
+        return result;
+    }
+};
+```
+
+
+
 
 
 
