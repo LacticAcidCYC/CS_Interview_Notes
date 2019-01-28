@@ -2650,7 +2650,56 @@ public:
 
 
 
+## 41. LeetCode 983 [Minimum Cost For Tickets](https://leetcode.com/problems/minimum-cost-for-tickets/)
 
+```c++
+class Solution {
+public:
+    int mincostTickets(vector<int>& days, vector<int>& costs) {
+        map<int, int> dp = {{-30,0}};
+        auto cost = [&](int d){
+            return prev(dp.upper_bound(d))->second;
+        };
+        
+        for(int d : days)
+            dp[d] = min({costs[0] + cost(d-1), costs[1] + cost(d-7), costs[2] + cost(d-30)});
+        
+        return dp.rbegin()->second;
+    }
+};
+```
+
+[dp-solution](https://leetcode.com/problems/minimum-cost-for-tickets/discuss/226670/Java-DP-Solution-with-explanation-O(n))
+
+
+
+## 42. LeetCode 982 [Triples with Bitwise AND Equal To Zero](https://leetcode.com/problems/triples-with-bitwise-and-equal-to-zero/)
+
+```c++
+class Solution {
+public:
+    int countTriplets(vector<int>& A) {
+        int n = A.size(), ans = 0;
+        vector<int> f(1 << 16, -1);
+
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++) {
+                int x = A[i] & A[j];
+                if (f[x] == -1) {
+                    f[x] = 0;
+                    for (int k = 0; k < n; k++)
+                        if ((x & A[k]) == 0)
+                            f[x]++;
+                }
+                ans += f[x];
+            }
+
+        return ans;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/triples-with-bitwise-and-equal-to-zero/discuss/226778/C%2B%2B-20-lines56msenumerate-with-memory-(with-Chinese-translation))
 
 
 

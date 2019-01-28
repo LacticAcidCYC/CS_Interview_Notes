@@ -423,6 +423,44 @@ private:
 
 
 
+## 8. LeetCode 984 [String Without AAA or BBB](https://leetcode.com/problems/string-without-aaa-or-bbb/)
+
+```c++
+class Solution {
+public:
+    string strWithout3a3b(int A, int B) {
+        string ans;
+        
+        while (A > 0 || B > 0) {
+            bool printA = false;
+            int l = ans.length();
+            
+            if (l >= 2 && ans[l-1] == ans[l-2]) {
+                if (ans[l-1] == 'b') {
+                    printA = true;
+                }
+            } else {
+                if (A >= B) {
+                    printA = true;
+                }
+            }
+            
+            if (printA) {
+                A--;
+                ans += 'a';
+            } else {
+                B--;
+                ans += 'b';
+            }
+        }
+        
+        return ans;
+    }
+};
+```
+
+
+
 
 
 
