@@ -1417,13 +1417,39 @@ public:
 
 
 
-## 21. LeetCode 
+## 21. LeetCode 962 [Maximum Width Ramp](https://leetcode.com/problems/maximum-width-ramp/)
 
 ```c++
-
+class Solution {
+public:
+    int maxWidthRamp(vector<int>& A) {
+        vector<int> st;
+        int res = 0;
+        int n = A.size();
+        
+        for (int i=0; i<n; i++) {
+            if (st.empty() || A[i] < A[st[st.size()-1]]) {
+                st.push_back(i);
+            } else {
+                int left = 0, right = st.size()-1;
+                while (left < right) {
+                    int mid = left + (right - left) / 2;
+                    if (A[st[mid]] > A[i]) {
+                        left = mid + 1;
+                    } else {
+                        right = mid;
+                    }
+                }
+                res = max(res, i - st[left]);
+            }
+        }
+        
+        return res;
+    }
+};
 ```
 
-
+[solution](https://leetcode.com/problems/maximum-width-ramp/discuss/208348/JavaC%2B%2BPython-O(N)-Using-Stack)
 
 
 
