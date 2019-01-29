@@ -2703,6 +2703,51 @@ public:
 
 
 
+## 43. LeetCode 472 [Concatenated Words](https://leetcode.com/problems/concatenated-words/)
+
+```c++
+class Solution {
+public:
+    vector<string> findAllConcatenatedWordsInADict(vector<string>& words) {
+        vector<string> res;
+        unordered_set<string> prewords;
+        
+        sort(words.begin(), words.end(), [](const string &a, const string &b) {
+            return a.size() < b.size();
+        });
+        
+        for (string word : words) {
+            if (canForm(word, prewords)) {
+                res.push_back(word);
+            }
+            prewords.insert(word);
+        }
+        
+        return res;
+    }
+    
+private:
+    bool canForm(string &word, unordered_set<string> &prewords) {
+        if (prewords.empty()) return false;
+        int n = word.length();
+        vector<bool> dp(n+1, false);
+        dp[0] = true;
+        for (int i = 1; i <= word.length(); i++) {
+            for (int j = 0; j < i; j++) {
+                if (!dp[j]) continue;
+                if (prewords.count(word.substr(j, i-j))) {
+                    dp[i] = true;
+                    break;
+                }
+            }
+        }
+        return dp[n];
+    }
+};
+```
+
+
+
 
 
 
