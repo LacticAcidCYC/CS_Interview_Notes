@@ -2748,7 +2748,41 @@ private:
 
 
 
+## 44. LeetCode 750 [Number Of Corner Rectangles](https://leetcode.com/problems/number-of-corner-rectangles/)
 
+```c++
+// grid: M * N
+// Time Complexity: O(M^2*N)
+// Space Complexity: O(1)
+
+class Solution {
+public:
+    int countCornerRectangles(vector<vector<int>>& grid) {
+        int res = 0;
+        if (grid.empty() || grid[0].empty()) return res;
+        int m = grid.size();
+        int n = grid[0].size();
+        
+        for (int i=0; i<m-1; i++) {
+            for (int j=i+1; j<m; j++) {
+                int cnt = 0;
+                
+                for (int k=0; k<n; k++) {
+                    if (grid[i][k] == 1 && grid[j][k] == 1) {
+                        cnt++;
+                    }
+                }
+                
+                if (cnt > 0) {
+                    res += cnt * (cnt - 1) / 2; 
+                }
+            }
+        }
+        
+        return res;
+    }
+};
+```
 
 
 
