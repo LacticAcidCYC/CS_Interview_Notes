@@ -1833,9 +1833,53 @@ private:
 
 
 
+## 17. LeetCode 833 [Find And Replace in String](https://leetcode.com/problems/find-and-replace-in-string/)
+
+### (1) Replace S from right to left
+
+```c++
+class Solution {
+public:
+    string findReplaceString(string S, vector<int>& indexes, vector<string>& sources, vector<string>& targets) {
+        vector<pair<int, int>> sorted;
+        for (int i = 0 ; i < indexes.size(); i++) sorted.push_back({ indexes[i], i });
+        sort(sorted.rbegin(), sorted.rend());
+        for (auto ind : sorted) {
+            int i = ind.first;
+            string s = sources[ind.second], t = targets[ind.second];
+            if (S.substr(i, s.length()) == s) S = S.substr(0, i) + t + S.substr(i + s.length());
+        }
+        return S;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/find-and-replace-in-string/discuss/130587/C%2B%2BJavaPython-Replace-S-from-right-to-left)
 
 
 
+### (2) Bucket Sort
+
+```c++
+class Solution {
+public:
+    string findReplaceString(string S, vector<int>& indexes, vector<string>& sources, vector<string>& targets) {
+        vector<pair<int, string>> m(S.size());
+        
+        for (int i = 0; i < indexes.size(); ++i) {
+            if (S.find(sources[i], indexes[i]) == indexes[i]) m[indexes[i]] = {sources[i].size(), targets[i]};
+        }
+        
+        for (int i = S.size() - 1; i >= 0; i--) {
+            S.replace(i, m[i].first, m[i].second);
+        }
+        
+        return S;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/find-and-replace-in-string/discuss/130577/C%2B%2B-5-lines-6-ms-bucket-sort-O(n))
 
 
 

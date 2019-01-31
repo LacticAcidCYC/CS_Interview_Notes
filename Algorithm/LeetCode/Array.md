@@ -1365,7 +1365,47 @@ public:
 
 
 
+## 26. LeetCode 485 [Max Consecutive Ones](https://leetcode.com/problems/max-consecutive-ones/)
 
+```c++
+class Solution {
+public:
+    int findMaxConsecutiveOnes(vector<int>& nums) {
+        int max_cnt = 0, cnt = 0;
+        for (auto n : nums) {
+            if (n == 1) max_cnt = max(++cnt, max_cnt);
+            else cnt = 0;
+        }
+        return max_cnt;
+    }
+};
+```
+
+
+
+## 27. LeetCode 487 [Max Consecutive Ones II](https://leetcode.com/problems/max-consecutive-ones-ii/)
+
+### Two Pointer(Sliding Window)
+
+```c++
+class Solution {
+public:
+    int findMaxConsecutiveOnes(vector<int>& nums) {
+        int ans = 0, zero = 0, k = 1; // flip at most k zero
+        for (int l = 0, h = 0; h < nums.size(); h++) {
+            if (nums[h] == 0)                                           
+                zero++;
+            while (zero > k)
+                if (nums[l++] == 0)
+                    zero--;                                     
+            ans = max(ans, h - l + 1);
+        }                                                               
+        return ans;             
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/max-consecutive-ones-ii/discuss/96920/Java-clean-solution-easily-extensible-to-flipping-k-zero-and-follow-up-handled)
 
 
 

@@ -488,7 +488,36 @@ public:
 };
 ```
 
+[solution](https://leetcode.com/problems/split-array-into-consecutive-subsequences/discuss/106493/C%2B%2B-O(n)-solution-two-pass)
 
+
+
+## 10. LeetCode 763 [Partition Labels](https://leetcode.com/problems/partition-labels/)
+
+```c++
+class Solution {
+public:
+    vector<int> partitionLabels(string S) {
+        vector<int> lastpos(26);
+        
+        for (int i=0; i<S.length(); i++) {
+            lastpos[S[i] - 'a'] = i;
+        }
+        
+        int j = 0, anchor = 0;
+        vector<int> ans;
+        for (int i=0; i<S.length(); i++) {
+            j = max(j, lastpos[S[i] - 'a']);
+            if (i == j) {
+                ans.push_back(i - anchor + 1);
+                anchor = i + 1;
+            }
+        }
+        
+        return ans;
+    }
+};
+```
 
 
 
