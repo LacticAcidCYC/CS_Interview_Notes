@@ -2786,6 +2786,144 @@ public:
 
 
 
+## 45. LeetCode 967. [Numbers With Same Consecutive Differences](https://leetcode.com/problems/numbers-with-same-consecutive-differences/)
+
+```c++
+class Solution {
+public:
+    vector<int> numsSameConsecDiff(int N, int K) {
+        vector<int> ans = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
+        vector<int> temp;
+        
+        for (int i=2; i<=N; i++) {
+            temp.clear();
+            for (int x : ans) {
+                int ld = x % 10;
+                if (x > 0 && ld + K < 10) {
+                    temp.push_back(x * 10 + ld + K);
+                }
+                
+                if (x > 0 && K > 0 && ld - K >= 0) {
+                    temp.push_back(x * 10 + ld - K);
+                }
+            }
+            ans = temp;
+        }
+        
+        return ans;
+    }
+};
+```
+
+
+
+## 46. LeetCode 837 [New 21 Game](https://leetcode.com/problems/new-21-game/)
+
+```c++
+class Solution {
+public:
+    double new21Game(int N, int K, int W) {
+        vector<double> dp(N+W+1);
+        
+        for (int k=K; k<=N; ++k) {
+            dp[k] = 1.0;
+        }
+        
+        double S = min(N-K+1, W);
+        
+        for (int k=K-1; k>=0; --k) {
+            dp[k] = S / W;
+            S += dp[k] - dp[k+W];
+        }
+        return dp[0];
+    }
+};
+```
+
+
+
+## 47. LeetCode 873 [Length of Longest Fibonacci Subsequence](https://leetcode.com/problems/length-of-longest-fibonacci-subsequence/)
+
+### (1) DP (O(N^2))
+
+```c++
+class Solution {
+public:
+    int lenLongestFibSubseq(vector<int>& A) {
+        int n = A.size();
+        unordered_map<int, int> val_to_idx;
+        for (int i=0; i<n; i++) {
+            val_to_idx[A[i]] = i;
+        }
+        
+        unordered_map<int, int> dp;
+        int ans = 0;
+        
+        for (int k=1; k<n; k++) {
+            for (int j=0; j<k; j++) {
+                int index = val_to_idx.count(A[k] - A[j]) ? val_to_idx[A[k] - A[j]] : -1;
+                if (index >= 0 && index < j) {
+                    int cand = dp[index*n+j] == 0 ? 3 : dp[index*n+j] + 1;
+                    dp[j*n+k] = cand;
+                    ans = max(ans, cand);
+                }
+            }
+        }
+        
+        return ans >= 3 ? ans : 0;
+    }
+};
+```
+
+
+
+### (2) Using set (O(N^2LogM))
+
+```c++
+class Solution {
+public:
+    int lenLongestFibSubseq(vector<int>& A) {
+        unordered_set<int> s(A.begin(), A.end());
+        int res = 0;
+        for (int i = 0; i < A.size(); ++i) {
+            for (int j = i + 1; j < A.size(); ++j) {
+                int  a = A[i], b = A[j], l = 2;
+                while (s.count(a + b))
+                    b = a + b, a = b - a, l++;
+                res = max(res, l);
+            }
+        }
+        return res > 2 ? res : 0;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/length-of-longest-fibonacci-subsequence/discuss/152343/C%2B%2BJavaPython-Check-Pair)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

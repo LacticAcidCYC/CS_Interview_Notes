@@ -1883,7 +1883,40 @@ public:
 
 
 
+## 18. LeetCode 838 [Push Dominoes](https://leetcode.com/problems/push-dominoes/)
 
+### Two Pointer
+
+```c++
+class Solution {
+public:
+    string pushDominoes(string dominoes) {
+        dominoes = 'L' + dominoes + 'R';
+        string ans = "";
+        
+        for (int i=0, j=1; j<dominoes.length(); j++) {
+            if (dominoes[j] == '.') continue;
+            int mid = j - i - 1; // number of dominoes in the middle
+            if (i > 0) ans += dominoes[i];
+            
+            // 3 situations
+            if (dominoes[i] == dominoes[j]) {
+                ans += string(mid, dominoes[i]);
+            } else if (dominoes[i] == 'L' && dominoes[j] == 'R') {
+                ans += string(mid, '.');
+            } else {
+                ans += string(mid / 2, 'R') + string(mid % 2, '.') + string(mid / 2, 'L');
+            }
+            
+            i = j;
+        }
+        
+        return ans;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/push-dominoes/discuss/132332/C%2B%2BJavaPython-Two-Pointers)
 
 
 
