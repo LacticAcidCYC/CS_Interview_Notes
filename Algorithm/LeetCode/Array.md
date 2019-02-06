@@ -1459,6 +1459,83 @@ public:
 
 
 
+## 30. LeetCode 643 [Maximum Average Subarray I](https://leetcode.com/problems/maximum-average-subarray-i/)
+
+```c++
+class Solution {
+public:
+    double findMaxAverage(vector<int>& nums, int k) {
+        double sum = 0;
+        for(int i=0; i<k; i++) {
+            sum += nums[i];
+        }
+        
+        double res = sum;
+        
+        for(int i=k; i<nums.size(); i++) {
+            sum += nums[i] - nums[i-k];
+            res = max(res,sum);
+        }
+        return res / k;
+    }
+};
+```
+
+
+
+## 31. LeetCode 644 [Maximum Average Subarray II](https://leetcode.com/problems/maximum-average-subarray-ii/)
+
+### Binary Search + "Sliding Window"
+
+```c++
+class Solution {
+public:
+    double findMaxAverage(vector<int>& nums, int k) {
+        double l = INT_MIN, r = INT_MAX;
+        while (r - l > 0.000001) {
+            double mid = (l + r) / 2;
+            if (check(nums, k, mid)) {
+                l = mid;
+            } else {
+                r = mid;
+            }
+        }
+        
+        return r;
+    }
+    
+private:
+    bool check(vector<int> &nums, int &k, double x) {
+        int n = nums.size();
+        vector<double> _nums(n);
+        
+        //Transfer to a[i], find whether there is a subarray whose sum is bigger than 0
+        for (int i=0; i<n; i++) {
+            _nums[i] = nums[i] - x;
+        }
+        double cur = 0, prev = 0;
+        
+        for (int i=0; i<k; i++) {
+            cur += _nums[i];
+        }
+        if (cur >= 0) return true;
+        
+        for (int i=k; i<n; i++) {
+            cur += _nums[i];
+            prev += _nums[i-k];
+            if (prev < 0) {
+                cur -= prev;
+                prev = 0;
+            }
+            if (cur >= 0) return true;
+        }
+        return false;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/maximum-average-subarray-ii/discuss/105480/Java-solution-O(nlogM)-Binary-search-the-answer)
+
 
 
 
