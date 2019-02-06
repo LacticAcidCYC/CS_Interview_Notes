@@ -2932,7 +2932,84 @@ public:
 
 
 
+## 49. LeetCode 718 [Maximum Length of Repeated Subarray](https://leetcode.com/problems/maximum-length-of-repeated-subarray/)
 
+```c++
+class Solution {
+public:
+    int findLength(vector<int>& A, vector<int>& B) {
+        int ans = 0;
+        int len_A = A.size();
+        int len_B = B.size();
+        
+        vector<vector<int>> dp(len_A + 1, vector<int>(len_B + 1));
+        
+        for (int i = len_A - 1; i >= 0; --i) {
+            for (int j = len_B - 1; j >= 0; --j) {
+                if (A[i] == B[j]) {
+                    dp[i][j] = dp[i+1][j+1] + 1;
+                    if (ans < dp[i][j]) ans = dp[i][j];
+                }
+            }
+        }
+        return ans;
+    }
+};
+```
+
+
+
+### Other Solution: Rolling Hash
+
+
+
+## 50. LeetCode 740 [Delete and Earn](https://leetcode.com/problems/delete-and-earn/)
+
+### Similar Question: House Robber 198
+
+```c++
+class Solution {
+public:
+    int deleteAndEarn(vector<int>& nums) {
+        vector<int> values(10001, 0);
+        
+        for (int num : nums) {
+            values[num] += num;
+        }
+
+        int take = 0, skip = 0;
+        
+        for (int i = 0; i < 10001; i++) {
+            int take_i = skip + values[i];
+            int skip_i = max(skip, take);
+            take = take_i;
+            skip = skip_i;
+        }
+        return max(take, skip);
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/delete-and-earn/discuss/109895/JavaC%2B%2B-Clean-Code-with-Explanation)
+
+
+
+## 51. LeetCode 746 [Min Cost Climbing Stairs](https://leetcode.com/problems/min-cost-climbing-stairs/)
+
+```c++
+class Solution {
+public:
+    int minCostClimbingStairs(vector<int>& cost) {
+        int f1 = 0, f2 = 0;
+        for (int i = cost.size() - 1; i >= 0; --i) {
+            int f0 = cost[i] + min(f1, f2);
+            f2 = f1;
+            f1 = f0;
+        }
+        return min(f1, f2);
+    }
+};
+```
 
 
 
