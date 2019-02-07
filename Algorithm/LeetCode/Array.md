@@ -1538,6 +1538,416 @@ private:
 
 
 
+## 32. LeetCode 581 [Shortest Unsorted Continuous Subarray](https://leetcode.com/problems/shortest-unsorted-continuous-subarray/)
+
+### (1) Sorting
+
+```c++
+// Time Complexity: O(nlogn)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    int findUnsortedSubarray(vector<int>& nums) {
+        vector<int> _nums(nums.begin(), nums.end());
+        sort(_nums.begin(), _nums.end());
+        
+        int start = _nums.size(), end = 0;
+        for (int i = 0; i < _nums.size(); i++) {
+            if (_nums[i] != nums[i]) {
+                start = min(start, i);
+                end = max(end, i);
+            }
+        }
+        return (end - start >= 0 ? end - start + 1 : 0);
+    }
+};
+```
+
+
+
+### (2) One Pass
+
+```c++
+class Solution {
+public:
+    int findUnsortedSubarray(vector<int>& nums) {
+        int n = nums.size(), begin = -1, end = -2;
+        int min_val = nums[n-1], max_val = nums[0];
+        
+        for (int i=1;i<n;i++) {
+            max_val = max(max_val, nums[i]);
+            min_val = min(min_val, nums[n-1-i]);
+            if (nums[i] < max_val) end = i;
+            if (nums[n-1-i] > min_val) begin = n-1-i; 
+        }
+        
+        return end - begin + 1;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/shortest-unsorted-continuous-subarray/discuss/103057/Java-O(n)-Time-O(1)-Space)
+
+[solution2](https://leetcode.com/problems/shortest-unsorted-continuous-subarray/discuss/103066/Ideas-behind-the-O(n)-two-pass-and-one-pass-solutions)
+
+
+
+## 33. LeetCode 216 [Combination Sum III](https://leetcode.com/problems/combination-sum-iii/)
+
+### Backtracking
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> combinationSum3(int k, int n) {
+        vector<vector<int>> result;
+        vector<int> sol;
+        combination(result, sol, k, n);
+        return result;
+    }
+    
+    void combination(vector<vector<int>>& result, vector<int> &sol, int k, int n) {
+        if (sol.size() == k && n == 0) { result.push_back(sol); return ; }
+        if (sol.size() < k) {
+            for (int i = sol.empty() ? 1 : sol.back() + 1; i <= 9; ++i) {
+                if (n - i < 0) break;
+                sol.push_back(i);
+                combination(result, sol, k, n - i);
+                sol.pop_back();
+            }
+        }
+    }
+};
+```
+
+
+
+## 34. LeetCode 565 [Array Nesting](https://leetcode.com/problems/array-nesting/)
+
+### (1) Using visited array
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    int arrayNesting(vector<int>& nums) {
+        int n = nums.size();
+        vector<bool> visited(n);
+        
+        int res = 0;
+        for (int i = 0; i < n; i++) {
+            if (!visited[i]) {
+                int start = nums[i], count = 0;
+                do {
+                    start = nums[start];
+                    count++;
+                    visited[start] = true;
+                } while (start != nums[i]);
+                
+                res = max(res, count);
+            }
+        }
+        return res;
+    }
+};
+```
+
+
+
+### (2) O(1) space
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(1)
+
+class Solution {
+public:
+    int arrayNesting(vector<int>& nums) {
+        int res = 0;
+        for (int i = 0; i < nums.size(); i++) {
+            if (nums[i] != INT_MAX) {
+                int start = nums[i], count = 0;
+                while (nums[start] != INT_MAX) {
+                    int temp = start;
+                    start = nums[start];
+                    count++;
+                    nums[temp] = INT_MAX;
+                }
+                res = max(res, count);
+            }
+        }
+        return res;
+    }
+};
+```
+
+
+
+## 35. LeetCode 605 [Can Place Flowers](https://leetcode.com/problems/can-place-flowers/)
+
+```c++
+class Solution {
+public:
+    bool canPlaceFlowers(vector<int>& flowerbed, int n) {
+        int i = 0, count = 0;
+        while (i < flowerbed.size()) {
+            if (flowerbed[i] == 0 && (i == 0 || flowerbed[i - 1] == 0) 
+                && (i == flowerbed.size() - 1 || flowerbed[i + 1] == 0)) {
+                flowerbed[i] = 1;
+                count++;
+            }
+            i++;
+        }
+        return count >= n;
+    }
+};
+```
+
+
+
+## 36. LeetCode 670 [Maximum Swap](https://leetcode.com/problems/maximum-swap/)
+
+### (1) Two Pass
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(1)
+
+class Solution {
+public:
+    int maximumSwap(int num) {
+        string _num = to_string(num);
+        vector<int> last(10);
+        
+        for (int i = 0; i < _num.size(); i++) {
+            last[_num[i] - '0'] = i;
+        }
+
+        for (int i = 0; i < _num.size(); i++) {
+            for (int d = 9; d > _num[i] - '0'; d--) {
+                if (last[d] > i) {
+                    swap(_num[i], _num[last[d]]);
+                    return stoi(_num);
+                }
+            }
+        }
+        return num;
+    }
+};
+```
+
+
+
+### (2) One Pass
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(1)
+
+class Solution {
+public:
+    int maximumSwap(int num) {
+        string _num = to_string(num);
+        int n = _num.length();
+        int max_idx = n-1, left_idx = n-1, right_idx = n-1;
+        
+        for (int i = n-1; i >= 0; --i) {
+            // current digit is the largest by far
+            if (_num[i] > _num[max_idx]) {
+                max_idx = i;
+            } else if (_num[i] < _num[max_idx]) {
+                // best candidate for max swap if there is no more 
+            	// such situation on the left side
+                left_idx = i;
+                right_idx = max_idx;
+            }
+        }
+        
+        swap(_num[left_idx], _num[right_idx]);
+        return stoi(_num);
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/maximum-swap/discuss/107073/C%2B%2B-one-pass-simple-and-fast-solution%3A-1-3ms-O(n)-time)
+
+
+
+## 37. LeetCode 719 [Find K-th Smallest Pair Distance](https://leetcode.com/problems/find-k-th-smallest-pair-distance/)
+
+### Binary Search + Sliding Window(Two Pointer)
+
+```c++
+// Time Complexity: O(nlogk)
+// Space Complexity: O(1)
+
+class Solution {
+public:
+    int smallestDistancePair(vector<int>& nums, int k) {
+        sort(nums.begin(), nums.end());
+        int n = nums.size();
+        
+        int lo = 0;
+        int hi = nums[n-1] - nums[0];
+        
+        while (lo < hi) {
+            int mid = (lo + hi) / 2;
+            int count = 0, left = 0;
+            
+            for (int right = 0; right < n; ++right) {
+                while (nums[right] - nums[left] > mid) left++;
+                count += right - left;
+            }
+            
+            //count = number of pairs with distance <= mid
+            if (count >= k) hi = mid;
+            else lo = mid + 1;
+        }
+        
+        return lo;
+    }
+};
+```
+
+
+
+## 38. LeetCode 786 [K-th Smallest Prime Fraction](https://leetcode.com/problems/k-th-smallest-prime-fraction/)
+
+### Similar: 719
+
+### (1) Binary Search
+
+```c++
+// Time Complexity: O(NlogW)
+// where N is the length of primes, and W is the width (in quantized units) of our binary search, (hi - lo) / 1e-9 which is 10^9
+// Space Complexity: O(1)
+
+class Solution {
+public:
+    vector<int> kthSmallestPrimeFraction(vector<int>& nums, int K) {
+        int n = nums.size();
+        
+        vector<int> ans = {0, 1};
+        double lo = 0;
+        double hi = 1;
+        
+        while (hi - lo > 1e-9) {
+            double mid = (lo + hi) / 2.0;
+            vector<int> res = helper(mid, nums);
+            int count = 0, left = 0;
+            
+            if (res[0] < K) {
+                lo = mid;
+            } else {
+                ans[0] = res[1];
+                ans[1] = res[2];
+                hi = mid;
+            }
+        }
+        
+        return ans;
+    }
+    
+private:
+    vector<int> helper(double x, vector<int> &nums) {
+        // Returns {count, numerator, denominator}
+        int left = 0, right = 1, count = 0, i = -1;
+        
+        for (int j = 1; j < nums.size(); ++j) {
+            // For each j, find the largest i so that nums[i] / nums[j] < x
+            // It has to be at least as big as the previous i, so reuse it ("two pointer")
+            while (nums[i+1] < nums[j] * x) ++i;
+
+            // There are i+1 fractions: (nums[0], nums[j]),
+            // (nums[1], nums[j]), ..., (nums[i], nums[j])
+            count += i+1;
+            if (i >= 0 && left * nums[j] < right * nums[i]) {
+                left = nums[i];
+                right = nums[j];
+            }
+        }
+        return {count, left, right};
+    }
+};
+```
+
+
+
+### (2) Heap
+
+```c++
+// Time Complexity: O(KlogN)
+// Space Complexity: O(N)
+
+class Solution {
+public:
+    vector<int> kthSmallestPrimeFraction(vector<int>& A, int K) {
+        auto compare = [&](const vector<int> &a, const vector<int> &b) {
+            return A[a[0]] * A[b[1]] > A[a[1]] * A[b[0]];
+        };
+        
+        priority_queue<vector<int>, vector<vector<int>>, decltype(compare)> pq(compare);
+        
+        for (int i = 1; i < A.size(); ++i)
+            pq.push({0, i});
+
+        while (--K > 0) {
+            auto frac = pq.top();
+            pq.pop();
+            if (frac[0]++ < frac[1])
+                pq.push(frac);
+        }
+
+        auto ans = pq.top();
+        return { A[ans[0]], A[ans[1]] };
+    }
+};
+```
+
+
+
+## 39. LeetCode 888 [Fair Candy Swap](https://leetcode.com/problems/fair-candy-swap/)
+
+```c++
+// Time Complexity: O(A.length + B.length)
+// Space Complexity: O(B.length)
+
+class Solution {
+public:
+    vector<int> fairCandySwap(vector<int>& A, vector<int>& B) {
+        int sum_a = 0, sum_b = 0;  // sum of A, B respectively
+        for (auto &x : A) sum_a += x;
+        for (auto &x : B) sum_b += x;
+        int delta = (sum_b - sum_a) / 2;
+        // If Alice gives x, she expects to receive x + delta
+
+        unordered_set<int> set_B;
+        for (auto &x : B) set_B.insert(x);
+
+        for (auto &x : A)
+            if (set_B.count(x + delta))
+                return { x, x + delta };
+        
+        return {};
+    }
+};
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

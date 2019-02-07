@@ -3411,6 +3411,43 @@ public:
 
 
 
+## 43. LeetCode 543 [Diameter of Binary Tree](https://leetcode.com/problems/diameter-of-binary-tree/)
+
+### Similar: 687, 124 (Bottom-up / post order traversal)
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    int diameterOfBinaryTree(TreeNode* root) {
+        int ans = 1;
+        dfs(root, ans);
+        
+        return ans - 1;
+    }
+    
+private:
+    int dfs(TreeNode* node, int &ans) {
+        if (node == nullptr) return 0;
+        int left = dfs(node->left, ans);
+        int right = dfs(node->right, ans);
+        
+        ans = max(ans, left+right+1);
+        return max(left, right) + 1;
+    }
+};
+```
+
+
+
 
 
 
