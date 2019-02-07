@@ -521,6 +521,41 @@ public:
 
 
 
+## 11. LeetCode 767 [Reorganize String](https://leetcode.com/problems/reorganize-string/)
+
+### Similar: 358, 621
+
+```c++
+class Solution {
+public:
+    string reorganizeString(string S) {
+        int N = S.size();
+        vector<int> counts(26);
+        
+        for (char c: S) counts[c - 'a'] += 100;
+        for (int i = 0; i < 26; ++i) counts[i] += i;
+        //Encoded counts[i] = 100*(actual count) + (i)
+        sort(counts.begin(), counts.end());
+
+        string ans(N, '.');
+        int t = 1;
+        for (int code : counts) {
+            int ct = code / 100;
+            char ch = 'a' + (code % 100);
+            if (ct > (N+1) / 2) return "";
+            
+            for (int i = 0; i < ct; ++i) {
+                if (t >= N) t = 0;
+                ans[t] = ch;
+                t += 2;
+            }
+        }
+
+        return ans;
+    }
+};
+```
+
 
 
 
