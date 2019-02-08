@@ -3448,6 +3448,66 @@ private:
 
 
 
+## 44. LeetCode 776 [Split BST](https://leetcode.com/problems/split-bst/)
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<TreeNode*> splitBST(TreeNode* root, int V) {
+        if (root == nullptr)
+            return {nullptr, nullptr};
+        else if (root->val <= V) {
+            vector<TreeNode*> ans = splitBST(root->right, V);
+            root->right = ans[0];
+            ans[0] = root;
+            return ans;
+        } else {
+            vector<TreeNode*> ans = splitBST(root->left, V);
+            root->left = ans[1];
+            ans[1] = root;
+            return ans;
+        }
+    }
+};
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

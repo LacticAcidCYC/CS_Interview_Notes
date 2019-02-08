@@ -1920,6 +1920,60 @@ public:
 
 
 
+## 19. LeetCode 544 [Output Contest Matches](https://leetcode.com/problems/output-contest-matches/)
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    string findContestMatch(int n) {
+        vector<string> ans(n);
+        for (int i = 1; i <= n; ++i)
+            ans[i-1] = to_string(i);
+
+        for (; n > 1; n /= 2)
+            for (int i = 0; i < n / 2; ++i)
+                ans[i] = "(" + ans[i] + "," + ans[n-1-i] + ")";
+
+        return ans[0];
+    }
+};
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
