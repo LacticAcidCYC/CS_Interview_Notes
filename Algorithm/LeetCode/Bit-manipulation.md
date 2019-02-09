@@ -246,6 +246,19 @@ public:
 
 
 
+## 12. LeetCode 201 [Bitwise AND of Numbers Range](https://leetcode.com/problems/bitwise-and-of-numbers-range/)
+
+```c++
+class Solution {
+public:
+    int rangeBitwiseAnd(int m, int n) {
+        return (n > m) ? (rangeBitwiseAnd(m/2, n/2) << 1) : m;
+    }
+};
+```
+
+
+
 
 
 
