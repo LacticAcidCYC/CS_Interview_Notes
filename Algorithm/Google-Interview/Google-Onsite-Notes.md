@@ -1,3 +1,33 @@
+特别鸣谢：
+
+[花花酱](https://www.youtube.com/user/xxfflower/)
+
+参考帖子：
+
+[google面经总结1](https://www.1point3acres.com/bbs/forum.php?mod=viewthread&tid=446944)
+
+[google面经总结2](https://www.1point3acres.com/bbs/forum.php?mod=viewthread&tid=448608)
+
+[**扫地机器人，Robot API、实现及总结**](https://www.1point3acres.com/bbs/thread-403845-1-1.html)
+
+[Unique-Path总结](https://www.1point3acres.com/bbs/forum.php?mod=viewthread&tid=423857&extra=&page=1&_dsign=2a102aab)
+
+[人车匹配](https://www.1point3acres.com/bbs/forum.php?mod=viewthread&tid=447853&ctid=201329)
+
+面经：
+
+https://drive.google.com/open?id=1G7fg6mghszqbeo0gVR1E8vOqo6K3ub0Q
+
+https://drive.google.com/open?id=1PqHO9Hnkun5OoYbhqoAoc6P7xyBM3Uyp
+
+https://drive.google.com/open?id=17WePTrYfMWNlhWyaPcf8PyjNQe9qmp46
+
+https://drive.google.com/open?id=1rxLbgD8Scy-Zvg4MJ7ICQuN_3xjTtNQl
+
+https://drive.google.com/open?id=1v1b_G2acMqKDv1zNUiUVpv0kP-UXevm4
+
+
+
 ## 1. LeetCode 134 [Gas Station](https://leetcode.com/problems/gas-station/)
 
 ### Greedy
@@ -741,10 +771,36 @@ public:
 
 
 
-## 9. LeetCode 359 
+## 9. LeetCode 359 [Logger Rate Limiter](https://leetcode.com/problems/logger-rate-limiter/)
 
 ```c++
+class Logger {
+public:
+    /** Initialize your data structure here. */
+    Logger() {}
+    
+    /** Returns true if the message should be printed in the given timestamp, otherwise returns false.
+        If this method returns false, the message will not be printed.
+        The timestamp is in seconds granularity. */
+    bool shouldPrintMessage(int timestamp, string message) {
+        if (messages.count(message)) {
+            if (timestamp - messages[message] < 10) {
+                return false;
+            }   
+        }
+        messages[message] = timestamp;
+        return true;
+    }
+    
+private:
+    unordered_map<string, int> messages;
+};
 
+/**
+ * Your Logger object will be instantiated and called as such:
+ * Logger obj = new Logger();
+ * bool param_1 = obj.shouldPrintMessage(timestamp,message);
+ */
 ```
 
 
@@ -816,26 +872,249 @@ private:
 
 
 
-## 11. LeetCode 418
+## 11. LeetCode 418 [Sentence Screen Fitting](https://leetcode.com/problems/sentence-screen-fitting/)
 
 ```c++
+class Solution {
+public:
+    int wordsTyping(vector<string>& sentence, int rows, int cols) {
+        string _sentence = "";
+        for (string &word : sentence) {
+            _sentence += word;
+            _sentence += " ";
+        }
+        //_sentence.pop_back();
+        
+        int start = 0;
+        int l = _sentence.size();
+        int res = 0;
+        
+        while (rows > 0) {
+            rows--;
+            //cout << _sentence[start] << endl;
+            if (start + cols >= l) {
+                res += (start + cols) / l;
+            }
+            start = (start + cols) % l;
+            if (_sentence[start] == ' ') {
+                if (start == l - 1) res++; // if include the last word!!
+                start = (start + 1) % l;
+            } else {
+                while (start >= 0 && _sentence[start] != ' ') {
+                    start--;
+                }
+                start++;
+            }
+        }
+        
+        return res;
+    }
+};
 
+// improved version
+class Solution {
+public:
+    int wordsTyping(vector<string>& sentence, int rows, int cols) {
+        string _sentence = "";
+        for (string &word : sentence) {
+            _sentence += word;
+            _sentence += " ";
+        }
+        
+        int start = 0;
+        int l = _sentence.size();
+        int res = 0;
+        
+        while (rows > 0) {
+            rows--;
+            int nxt = start + cols;
+
+            start = nxt % l;
+            if (_sentence[start] == ' ') {
+                start = (start + 1) % l;
+                nxt++;
+            } else {
+                while (start >= 0 && _sentence[start] != ' ') {
+                    start--;
+                    nxt--;
+                }
+                start++;
+                nxt++;
+            }
+            res += nxt / l;
+        }
+        
+        return res;
+    }
+};
+
+// shorter
+class Solution {
+public:
+    int wordsTyping(vector<string>& sentence, int rows, int cols) {
+        string _sentence = "";
+        for (string &word : sentence) {
+            _sentence += word;
+            _sentence += " ";
+        }
+        
+        int start = 0, nxt;
+        int l = _sentence.size();
+        int res = 0;
+        
+        while (rows > 0) {
+            rows--;
+            nxt = start + cols;
+
+            if (_sentence[nxt % l] == ' ') {
+                nxt++;
+            } else {
+                while (nxt % l >= 0 && _sentence[nxt % l] != ' ') {
+                    nxt--;
+                }
+                nxt++;
+            }
+            res += nxt / l;
+            start = nxt % l;
+        }
+        
+        return res;
+    }
+};
 ```
 
 
 
-## 12. LeetCode 490 
+## 12. LeetCode 490 [The Maze](https://leetcode.com/problems/the-maze/)
+
+### Similar to 200 (Number of Islands)
 
 ```c++
+// Time Complexity: O(mn)
+// Space Complexity: O(mn)
 
+// BFS
+class Solution {
+public:
+    bool hasPath(vector<vector<int>>& maze, vector<int>& start, vector<int>& destination) {
+        int m = maze.size();
+        int n = maze[0].size();
+        
+        if (start[0] == destination[0] && start[1] == destination[1]) return true;
+        
+        vector<pair<int,int>> dirs = {
+            {-1, 0},
+            {0, 1},
+            {1, 0},
+            {0, -1}
+        };
+        
+        set<pair<int, int>> visited;
+        queue<pair<int, int>> q;
+        q.push({start[0], start[1]});
+        visited.insert({start[0], start[1]});
+        
+        while (!q.empty()) {
+            auto cur = q.front();
+            q.pop();
+            
+            for (int i=0; i<4; i++) {
+                pair<int, int> nxt = cur;
+                while (nxt.first >= 0 && nxt.second >= 0 && nxt.first < m && nxt.second < n 
+                       && maze[nxt.first][nxt.second] == 0) {
+                    nxt.first += dirs[i].first;
+                    nxt.second += dirs[i].second;
+                }
+                nxt.first -= dirs[i].first;
+                nxt.second -= dirs[i].second;
+                
+                if (visited.count(nxt)) continue;
+                visited.insert(nxt);
+                
+                if (nxt.first == destination[0] && nxt.second == destination[1]) {
+                    return true;
+                }
+                q.push(nxt);
+            }
+        }
+        
+        return false;
+    }
+};
+
+// replace set to vector (visited)
+class Solution {
+public:
+    bool hasPath(vector<vector<int>>& maze, vector<int>& start, vector<int>& destination) {
+        int m = maze.size();
+        int n = maze[0].size();
+        
+        if (start[0] == destination[0] && start[1] == destination[1]) return true;
+        
+        vector<pair<int,int>> dirs = {
+            {-1, 0},
+            {0, 1},
+            {1, 0},
+            {0, -1}
+        };
+        
+        vector<vector<int>> visited(m, vector<int>(n, 0));
+        queue<pair<int, int>> q;
+        q.push({start[0], start[1]});
+        visited[start[0]][start[1]] = 1;
+        
+        while (!q.empty()) {
+            auto cur = q.front();
+            q.pop();
+            
+            for (int i=0; i<4; i++) {
+                pair<int, int> nxt = cur;
+                while (nxt.first >= 0 && nxt.second >= 0 && nxt.first < m && nxt.second < n 
+                       && maze[nxt.first][nxt.second] == 0) {
+                    nxt.first += dirs[i].first;
+                    nxt.second += dirs[i].second;
+                }
+                nxt.first -= dirs[i].first;
+                nxt.second -= dirs[i].second;
+                
+                if (visited[nxt.first][nxt.second]) continue;
+                visited[nxt.first][nxt.second] = 1;
+                
+                if (nxt.first == destination[0] && nxt.second == destination[1]) {
+                    return true;
+                }
+                q.push(nxt);
+            }
+        }
+        
+        return false;
+    }
+};
 ```
 
 
 
-## 13. LeetCode 674 
+## 13. LeetCode 674 [Longest Continuous Increasing Subsequence](https://leetcode.com/problems/longest-continuous-increasing-subsequence/)
 
 ```c++
-
+class Solution {
+public:
+    int findLengthOfLCIS(vector<int>& nums) {
+        if (nums.empty()) return 0;
+        int n = nums.size();
+        int res = 1, len_lcis = 1;
+        for (int i = 1; i < n; ++i) {
+            if (nums[i] > nums[i-1]) {
+                len_lcis++;
+                res = max(res, len_lcis);
+            } else {
+                len_lcis = 1;
+            }
+        }
+        
+        return res;
+    }
+};
 ```
 
 
@@ -1025,22 +1304,84 @@ public:
 
 
 
-## 17. LeetCode 723 
+## 17. LeetCode 723 [Candy Crush](https://leetcode.com/problems/candy-crush/)
 
 ```c++
-
+class Solution {
+public:
+    vector<vector<int>> candyCrush(vector<vector<int>>& board) {
+        int m = board.size(), n = board[0].size();
+        bool toBeContinued = false;
+        
+        for (int i = 0; i < m; ++i) { // horizontal crushing 
+            for (int j = 0; j + 2 < n; ++j) {
+                int& v1 = board[i][j];
+                int& v2 = board[i][j+1];
+                int& v3 = board[i][j+2];
+                
+                int v0 = std::abs(v1);
+                
+                if (v0 && v0 == std::abs(v2) && v0 == std::abs(v3)) {
+                    v1 = v2 = v3 = - v0;
+                    toBeContinued =  true;
+                }
+            }
+        }
+        
+        for (int i = 0; i + 2 < m; ++i) {  // vertical crushing
+            for (int j = 0; j < n; ++j) {
+                int& v1 = board[i][j];
+                int& v2 = board[i+1][j];
+                int& v3 = board[i+2][j];
+                int v0 = std::abs(v1);
+                if (v0 && v0 == std::abs(v2) && v0 == std::abs(v3)) {
+                    v1 = v2 = v3 = -v0;
+                    toBeContinued = true;
+                }
+            }
+        }
+        
+        for (int j = 0; j < n; ++j) { // gravity step
+            int dropTo = m - 1;
+            for (int i = m - 1; i >= 0; --i) {
+                if (board[i][j] >= 0) {
+                    board[dropTo--][j] = board[i][j];
+                }
+            }
+            
+            for (int i = dropTo; i >= 0; i--) {
+                board[i][j] = 0;
+            }
+        }
+        
+        return toBeContinued ? candyCrush(board) : board;
+    }
+};
 ```
 
 
 
-## 18. LeetCode 739 
+## 18. LeetCode 739 [Daily Temperatures](https://leetcode.com/problems/daily-temperatures/)
 
 ### Related LeetCode 496
 
 Monotone Stack
 
 ```c++
-
+class Solution {
+public:
+    vector<int> dailyTemperatures(vector<int>& T) {
+        int N = T.size();
+        vector<int> ans(N);
+        stack<int> st;
+        for (int i = N - 1; i >= 0; --i) {
+            while (!st.empty() && T[i] >= T[st.top()]) st.pop();
+            ans[i] = st.empty() ? 0 : st.top() - i;
+            st.push(i);
+        }
+        return ans;
+    }
+};
 ```
 
 
@@ -1665,15 +2006,65 @@ private:
 
 
 
-## 26. LeetCode 140 
+## 26. LeetCode 140 [Word Break II](https://leetcode.com/problems/word-break-ii/)
 
 ```c++
-
+class Solution {
+public:
+    vector<string> wordBreak(string s, vector<string>& wordDict) {
+        unordered_set<string> hashset(wordDict.begin(), wordDict.end());
+        unordered_map<int, vector<string>> mp;
+        return dfs(s, hashset, 0, mp);
+    }
+    
+    vector<string> dfs(string &s, unordered_set<string> &wordSet, int start, unordered_map<int, vector<string>> &mp) {
+        if (mp.count(start)) {
+            return mp[start];
+        }
+        
+        vector<string> res;
+        int n = s.length();
+        if (start == n) {
+            res.push_back("");
+        }
+        
+        for (int i=start+1; i<=n; i++) {
+            if (wordSet.count(s.substr(start, i-start))) {
+                vector<string> subres = dfs(s, wordSet, i, mp);
+                for (auto ss : subres) {
+                    res.push_back(s.substr(start, i-start) + (ss.empty() ? "" : (" " + ss)));
+                }
+            }
+        }
+        
+        mp[start] = res;
+        
+        return res;
+    }
+};
 ```
 
 
 
-## 27. LeetCode 246 | 247 | 248
+## 27. LeetCode 246 [Strobogrammatic Number](https://leetcode.com/problems/strobogrammatic-number/) | 247 [Strobogrammatic Number II](https://leetcode.com/problems/strobogrammatic-number-ii/) | 248 [Strobogrammatic Number III](https://leetcode.com/problems/strobogrammatic-number-iii/)
+
+### 246
+
+```c++
+class Solution {
+public:
+    bool isStrobogrammatic(string num) {
+        unordered_map<char, char> lut{{'0', '0'}, {'1', '1'}, {'6', '9'}, {'8', '8'}, {'9', '6'}};
+        int n = num.length();
+        for (int l = 0, r = n - 1; l <= r; l++, r--)
+            if (lut.find(num[l]) == lut.end() || lut[num[l]] != num[r])
+                return false; 
+        return true; 
+    }
+};
+```
+
+
 
 ### 247
 
@@ -1718,6 +2109,54 @@ private:
                 generateNumbers(mp, res, n, index+2, left+'9', mp['9']+right);
             }
         }
+    }
+};
+```
+
+
+
+### 248
+
+```c++
+class Solution {
+public:
+    int strobogrammaticInRange(string low, string high) {
+        if (!compare(low, high)) return 0;
+
+        vector<pair<char, char>> nums = { { '0', '0' }, { '1', '1' }, { '6', '9' }, { '8', '8' }, { '9', '6' } };
+
+        int cnt = strobogrammaticInRange(nums, low, high, "", 0);
+        cnt = strobogrammaticInRange(nums, low, high, "0", cnt);
+        cnt = strobogrammaticInRange(nums, low, high, "1", cnt);
+        cnt = strobogrammaticInRange(nums, low, high, "8", cnt);
+
+        return cnt;
+    }
+    
+private:
+    bool compare(string s1, string s2) {
+        if (s1.length() != s2.length())
+            return s1.length() <= s2.length();
+
+        for (int i = 0; i < s1.length(); i++) {
+            if (s1[i] < s2[i]) return true;
+            else if (s1[i] > s2[i]) return false;
+        }
+
+        return true;
+    }
+
+    int strobogrammaticInRange(const vector<pair<char, char>>& nums, const string& low, const string& high, string t, int cnt) {
+        if (high.length() < t.length())
+            return cnt;
+        if (compare(low, t) && compare(t, high)) 
+            if (t.length() == 1 || t.length() > 1 && t.front() != '0')
+                cnt++;
+
+        for (auto iter = nums.begin(); iter != nums.end(); ++iter) 
+            cnt = strobogrammaticInRange(nums, low, high, string(1, iter->first) + t + string(1, iter->second), cnt);
+
+        return cnt;
     }
 };
 ```
@@ -1827,7 +2266,35 @@ public:
 ## 30. LeetCode 163 [Missing Ranges](https://leetcode.com/problems/missing-ranges/)
 
 ```c++
+class Solution {
+public:
+    vector<string> findMissingRanges(vector<int>& nums, int lower, int upper) {
+        int size = nums.size();
+        vector<string> res;
+        long missingL = lower;
+        for (int i=0; i<size; i++) {
+            if (nums[i] == missingL) {
+                missingL++;
+            } else if (missingL < nums[i]){
+                long missingU = long(nums[i]) - 1;
+                res.push_back(helper(missingL, missingU));
+                missingL = long(nums[i]) + 1;
+            }  
+        }
+        if (missingL <= upper) {
+            res.push_back(helper(missingL, upper));
+        }
+        return res;
+    }
 
+    string helper(long a, long b) {
+        if (b > a) {
+            return to_string(a) + "->" + to_string(b);
+        } else {
+            return to_string(a);
+        }
+    }
+};
 ```
 
 
@@ -2640,12 +3107,63 @@ public:
 
 
 
-## 43. LeetCode 803 
+## 43. LeetCode 803 [Bricks Falling When Hit](https://leetcode.com/problems/bricks-falling-when-hit/)
 
-### Union-Find
+### Union-Find / DFS
 
 ```c++
+class Solution {
+public:
+    vector<int> hitBricks(vector<vector<int>>& grid, vector<vector<int>>& hits) {    
+        dirs_ = {0, -1, 0, 1, 0};    
+        m_ = grid.size();
+        n_ = grid[0].size();
+        g_.swap(grid);
+        seq_ = 1;
 
+        vector<int> ans;
+        for (int i = 0; i < hits.size(); ++i)
+            ans.push_back(hit(hits[i][1], hits[i][0]));
+        return ans;
+    }
+
+private:
+    vector<vector<int>> g_;
+    vector<int> dirs_;
+    int seq_;
+    int m_;
+    int n_;
+
+    // hit x, y and return the number of bricks fallen.
+    int hit(int x, int y) {
+        if (x < 0 || x >= n_ || y < 0 || y >= m_) return 0;    
+        g_[y][x] = 0;
+        int ans = 0; 
+        for (int i = 0; i < 4; ++i) {
+            ++seq_;
+            int count = 0;
+            if (!fall(x + dirs_[i], y + dirs_[i + 1], false, count)) continue;      
+                ++seq_;
+            ans += count;
+            fall(x + dirs_[i], y + dirs_[i + 1], true, count);
+        }
+        return ans;
+    }
+
+    // Check whether the CC contains (x, y) will fall or not.
+    // Set all nodes in this CC as seq_ or 0 if clear.
+    // count: the # of nodes in this CC.
+    bool fall(int x, int y, bool clear, int& count) {
+        if (x < 0 || x >= n_ || y < 0 || y >= m_) return true;
+        if (g_[y][x] == seq_ || g_[y][x] == 0) return true;
+        if (y == 0) return false;
+        g_[y][x] = clear ? 0 : seq_;
+        ++count;
+        for (int i = 0; i < 4; ++i)
+            if (!fall(x + dirs_[i], y + dirs_[i + 1], clear, count)) return false;
+        return true;
+    }
+};
 ```
 
 
@@ -2699,13 +3217,51 @@ private:
 
 
 
-## 45. LeetCode 843
+## 45. LeetCode 843 [Guess the Word](https://leetcode.com/problems/guess-the-word/)
 
 ### Minimax (Read Solution Later)
 
 ```c++
-
+/**
+ * // This is the Master's API interface.
+ * // You should not implement it, or speculate about its implementation
+ * class Master {
+ *   public:
+ *     int guess(string word);
+ * };
+ */
+class Solution {
+public:
+    void findSecretWord(vector<string>& wordlist, Master& master) {
+        for (int i = 0, x = 0; i < 10 && x < 6; ++i) {
+            unordered_map<string, int> count;
+            for (string w1 : wordlist)
+                for (string w2 : wordlist)
+                    if (match(w1, w2) == 0)
+                        count[w1]++;
+            pair<string, int> minimax = make_pair(wordlist[0], 1000);
+            for (string w : wordlist)
+                if (count[w] <= minimax.second)
+                    minimax = make_pair(w, count[w]);
+            x = master.guess(minimax.first);
+            vector<string> wordlist2;
+            for (string w : wordlist)
+                if (match(minimax.first, w) == x)
+                    wordlist2.push_back(w);
+            wordlist = wordlist2;
+        }
+    }
+    
+private:
+    int match(string a, string b) {
+        int matches = 0;
+        for (int i = 0; i < a.length(); ++i) if (a[i] == b[i]) matches ++;
+        return matches;
+    }
+};
 ```
+
+[solution](https://leetcode.com/problems/guess-the-word/discuss/133862/Random-Guess-and-Minimax-Guess-with-Comparison)
 
 
 
@@ -2809,281 +3365,7 @@ public:
 
 
 
-## 48. LeetCode 490 (499, 505)
-
-### Similar to 200 (Number of Islands)
-
-### LeetCode 490 [The Maze](https://leetcode.com/problems/the-maze/)
-
-```c++
-// Time Complexity: O(mn)
-// Space Complexity: O(mn)
-
-// BFS
-class Solution {
-public:
-    bool hasPath(vector<vector<int>>& maze, vector<int>& start, vector<int>& destination) {
-        int m = maze.size();
-        int n = maze[0].size();
-        
-        if (start[0] == destination[0] && start[1] == destination[1]) return true;
-        
-        vector<pair<int,int>> dirs = {
-            {-1, 0},
-            {0, 1},
-            {1, 0},
-            {0, -1}
-        };
-        
-        set<pair<int, int>> visited;
-        queue<pair<int, int>> q;
-        q.push({start[0], start[1]});
-        visited.insert({start[0], start[1]});
-        
-        while (!q.empty()) {
-            auto cur = q.front();
-            q.pop();
-            
-            for (int i=0; i<4; i++) {
-                pair<int, int> nxt = cur;
-                while (nxt.first >= 0 && nxt.second >= 0 && nxt.first < m && nxt.second < n 
-                       && maze[nxt.first][nxt.second] == 0) {
-                    nxt.first += dirs[i].first;
-                    nxt.second += dirs[i].second;
-                }
-                nxt.first -= dirs[i].first;
-                nxt.second -= dirs[i].second;
-                
-                if (visited.count(nxt)) continue;
-                visited.insert(nxt);
-                
-                if (nxt.first == destination[0] && nxt.second == destination[1]) {
-                    return true;
-                }
-                q.push(nxt);
-            }
-        }
-        
-        return false;
-    }
-};
-
-// replace set to vector (visited)
-class Solution {
-public:
-    bool hasPath(vector<vector<int>>& maze, vector<int>& start, vector<int>& destination) {
-        int m = maze.size();
-        int n = maze[0].size();
-        
-        if (start[0] == destination[0] && start[1] == destination[1]) return true;
-        
-        vector<pair<int,int>> dirs = {
-            {-1, 0},
-            {0, 1},
-            {1, 0},
-            {0, -1}
-        };
-        
-        vector<vector<int>> visited(m, vector<int>(n, 0));
-        queue<pair<int, int>> q;
-        q.push({start[0], start[1]});
-        visited[start[0]][start[1]] = 1;
-        
-        while (!q.empty()) {
-            auto cur = q.front();
-            q.pop();
-            
-            for (int i=0; i<4; i++) {
-                pair<int, int> nxt = cur;
-                while (nxt.first >= 0 && nxt.second >= 0 && nxt.first < m && nxt.second < n 
-                       && maze[nxt.first][nxt.second] == 0) {
-                    nxt.first += dirs[i].first;
-                    nxt.second += dirs[i].second;
-                }
-                nxt.first -= dirs[i].first;
-                nxt.second -= dirs[i].second;
-                
-                if (visited[nxt.first][nxt.second]) continue;
-                visited[nxt.first][nxt.second] = 1;
-                
-                if (nxt.first == destination[0] && nxt.second == destination[1]) {
-                    return true;
-                }
-                q.push(nxt);
-            }
-        }
-        
-        return false;
-    }
-};
-```
-
-
-
-### LeetCode 499
-
-```c++
-
-```
-
-
-
-### LeetCode 505
-
-```c++
-
-```
-
-
-
-## 49. LeetCode 418 [Sentence Screen Fitting](https://leetcode.com/problems/sentence-screen-fitting/)
-
-```c++
-class Solution {
-public:
-    int wordsTyping(vector<string>& sentence, int rows, int cols) {
-        string _sentence = "";
-        for (string &word : sentence) {
-            _sentence += word;
-            _sentence += " ";
-        }
-        //_sentence.pop_back();
-        
-        int start = 0;
-        int l = _sentence.size();
-        int res = 0;
-        
-        while (rows > 0) {
-            rows--;
-            //cout << _sentence[start] << endl;
-            if (start + cols >= l) {
-                res += (start + cols) / l;
-            }
-            start = (start + cols) % l;
-            if (_sentence[start] == ' ') {
-                if (start == l - 1) res++; // if include the last word!!
-                start = (start + 1) % l;
-            } else {
-                while (start >= 0 && _sentence[start] != ' ') {
-                    start--;
-                }
-                start++;
-            }
-        }
-        
-        return res;
-    }
-};
-
-// improved version
-class Solution {
-public:
-    int wordsTyping(vector<string>& sentence, int rows, int cols) {
-        string _sentence = "";
-        for (string &word : sentence) {
-            _sentence += word;
-            _sentence += " ";
-        }
-        
-        int start = 0;
-        int l = _sentence.size();
-        int res = 0;
-        
-        while (rows > 0) {
-            rows--;
-            int nxt = start + cols;
-
-            start = nxt % l;
-            if (_sentence[start] == ' ') {
-                start = (start + 1) % l;
-                nxt++;
-            } else {
-                while (start >= 0 && _sentence[start] != ' ') {
-                    start--;
-                    nxt--;
-                }
-                start++;
-                nxt++;
-            }
-            res += nxt / l;
-        }
-        
-        return res;
-    }
-};
-
-// shorter
-class Solution {
-public:
-    int wordsTyping(vector<string>& sentence, int rows, int cols) {
-        string _sentence = "";
-        for (string &word : sentence) {
-            _sentence += word;
-            _sentence += " ";
-        }
-        
-        int start = 0, nxt;
-        int l = _sentence.size();
-        int res = 0;
-        
-        while (rows > 0) {
-            rows--;
-            nxt = start + cols;
-
-            if (_sentence[nxt % l] == ' ') {
-                nxt++;
-            } else {
-                while (nxt % l >= 0 && _sentence[nxt % l] != ' ') {
-                    nxt--;
-                }
-                nxt++;
-            }
-            res += nxt / l;
-            start = nxt % l;
-        }
-        
-        return res;
-    }
-};
-```
-
-
-
-## 50. LeetCode 359 [Logger Rate Limiter](https://leetcode.com/problems/logger-rate-limiter/)
-
-```c++
-class Logger {
-public:
-    /** Initialize your data structure here. */
-    Logger() {}
-    
-    /** Returns true if the message should be printed in the given timestamp, otherwise returns false.
-        If this method returns false, the message will not be printed.
-        The timestamp is in seconds granularity. */
-    bool shouldPrintMessage(int timestamp, string message) {
-        if (messages.count(message)) {
-            if (timestamp - messages[message] < 10) {
-                return false;
-            }   
-        }
-        messages[message] = timestamp;
-        return true;
-    }
-    
-private:
-    unordered_map<string, int> messages;
-};
-
-/**
- * Your Logger object will be instantiated and called as such:
- * Logger obj = new Logger();
- * bool param_1 = obj.shouldPrintMessage(timestamp,message);
- */
-```
-
-
-
-## 51. LeetCode 220 [Contains Duplicate III](https://leetcode.com/problems/contains-duplicate-iii/)
+## 49. LeetCode 220 [Contains Duplicate III](https://leetcode.com/problems/contains-duplicate-iii/)
 
 ```c++
 class Solution {
@@ -3113,15 +3395,70 @@ public:
 
 
 
-## 52. LeetCode 773 
+## 50. LeetCode 773 [Sliding Puzzle](https://leetcode.com/problems/sliding-puzzle/)
+
+### (1) DFS
 
 ```c++
+class Solution {
+public:
+    int slidingPuzzle(vector<vector<int>>& b) {
+        int min_moves = INT_MAX;
+        string s = to_string(b[0][0]) + to_string(b[0][1]) + to_string(b[0][2]) 
+                    + to_string(b[1][0]) + to_string(b[1][1]) + to_string(b[1][2]);
 
+        dfs(s, unordered_map<string, int>() = {}, s.find('0'), s.find('0'), 0, min_moves);
+        return min_moves == INT_MAX ? -1 : min_moves;
+    }
+    
+private:
+    unordered_map<int, vector<int>> moves{{0,{1,3}},{1,{0,2,4}},{2,{1,5}},{3,{0,4}},{4,{3,5,1}},{5,{4,2}}};
+    
+    void dfs(string s, unordered_map<string, int>& m, int cur_zero, int swap_zero, int cur_move, int& min_moves) {
+        swap(s[cur_zero], s[swap_zero]);
+        if (s == "123450") min_moves = min(min_moves, cur_move);
+        if (cur_move < min_moves && (m[s] == 0 || m[s] > cur_move)) {
+            m[s] = cur_move;
+            for (auto new_zero : moves[swap_zero]) dfs(s, m, swap_zero, new_zero, cur_move + 1, min_moves);
+        }
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/sliding-puzzle/discuss/113613/C%2B%2B-9-lines-DFS-and-BFS)
+
+
+
+### (2) BFS
+
+```c++
+class Solution {
+public:
+    int slidingPuzzle(vector<vector<int>>& b) {
+        string s = to_string(b[0][0]) + to_string(b[0][1]) + to_string(b[0][2])
+                    + to_string(b[1][0]) + to_string(b[1][1]) + to_string(b[1][2]);
+
+        unordered_map<string, int> m({{s, 0}});
+        queue<pair<string, int>> q({{s, s.find('0')}});
+
+        for (; !q.empty() && q.front().first != "123450"; q.pop()) {
+            for (auto new_zero : moves[q.front().second]) {
+                auto str = q.front().first;
+                swap(str[q.front().second], str[new_zero]);
+                if (m.insert({str, m[q.front().first] + 1}).second) q.push({ str, new_zero });
+            }   
+        }
+        return q.empty() ? -1 : m[q.front().first];
+    }
+    
+private:
+    unordered_map<int, vector<int>> moves{{0,{1,3}},{1,{0,2,4}},{2,{1,5}},{3,{0,4}},{4,{3,5,1}},{5,{4,2}}};
+};
 ```
 
 
 
-## 53. LeetCode 658 [Find K Closest Elements](https://leetcode.com/problems/find-k-closest-elements/)
+## 51. LeetCode 658 [Find K Closest Elements](https://leetcode.com/problems/find-k-closest-elements/)
 
 ```c++
 // O(logn + k)
@@ -3185,7 +3522,7 @@ public:
 
 
 
-## 54. LeetCode 894 [All Possible Full Binary Trees](https://leetcode.com/problems/all-possible-full-binary-trees/)
+## 52. LeetCode 894 [All Possible Full Binary Trees](https://leetcode.com/problems/all-possible-full-binary-trees/)
 
 ```c++
 // Time Complexity: O(2^n)
@@ -3278,10 +3615,27 @@ private:
 
 
 
-## 55. LeetCode 568
+## 53. LeetCode 568 [Maximum Vacation Days](https://leetcode.com/problems/maximum-vacation-days/)
 
 ```c++
-
+class Solution {
+public:
+    int maxVacationDays(vector<vector<int>>& flights, vector<vector<int>>& days) {
+        int maxplay = 0, n = days.size(), k = days[0].size(); // n city , k weeks
+        vector<vector<int>> dp(n, vector<int>(k, 0)); // dp[i][j] - max days play if you spent week j in city i;
+        for (int j = k - 1; j >= 0; j--)
+            for (int i = 0; i < n; i++) {
+                dp[i][j] = days[i][j];
+                for (int i1 = 0; i1 < n && j < k - 1; i1++)
+                    if (flights[i][i1] || i == i1) 
+                        dp[i][j] = max(dp[i][j], days[i][j] + dp[i1][j + 1]);
+                
+                if (j == 0 && (i == 0 || flights[0][i])) 
+                    maxplay = max(maxplay, dp[i][0]);
+            }
+        return maxplay;
+    }
+};
 ```
 
 
