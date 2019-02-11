@@ -785,6 +785,40 @@ private:
 
 
 
+## 5. LeetCode 990 [Satisfiability of Equality Equations](https://leetcode.com/problems/satisfiability-of-equality-equations/)
+
+### DFS / Union-Find
+
+### (1) Union-Find
+
+```c++
+class Solution {
+public:
+    bool equationsPossible(vector<string>& equations) {
+        vector<int> parents(26);
+        
+        for (int i = 0; i < 26; ++i) 
+            parents[i] = i;
+        
+        for (string e : equations)
+            if (e[1] == '=')
+                parents[find(e[0] - 'a', parents)] = find(e[3] - 'a', parents);
+        
+        for (string e : equations)
+            if (e[1] == '!' && find(e[0] - 'a', parents) == find(e[3] - 'a', parents))
+                return false;
+        return true;
+    }
+
+private:
+    int find(int x, vector<int> &parents) {
+        if (x != parents[x]) 
+            parents[x] = find(parents[x], parents);
+        return parents[x];
+    }
+};
+```
+
 
 
 
