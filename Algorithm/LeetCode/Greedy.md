@@ -558,7 +558,47 @@ public:
 
 
 
+## 12. LeetCode 910 [Smallest Range II](https://leetcode.com/problems/smallest-range-ii/)
 
+### **Intuition**:
+
+For each integer `A[i]`,
+we may choose either `x = -K` or `x = K`.
+
+If we add `K` to all `B[i]`, the result won't change.
+
+It's the same as:
+For each integer `A[i]`, we may choose either `x = 0` or `x = 2 * K`.
+
+### **Explanation**:
+
+We sort the `A` first, and we choose to add `x = 0` to all `A[i]`.
+Now we have `res = A[n - 1] - A[0]`.
+Starting from the smallest of `A`, we add `2 * K` to `A[i]`,
+hoping this process will reduce the difference.
+
+Update the new `mx = max(mx, A[i] + 2 * K)`
+Update the new `mn = min(A[i + 1], A[0] + 2 * K)`
+Update the `res = min(res, mx - mn)`
+
+```c++
+class Solution {
+public:
+    int smallestRangeII(vector<int>& A, int K) {
+        sort(A.begin(), A.end());
+        int n = A.size(), mx = A[n - 1], mn = A[0], res = mx - mn;
+        
+        for (int i = 0; i < n - 1; ++i) {
+            mx = max(mx, A[i] + 2 * K);
+            mn = min(A[i + 1], A[0] + 2 * K);
+            res = min(res, mx - mn);
+        }
+        return res;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/smallest-range-ii/discuss/173377/C%2B%2BJavaPython-Add-0-or-2-*-K)
 
 
 

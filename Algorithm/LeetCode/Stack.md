@@ -549,7 +549,60 @@ public:
 
 
 
+## 8. LeetCode 496 [Next Greater Element I](https://leetcode.com/problems/next-greater-element-i/)
 
+### Monotonic Stack
+
+```c++
+class Solution {
+public:
+    vector<int> nextGreaterElement(vector<int>& findNums, vector<int>& nums) {
+        stack<int> s;
+        unordered_map<int, int> m;
+        for (int n : nums) {
+            while (s.size() && s.top() < n) {
+                m[s.top()] = n;
+                s.pop();
+            }
+            s.push(n);
+        }
+        vector<int> ans;
+        
+        for (int n : findNums) {
+            ans.push_back(m.count(n) ? m[n] : -1);
+        }
+        return ans;
+    }
+};
+```
+
+
+
+## 9. LeetCode 503 [Next Greater Element II](https://leetcode.com/problems/next-greater-element-ii/)
+
+### Monotonic Stack (keep the **indexes** of the **decreasing** subsequence)
+
+```c++
+class Solution {
+public:
+    vector<int> nextGreaterElements(vector<int>& nums) {
+        int n = nums.size();
+        vector<int> res(n);
+        stack<int> st;
+        
+        for (int i=2*n-1; i>=0; i--) {
+            while (!st.empty() && nums[st.top()] <= nums[i % n]) {
+                st.pop();
+            }
+            
+            res[i % n] = st.empty() ? -1 : nums[st.top()];
+            st.push(i % n);
+        }
+        
+        return res;
+    }
+};
+```
 
 
 

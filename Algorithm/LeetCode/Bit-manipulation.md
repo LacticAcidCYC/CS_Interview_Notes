@@ -1,3 +1,7 @@
+[Bit-Manipulation-Summary](https://leetcode.com/problems/sum-of-two-integers/discuss/84278/A-summary%3A-how-to-use-bit-manipulation-to-solve-problems-easily-and-efficiently)
+
+
+
 ## 1. LeetCode 136 [Single Number](https://leetcode.com/problems/single-number/)
 
 ```c++
@@ -259,7 +263,94 @@ public:
 
 
 
+## 13. LeetCode 371 [Sum of Two Integers](https://leetcode.com/problems/sum-of-two-integers/)
 
+```c++
+class Solution {
+public:
+    int getSum(unsigned int a, unsigned int b) {
+        int sum = a;
+        
+        while (b != 0) {
+            sum = a ^ b; //calculate sum of a and b without thinking the carry 
+            b = (a & b) << 1; //calculate the carry
+            a = sum; //add sum(without carry) and carry
+        }
+        
+        return sum;
+    }
+};
+
+// recursion
+class Solution {
+public:
+    int getSum(unsigned int a, unsigned int b) {
+        return b == 0 ? a : getSum(a ^ b, (a & b) << 1);
+    }
+};
+```
+
+
+
+## 14. LeetCode 389 [Find the Difference](https://leetcode.com/problems/find-the-difference/)
+
+```c++
+class Solution {
+public:
+    char findTheDifference(string s, string t) {
+        int bits = 0;
+        
+        for (char &c : s) {
+            bits ^= c;
+        }
+        
+        for (char &c : t) {
+            bits ^= c;
+        }
+        
+        return bits;
+    }
+};
+```
+
+
+
+## 15. LeetCode 405 [Convert a Number to Hexadecimal](https://leetcode.com/problems/convert-a-number-to-hexadecimal/)
+
+```c++
+class Solution {
+public:
+    string toHex(int num) {
+        char digits[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+        string hex = "";
+        
+        unsigned int n = num;
+        while (n) {
+            hex = digits[n & 0xf] + hex;
+            n >>= 4;
+        }
+        return hex.empty() ? "0" : hex;
+    }
+};
+
+class Solution {
+public:
+    string toHex(int num) {
+        int count = 0;
+        if(!num) return "0";
+        string result;
+        while (num && count < 8) {
+            int temp = num & 15;
+            if (temp < 10) result.push_back('0' + temp);
+            else result.push_back('a' + temp - 10);
+            num = num >> 4;
+            count++;
+        }
+        reverse(result.begin(), result.end());
+        return result;
+    }
+};
+```
 
 
 

@@ -421,6 +421,149 @@ private:
 
 
 
+## 5. LeetCode 359 [Logger Rate Limiter](https://leetcode.com/problems/logger-rate-limiter/)
+
+### Hash Table
+
+```c++
+class Logger {
+public:
+    /** Initialize your data structure here. */
+    Logger() {}
+    
+    /** Returns true if the message should be printed in the given timestamp, otherwise returns false.
+        If this method returns false, the message will not be printed.
+        The timestamp is in seconds granularity. */
+    bool shouldPrintMessage(int timestamp, string message) {
+        if (messages.count(message)) {
+            if (timestamp - messages[message] < 10) {
+                return false;
+            }   
+        }
+        messages[message] = timestamp;
+        return true;
+    }
+    
+private:
+    unordered_map<string, int> messages;
+};
+
+/**
+ * Your Logger object will be instantiated and called as such:
+ * Logger obj = new Logger();
+ * bool param_1 = obj.shouldPrintMessage(timestamp,message);
+ */
+```
+
+
+
+## 6. LeetCode 362 [Design Hit Counter](https://leetcode.com/problems/design-hit-counter/)
+
+```c++
+class HitCounter {
+public:
+    /** Initialize your data structure here. */
+    HitCounter() : times(300), hits(300) {}
+    
+    /** Record a hit.
+        @param timestamp - The current timestamp (in seconds granularity). */
+    void hit(int timestamp) {
+        int index = timestamp % 300;
+        if (times[index] != timestamp) {
+            times[index] = timestamp;
+            hits[index] = 1;
+        } else {
+            hits[index]++;
+        }
+    }
+    
+    /** Return the number of hits in the past 5 minutes.
+        @param timestamp - The current timestamp (in seconds granularity). */
+    int getHits(int timestamp) {
+        int total = 0;
+        for (int i = 0; i < 300; i++) {
+            if (timestamp - times[i] < 300) {
+                total += hits[i];
+            }
+        }
+        return total;
+    }
+    
+private:
+    vector<int> times;
+    vector<int> hits;
+};
+
+/**
+ * Your HitCounter object will be instantiated and called as such:
+ * HitCounter obj = new HitCounter();
+ * obj.hit(timestamp);
+ * int param_2 = obj.getHits(timestamp);
+ */
+```
+
+
+
+## 7. LeetCode 716 [Max Stack](https://leetcode.com/problems/max-stack/)
+
+```c++
+class MaxStack {
+public:
+    /** initialize your data structure here. */
+    MaxStack() {}
+    
+    void push(int x) {
+        int mx = maxStack.empty() ? x : maxStack.top();
+        maxStack.push(mx > x ? mx : x);
+        helperStack.push(x);
+    }
+    
+    int pop() {
+        maxStack.pop();
+        int top = helperStack.top();
+        helperStack.pop();
+        return top;
+    }
+    
+    int top() {
+        return helperStack.top();
+    }
+    
+    int peekMax() {
+        return maxStack.top();
+    }
+    
+    int popMax() {
+        int mx = peekMax();
+        stack<int> buff;
+        while (top() != mx) {
+            buff.push(pop());
+        }
+        pop();
+        while (!buff.empty()) {
+            push(buff.top());
+            buff.pop();
+        }
+        
+        return mx;
+    }
+    
+private:
+    stack<int> helperStack;
+    stack<int> maxStack;
+};
+
+/**
+ * Your MaxStack object will be instantiated and called as such:
+ * MaxStack obj = new MaxStack();
+ * obj.push(x);
+ * int param_2 = obj.pop();
+ * int param_3 = obj.top();
+ * int param_4 = obj.peekMax();
+ * int param_5 = obj.popMax();
+ */
+```
+
 
 
 

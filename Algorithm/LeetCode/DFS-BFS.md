@@ -1377,6 +1377,75 @@ private:
 
 
 
+## 21. LeetCode 675 [Cut Off Trees for Golf Event](https://leetcode.com/problems/cut-off-trees-for-golf-event/)
+
+```c++
+class Solution {
+public:
+    int cutOffTree(vector<vector<int>>& forest) {
+        if (forest.empty() || forest[0].empty()) return 0;
+        
+        const vector<int> dr = {-1, 1, 0, 0};
+        const vector<int> dc = {0, 0, -1, 1};
+        
+        // get all the tree positions and sort based on height
+        // trees[i][0] is height. The default comparison of vector compare first element before other elements.
+        int m = forest.size(), n = forest[0].size();
+        vector<vector<int>> trees;
+        for (int i=0; i<m; i++) {
+            for (int j=0; j<n; j++) {
+                if (forest[i][j] > 1) {
+                    trees.push_back({forest[i][j], i, j});
+                }
+            }
+        }
+        
+        sort(trees.begin(), trees.end());
+        
+        int ans = 0;
+        // accumulate all the paths
+        for (int i = 0, cur_row = 0, cur_col = 0; i < trees.size(); i++) {
+            int step = bfs(forest, cur_row, cur_col, trees[i][1], trees[i][2], dr, dc);
+            // if next tree cannot be reached, step = -1;
+            if (step == -1) return -1;
+            ans += step;
+            cur_row = trees[i][1];
+            cur_col = trees[i][2];
+        }
+        return ans;
+    }
+    
+private:
+    int bfs(vector<vector<int>>& forest, int sr, int sc, int tr, int tc, const vector<int> &dr, const vector<int> &dc) {
+        if (sr == tr && sc == tc) return 0;
+        
+        int R = forest.size(), C = forest[0].size();
+        queue<pair<int, int>> q;
+        q.push({sr, sc});
+        vector<vector<int>> visited(R, vector<int>(C));
+        visited[sr][sc] = 1;
+        int step = 0;
+        while (!q.empty()) {
+            step++;
+            
+            int N = q.size();
+            for (int i = 0; i < N; i++) {
+                int row = q.front().first, col = q.front().second;
+                q.pop();
+                for (int i = 0; i < 4; i++) {
+                    int r = row + dr[i], c = col + dc[i];
+                    if (r < 0 || r >= R || c < 0 || c >= C || visited[r][c] == 1 || forest[r][c] == 0) continue;
+                    if (r == tr && c == tc) return step;
+                    visited[r][c] = 1;
+                    q.push({r, c});
+                }
+            }
+        }
+        return -1;
+    }
+};
+```
+
 
 
 
