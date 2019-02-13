@@ -1542,6 +1542,31 @@ public:
 
 
 
+## 24. LeetCode 475 [Heaters](https://leetcode.com/problems/heaters/)
+
+```c++
+class Solution {
+public:
+    int findRadius(vector<int>& houses, vector<int>& heaters) {
+        sort(heaters.begin(), heaters.end());
+        int result = INT_MIN;
+        
+        for (int &house : houses) {
+            auto pos = lower_bound(heaters.begin(), heaters.end(), house);
+            int r = INT_MAX;
+            if (pos != heaters.end()) r = min(r, *pos - house); // right heaters
+            if (pos != heaters.begin()) r = min(r, house - *(pos - 1)); // left heaters
+        
+            result = max(result, r);
+        }
+        
+        return result;
+    }
+};
+```
+
+
+
 
 
 
