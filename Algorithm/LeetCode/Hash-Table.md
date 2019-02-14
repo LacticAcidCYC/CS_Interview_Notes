@@ -299,7 +299,64 @@ public:
 
 
 
+## 9. LeetCode 594 [Longest Harmonious Subsequence](https://leetcode.com/problems/longest-harmonious-subsequence/)
 
+```c++
+class Solution {
+public:
+    int findLHS(vector<int>& nums) {
+        unordered_map<int, int> mp;
+        int res = 0;
+        
+        for (int &num : nums) {
+            mp[num]++;
+            
+            if (mp.count(num + 1)) {
+                res = max(res, mp[num] + mp[num+1]);
+            }
+            if (mp.count(num - 1)) {
+                res = max(res, mp[num] + mp[num-1]);
+            }
+        }
+        return res;
+    }
+};
+```
+
+
+
+## 10. LeetCode 599 [Minimum Index Sum of Two Lists](https://leetcode.com/problems/minimum-index-sum-of-two-lists/)
+
+```c++
+class Solution {
+public:
+    vector<string> findRestaurant(vector<string>& list1, vector<string>& list2) {
+        unordered_map<string, int> mp;
+        
+        for (int i=0; i<list1.size(); i++) {
+            mp[list1[i]] = i;
+        }
+        
+        vector<string> res;
+        int min_sum = INT_MAX, sum;
+        
+        for (int j=0; j<list2.size() && j<=min_sum; j++) {
+            if (mp.count(list2[j])) {
+                sum = j + mp[list2[j]];
+                if (sum < min_sum) {
+                    res.clear();
+                    res.push_back(list2[j]);
+                    min_sum = sum;
+                } else if (sum == min_sum) {
+                    res.push_back(list2[j]);
+                }
+            }
+        }
+        
+        return res;
+    }
+};
+```
 
 
 

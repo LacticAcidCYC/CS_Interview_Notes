@@ -354,6 +354,47 @@ public:
 
 
 
+## 16. LeetCode 476 [Number Complement](https://leetcode.com/problems/number-complement/)
+
+```c++
+class Solution {
+public:
+    int findComplement(int num) {
+        unsigned int mask = ~0;
+        while (num & mask) mask <<= 1;
+        return ~mask & ~num;
+    }
+};
+```
+
+
+
+## 17. LeetCode 500 [Keyboard Row](https://leetcode.com/problems/keyboard-row/)
+
+```c++
+class Solution {
+public:
+    vector<string> findWords(vector<string>& words) {
+        vector<int> dict(26);
+        vector<string> rows = {"QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"};
+        for (int i = 0; i < rows.size(); i++) {
+            for (auto &c : rows[i]) dict[c-'A'] = 1 << i;
+        }
+        
+        vector<string> res;
+        for (auto w : words) {
+            int r = 7;
+            for (char c : w) {
+                r &= dict[toupper(c)-'A'];
+                if (r == 0) break;
+            }
+            if (r) res.push_back(w);
+        }
+        return res;
+    }
+};
+```
+
 
 
 

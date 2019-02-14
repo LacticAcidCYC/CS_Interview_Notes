@@ -3279,18 +3279,82 @@ public:
 
 
 
-## 38. LeetCode 863 
+## 38. LeetCode 863 [All Nodes Distance K in Binary Tree](https://leetcode.com/problems/all-nodes-distance-k-in-binary-tree/)
 
 ```c++
-
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<int> distanceK(TreeNode* root, TreeNode* target, int K) {
+        unordered_map<TreeNode*, TreeNode*> backEdge;
+        unordered_set<TreeNode*> visited;
+        vector<int> res;
+        dfs(root, backEdge, target);
+        queue<TreeNode*> que;
+        que.push(target);
+        while(!que.empty() && K >= 0){
+            int s = que.size();
+            while(s--){
+                TreeNode* cur = que.front();
+                int val = cur->val; que.pop();
+                visited.insert(cur);
+                if(K == 0) res.push_back(val); 
+                if(!visited.count(backEdge[cur]) && backEdge[cur]) que.push(backEdge[cur]);
+                if(!visited.count(cur->left) && cur->left) que.push(cur->left);
+                if(!visited.count(cur->right) && cur->right) que.push(cur->right);
+            } 
+            K--;  
+        }
+        return res;
+    }
+    
+    void dfs(TreeNode* root, unordered_map<TreeNode*, TreeNode*> &backEdge, TreeNode* target){
+        if(!root || (root == target)) return;
+    
+        if(root->left){
+            backEdge[root->left] = root;
+            dfs(root->left, backEdge, target);
+        }
+        if(root->right){
+            backEdge[root->right] = root;
+            dfs(root->right, backEdge, target);
+        }
+    }
+};
 ```
 
 
 
-## 39. LeetCode 582 
+## 39. LeetCode 582 [Kill Process](https://leetcode.com/problems/kill-process/)
 
 ```c++
+class Solution {
+public:
+    vector<int> killProcess(vector<int>& pid, vector<int>& ppid, int kill) {
+        vector<int> killeds;
+        unordered_map<int, unordered_set<int>> children;
+        for(int i=0; i<(int)pid.size(); i++) {
+            children[ppid[i]].insert(pid[i]);
+        }
+        killAll(kill, children, killeds);
+        return killeds;
+    }
 
+    void killAll(int pid, unordered_map<int, unordered_set<int>>& children, vector<int>& killeds) {
+        killeds.push_back(pid);
+        for(int child : children[pid]) {
+            killAll(child, children, killeds);
+        }
+    }
+};
 ```
 
 
@@ -3505,21 +3569,363 @@ public:
 
 
 
+## 46. LeetCode 427 [Construct Quad Tree](https://leetcode.com/problems/construct-quad-tree/)
+
+```c++
+/*
+// Definition for a QuadTree node.
+class Node {
+public:
+    bool val;
+    bool isLeaf;
+    Node* topLeft;
+    Node* topRight;
+    Node* bottomLeft;
+    Node* bottomRight;
+
+    Node() {}
+
+    Node(bool _val, bool _isLeaf, Node* _topLeft, Node* _topRight, Node* _bottomLeft, Node* _bottomRight) {
+        val = _val;
+        isLeaf = _isLeaf;
+        topLeft = _topLeft;
+        topRight = _topRight;
+        bottomLeft = _bottomLeft;
+        bottomRight = _bottomRight;
+    }
+};
+*/
+class Solution {
+public:
+    Node* construct(vector<vector<int>>& grid) {
+        int N = grid.size();
+        if (N == 0) return nullptr;
+        return buildNode(grid, 0, 0, N);
+    }
+    
+private:
+    Node* buildNode(vector<vector<int>>& grid, int x, int y, int length) {
+        if (length == 1) {
+            return new Node(grid[x][y] == 1, true, nullptr, nullptr, nullptr, nullptr);
+        }
+        
+        int newLength = length / 2;
+        Node* topLeft = buildNode(grid, x, y, newLength);
+        Node* topRight = buildNode(grid, x, y + newLength, newLength);
+        Node* botLeft = buildNode(grid, x + newLength, y, newLength);
+        Node* botRight = buildNode(grid, x + newLength, y + newLength, newLength);
+        
+        if (topLeft -> isLeaf && topRight -> isLeaf && botRight -> isLeaf && botLeft -> isLeaf &&
+            ((topLeft -> val && topRight -> val && botLeft -> val && botRight -> val) ||
+            !(topLeft -> val || topRight -> val || botLeft -> val || botRight -> val))) {
+            bool val = topLeft -> val;
+            delete topLeft;
+            topLeft = nullptr;
+            delete topRight;
+            topRight = nullptr;
+            delete botLeft;
+            botLeft = nullptr;
+            delete botRight;
+            botRight = nullptr;
+            return new Node(val, true, nullptr, nullptr, nullptr, nullptr);
+        }
+        return new Node(true, false, topLeft, topRight, botLeft, botRight);
+    }
+};
+```
 
 
 
+## 47. LeetCode 429 [N-ary Tree Level Order Traversal](https://leetcode.com/problems/n-ary-tree-level-order-traversal/)
+
+```c++
+/*
+// Definition for a Node.
+class Node {
+public:
+    int val;
+    vector<Node*> children;
+
+    Node() {}
+
+    Node(int _val, vector<Node*> _children) {
+        val = _val;
+        children = _children;
+    }
+};
+*/
+class Solution {
+public:
+    vector<vector<int>> levelOrder(Node* root) {
+        if (root == nullptr) return {};
+        
+        vector<vector<int>> orders;
+        queue<Node*> q;
+        q.push(root);
+        
+        while (!q.empty()) {
+            int n = q.size();
+            vector<int> level;
+            
+            for (int i=0; i<n; i++) {
+                auto cur = q.front();
+                q.pop();
+                level.push_back(cur->val);
+                
+                for (auto &child : cur->children) {
+                    q.push(child);
+                }
+            }
+            
+            orders.push_back(level);
+        }
+        
+        return orders;
+    }
+};
+```
 
 
 
+## 48. LeetCode 538 [Convert BST to Greater Tree](https://leetcode.com/problems/convert-bst-to-greater-tree/)
+
+### (1) Recursive
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(n)
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* convertBST(TreeNode* root) {
+        if (root != nullptr) {
+            convertBST(root->right);
+            sum += root->val;
+            root->val = sum;
+            convertBST(root->left);
+        }
+        return root;
+    }
+    
+private:
+    int sum = 0;
+};
+```
 
 
 
+### (2) Iterative + Stack
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(n)
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* convertBST(TreeNode* root) {
+        int sum = 0;
+        TreeNode* node = root;
+        stack<TreeNode*> st;
+
+        while (!st.empty() || node != nullptr) {
+            /* push all nodes up to (and including) this subtree's maximum on
+             * the stack. */
+            while (node != nullptr) {
+                st.push(node);
+                node = node->right;
+            }
+
+            node = st.top();
+            st.pop();
+            sum += node->val;
+            node->val = sum;
+
+            /* all nodes with values between the current and its parent lie in
+             * the left subtree. */
+            node = node->left;
+        }
+
+        return root;
+    }
+};
+```
 
 
 
+## 49. LeetCode 558 [Quad Tree Intersection](https://leetcode.com/problems/quad-tree-intersection/)
+
+```c++
+/*
+// Definition for a QuadTree node.
+class Node {
+public:
+    bool val;
+    bool isLeaf;
+    Node* topLeft;
+    Node* topRight;
+    Node* bottomLeft;
+    Node* bottomRight;
+
+    Node() {}
+
+    Node(bool _val, bool _isLeaf, Node* _topLeft, Node* _topRight, Node* _bottomLeft, Node* _bottomRight) {
+        val = _val;
+        isLeaf = _isLeaf;
+        topLeft = _topLeft;
+        topRight = _topRight;
+        bottomLeft = _bottomLeft;
+        bottomRight = _bottomRight;
+    }
+};
+*/
+class Solution {
+public:
+    Node* intersect(Node* quadTree1, Node* quadTree2) {
+        if(quadTree1->isLeaf && quadTree1->val) return quadTree1;
+        if(quadTree2->isLeaf && quadTree2->val) return quadTree2;
+        if(quadTree1->isLeaf && !quadTree1->val) return quadTree2;
+        if(quadTree2->isLeaf && !quadTree2->val) return quadTree1;     
+        
+        auto tl = intersect(quadTree1->topLeft, quadTree2->topLeft);
+        auto tr = intersect(quadTree1->topRight, quadTree2->topRight);
+        auto bl = intersect(quadTree1->bottomLeft, quadTree2->bottomLeft);
+        auto br = intersect(quadTree1->bottomRight, quadTree2->bottomRight);
+        
+        if(tl->val == tr->val && tl->val == bl->val && tl->val == br->val && tl->isLeaf && tr->isLeaf && bl->isLeaf && br->isLeaf)
+            return new Node(tl->val, true, nullptr, nullptr, nullptr, nullptr);
+        else         
+            return new Node(false, false, tl, tr, bl, br);
+    }
+};
+```
 
 
 
+## 50. LeetCode 559 [Maximum Depth of N-ary Tree](https://leetcode.com/problems/maximum-depth-of-n-ary-tree/)
+
+```c++
+/*
+// Definition for a Node.
+class Node {
+public:
+    int val;
+    vector<Node*> children;
+
+    Node() {}
+
+    Node(int _val, vector<Node*> _children) {
+        val = _val;
+        children = _children;
+    }
+};
+*/
+class Solution {
+public:
+    int maxDepth(Node* root) {
+        if (!root) return 0;
+        int res = 0;
+        dfs(root, res, 1);
+        return res;
+    }
+
+
+private:
+    void dfs(Node* root, int& res, int depth) {
+        if (!root) return;
+        
+        if (root->children.empty()) {
+            res = max(res, depth);
+            return;
+        }
+        
+        for (auto child : root->children)
+            dfs(child, res, depth+1);
+    }
+};
+
+```
+
+
+
+## 51. LeetCode 563 [Binary Tree Tilt](https://leetcode.com/problems/binary-tree-tilt/)
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    int findTilt(TreeNode* root) {
+        int tilt = 0;
+        traverse(root, tilt);
+        return tilt;
+    }
+    
+private:
+    int traverse(TreeNode* root, int &tilt) {
+        if (root == nullptr) {
+            return 0;
+        }
+        
+        int left = traverse(root->left, tilt);
+        int right = traverse(root->right, tilt);
+        tilt += abs(left - right);
+        return left + right + root->val;
+    }
+};
+```
+
+
+
+## 52. LeetCode 669 [Trim a Binary Search Tree](https://leetcode.com/problems/trim-a-binary-search-tree/)
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* trimBST(TreeNode* root, int L, int R) {
+        if (root == nullptr) return root;
+        if (root->val > R) return trimBST(root->left, L, R);
+        if (root->val < L) return trimBST(root->right, L, R);
+
+        root->left = trimBST(root->left, L, R);
+        root->right = trimBST(root->right, L, R);
+        return root;
+    }
+};
+```
 
 
 

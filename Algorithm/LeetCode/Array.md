@@ -2074,11 +2074,57 @@ public:
 
 
 
+## 43. LeetCode 506 [Relative Ranks](https://leetcode.com/problems/relative-ranks/)
+
+```c++
+class Solution {
+public:
+    vector<string> findRelativeRanks(vector<int>& nums) {
+        vector<pair<int, int>> _nums;
+        int n = nums.size();
+        vector<string> res(n);
+        
+        for (int i=0; i<n; i++) {
+            _nums.push_back({nums[i], i});
+        }
+        
+        sort(_nums.begin(), _nums.end(), [](const pair<int, int> &A, const pair<int, int> &B) {
+            return A.first > B.first;
+        });
+        for (int i=0; i<n; i++) {
+            if (i == 0) {
+                res[_nums[i].second] = "Gold Medal";
+            } else if (i == 1) {
+                res[_nums[i].second] = "Silver Medal";
+            } else if (i == 2) {
+                res[_nums[i].second] = "Bronze Medal";
+            } else {
+                res[_nums[i].second] = to_string(i+1);
+            }
+        }
+        
+        return res;
+    }
+};
+```
 
 
 
+## 44. LeetCode 624 [Maximum Distance in Arrays](https://leetcode.com/problems/maximum-distance-in-arrays/)
 
-
+```c++
+class Solution {
+public:
+    int maxDistance(vector<vector<int>>& arrays) {
+        int maxDif = 0, curMin = 10000, curMax = -10000;
+        for (auto& a : arrays) {
+            maxDif = max(maxDif, max(a.back()-curMin, curMax-a.front()));
+            curMin = min(curMin, a.front()), curMax = max(curMax, a.back());
+        }
+        return maxDif;
+    }
+};
+```
 
 
 
