@@ -2128,9 +2128,91 @@ public:
 
 
 
+## 45. LeetCode 376 [Wiggle Subsequence](https://leetcode.com/problems/wiggle-subsequence/)
+
+```c++
+class Solution {
+public:
+    int wiggleMaxLength(vector<int>& nums) {
+        int n = nums.size();
+        if (n < 2)
+            return n;
+        int prevdiff = nums[1] - nums[0];
+        int count = prevdiff != 0 ? 2 : 1;
+        for (int i = 2; i < n; i++) {
+            int diff = nums[i] - nums[i - 1];
+            if ((diff > 0 && prevdiff <= 0) || (diff < 0 && prevdiff >= 0)) {
+                count++;
+                prevdiff = diff;
+            }
+        }
+        return count;
+    }
+};
+```
 
 
 
+## 46. LeetCode 978 [Longest Turbulent Subarray](https://leetcode.com/problems/longest-turbulent-subarray/)
+
+### Similar to 376
+
+```c++
+class Solution {
+public:
+    int maxTurbulenceSize(vector<int>& A) {
+        if (A.empty()) return 0;
+        int res = 1;
+        int anchor = 0;
+        int n = A.size();
+        
+        for (int i=1; i<n; i++) {
+            int c = compare(A[i-1], A[i]);
+            if (c == 0) {
+                anchor = i;
+            } else if (i == n - 1 || c * compare(A[i], A[i+1]) != -1) {
+                res = max(res, i - anchor + 1);
+                anchor = i;
+            }
+        }
+        
+        return res;
+    }
+    
+private:
+    int compare(const int &A, const int &B) {
+        if (A < B) {
+            return -1;
+        } else if (A > B) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+};
+```
+
+
+
+## 47. LeetCode 974 [Subarray Sums Divisible by K](https://leetcode.com/problems/subarray-sums-divisible-by-k/)
+
+### Similar to 523
+
+```c++
+class Solution {
+public:
+    int subarraysDivByK(vector<int>& A, int K) {
+        vector<int> count(K);
+        count[0] = 1;
+        int prefix = 0, res = 0;
+        for (int a : A) {
+            prefix = (prefix + a % K + K) % K;
+            res += count[prefix]++;
+        }
+        return res;
+    }
+};
+```
 
 
 
