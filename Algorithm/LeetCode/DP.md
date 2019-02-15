@@ -3049,7 +3049,70 @@ public:
 
 
 
+## 53. LeetCode 583 [Delete Operation for Two Strings](https://leetcode.com/problems/delete-operation-for-two-strings/)
 
+### (1) LCS
+
+```c++
+// Time Complexity: O(MN)
+// Space Complexity: O(MN)
+
+class Solution {
+public:
+    int minDistance(string word1, string word2) {
+        int l1 = word1.size(), l2 = word2.size();
+        vector<vector<int>> dp(l1+1, vector<int>(l2+1));
+        
+        for (int i=0; i<=l1; i++) {
+            for (int j=0; j<=l2; j++) {
+                if (i == 0 || j == 0) {
+                    continue;
+                }
+                if (word1[i-1] == word2[j-1]) {
+                    dp[i][j] = 1 + dp[i-1][j-1];
+                } else {
+                    dp[i][j] = max(dp[i-1][j], dp[i][j-1]);
+                }
+            }
+        }
+        
+        return l1 + l2 - 2 * dp[l1][l2];
+    }
+};
+```
+
+
+
+### (2) O(n) space
+
+```c++
+// Time Complexity: O(MN)
+// Space Complexity: O(N)
+
+class Solution {
+public:
+    int minDistance(string word1, string word2) {
+        int l1 = word1.size(), l2 = word2.size();
+        vector<int> dp(l2+1);
+        
+        for (int i=0; i<=l1; i++) {
+            vector<int> temp(l2+1);
+            for (int j=0; j<=l2; j++) {
+                if (i == 0 || j == 0) {
+                    temp[j] = i + j;
+                } else if (word1[i-1] == word2[j-1]) {
+                    temp[j] = dp[j-1];
+                } else {
+                    temp[j] = 1 + min(dp[j], temp[j-1]);
+                }
+            }
+            dp = temp;
+        }
+        
+        return dp[l2];
+    }
+};
+```
 
 
 

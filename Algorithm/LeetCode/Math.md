@@ -82,3 +82,28 @@ public:
 };
 ```
 
+
+
+## 5. LeetCode 573 [Squirrel Simulation](https://leetcode.com/problems/squirrel-simulation/)
+
+```c++
+class Solution {
+public:
+    int minDistance(int height, int width, vector<int>& tree, vector<int>& squirrel, vector<vector<int>>& nuts) {
+        int total_dist = 0, d = INT_MIN;
+        
+        for (auto nut : nuts) {
+            total_dist += distance(nut, tree) * 2;
+            d = max(d, distance(nut, tree) - distance(nut, squirrel));
+        }
+        
+        return total_dist - d;
+    }
+    
+private:
+    int distance(vector<int> &a, vector<int> &b) {
+        return abs(a[0] - b[0]) + abs(a[1] - b[1]);
+    }
+};
+```
+

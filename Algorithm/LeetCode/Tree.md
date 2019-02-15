@@ -3929,7 +3929,81 @@ public:
 
 
 
+## 53. LeetCode 510 [Inorder Successor in BST II](https://leetcode.com/problems/inorder-successor-in-bst-ii/)
 
+### (1) Visiting value
+
+```c++
+/*
+// Definition for a Node.
+class Node {
+public:
+    int val;
+    Node* left;
+    Node* right;
+    Node* parent;
+};
+*/
+class Solution {
+public:
+    Node* inorderSuccessor(Node* node) {
+        if (node->right == nullptr) {
+            Node* res = node->parent;
+            while (res != nullptr && res->val < node->val) {
+                res = res->parent;
+            }
+            return res;
+        } else {
+            Node* res = node->right;
+            while (res->left != nullptr) {
+                res = res->left;
+            }
+            return res;
+        }
+    }
+};
+```
+
+
+
+### (2) Follow-up: without visiting val
+
+```c++
+/*
+// Definition for a Node.
+class Node {
+public:
+    int val;
+    Node* left;
+    Node* right;
+    Node* parent;
+};
+*/
+class Solution {
+public:
+    Node* inorderSuccessor(Node* node) {
+        if (node == nullptr) {
+            return nullptr;
+        }
+        
+        Node* cur = node;
+        
+        if (cur->right != nullptr) {
+            cur = cur->right;
+            while(cur->left != nullptr) {
+               cur = cur->left;
+            }
+            return cur;
+        }
+        
+        while (cur->parent != nullptr && cur->parent->left != cur) {
+            cur = cur->parent;
+        }
+        
+        return cur->parent;
+    }
+};
+```
 
 
 
