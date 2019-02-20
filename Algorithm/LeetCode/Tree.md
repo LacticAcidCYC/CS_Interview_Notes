@@ -4007,6 +4007,89 @@ public:
 
 
 
+## 54. LeetCode 899 [Construct Binary Tree from Preorder and Postorder Traversal](https://leetcode.com/problems/construct-binary-tree-from-preorder-and-postorder-traversal/)
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* constructFromPrePost(vector<int>& pre, vector<int>& post) {
+        vector<TreeNode*> s;
+        s.push_back(new TreeNode(pre[0]));
+        for (int i = 1, j = 0; i < pre.size(); ++i) {
+            TreeNode* node = new TreeNode(pre[i]);
+            while (s.back()->val == post[j])
+                s.pop_back(), j++;
+            if (s.back()->left == NULL) s.back()->left = node;
+            else s.back()->right = node;
+            s.push_back(node);
+        }
+        return s[0];
+    }
+};
+```
+
+
+
+## 55. LeetCode 993 [Cousins in Binary Tree](https://leetcode.com/problems/cousins-in-binary-tree/)
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    bool isCousins(TreeNode* root, int x, int y) {
+        bool sibling = false, cousin = false;
+        queue<TreeNode*> q, qt;
+        q.push(root);
+        
+        while (!q.empty() && !cousin) {
+            while (!q.empty()) {
+                auto cur = q.front();
+                q.pop();
+                
+                if (cur == nullptr) {
+                    sibling = false;
+                } 
+                else {
+                    if (cur->val == x || cur->val == y) {
+                        if (!cousin) {
+                            cousin = sibling = true;
+                        } 
+                        else {
+                            return !sibling;
+                        }
+                    }
+                    qt.push(cur->left);
+                    qt.push(cur->right);
+                    qt.push(nullptr);
+                }
+                
+            }
+            
+            swap(q, qt);
+        }
+        
+        return false;
+    }
+};
+```
+
 
 
 

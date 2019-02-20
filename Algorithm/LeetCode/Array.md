@@ -2216,6 +2216,172 @@ public:
 
 
 
+## 48. LeetCode 807 [Max Increase to Keep City Skyline](https://leetcode.com/problems/max-increase-to-keep-city-skyline/)
+
+```c++
+class Solution {
+public:
+    int maxIncreaseKeepingSkyline(vector<vector<int>>& grid) {
+        int n = grid.size();
+        vector<int> row_maxes(n), col_maxes(n);
+        
+        for (int i=0; i<n; i++) {
+            for (int j=0; j<n; j++) {
+                row_maxes[i] = max(row_maxes[i], grid[i][j]);
+                col_maxes[j] = max(col_maxes[j], grid[i][j]);
+            }
+        }
+        
+        int res = 0;
+        for (int i=0; i<n; i++) {
+            for (int j=0; j<n; j++) {
+                res += min(row_maxes[i], col_maxes[j]) - grid[i][j];
+            }
+        }
+        
+        return res;
+    }
+};
+```
+
+
+
+## 49. LeetCode 995 [Minimum Number of K Consecutive Bit Flips](https://leetcode.com/problems/minimum-number-of-k-consecutive-bit-flips/)
+
+### Greedy & Bit manipulation
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    int minKBitFlips(vector<int>& A, int K) {
+        int n = A.size(), isCurFlipped = 0, res = 0;
+        vector<int> isFlipped(n);
+        
+        for (int i=0; i<n; i++) {
+            if (i >= K) {
+                isCurFlipped ^= isFlipped[i-K];
+            }
+            
+            if (isCurFlipped == A[i]) {
+                if (i + K - 1 > n - 1) {
+                    return -1;
+                }
+                
+                isFlipped[i] = 1;
+                isCurFlipped ^= isFlipped[i];
+                res++;
+            }
+        }
+        
+        return res;
+    }
+};
+```
+
+
+
+## 50. LeetCode 945 [Minimum Increment to Make Array Unique](https://leetcode.com/problems/minimum-increment-to-make-array-unique/)
+
+### Greedy
+
+```c++
+class Solution {
+public:
+    int minIncrementForUnique(vector<int>& A) {
+        sort(A.begin(), A.end());
+        int res = 0, need = 0;
+        for (int &a: A) {
+            res += max(need - a, 0);
+            need = max(a, need) + 1;
+        }
+        return res;
+    }
+};
+```
+
+
+
+## 51. LeetCode 923 [3Sum With Multiplicity](https://leetcode.com/problems/3sum-with-multiplicity/)
+
+```c++
+class Solution {
+public:
+    int threeSumMulti(vector<int>& A, int target) {
+        unordered_map<int, long> cnts;
+        for (int a : A) cnts[a]++;
+        
+        long res = 0;
+        for (auto it : cnts) {
+            for (auto it2 : cnts) {
+                int i = it.first, j = it2.first, k = target - i - j;
+                if (!cnts.count(k)) continue;
+                if (i == j && j == k) {
+                    res += cnts[i] * (cnts[i] - 1) * (cnts[i] - 2) / 6;
+                } else if (i == j && j != k) {
+                    res += cnts[i] * (cnts[i] - 1) / 2 * cnts[k];
+                } else if (i < j && j < k) {
+                    res += cnts[i] * cnts[j] * cnts[k];
+                }
+            }
+        }
+        
+        return  res % (int)(1e9 + 7);
+    }
+};
+```
+
+
+
+## 52. LeetCode 915 [Partition Array into Disjoint Intervals](https://leetcode.com/problems/partition-array-into-disjoint-intervals/)
+
+```c++
+class Solution {
+public:
+    int partitionDisjoint(vector<int>& A) {
+        int n = A.size(), pmax = 0;
+        vector<int> B(n);
+        B[n - 1] = A[n - 1];
+        
+        for (int i = n - 2; i > 0; --i)
+            B[i] = min(A[i], B[i + 1]);
+        
+        for (int i = 1; i < n; ++i) {
+            pmax = max(pmax, A[i - 1]);
+            if (pmax <= B[i]) return i;
+        }
+        
+        return -1;
+    }
+};
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -397,6 +397,35 @@ public:
 
 
 
+## 18. LeetCode 898 [Bitwise ORs of Subarrays](https://leetcode.com/problems/bitwise-ors-of-subarrays/)
+
+### Bruteforce + hashset
+
+```c++
+class Solution {
+public:
+    int subarrayBitwiseORs(vector<int>& A) {
+        unordered_set<int> res, cur;
+        cur.insert(0);
+        
+        for (int a : A) {
+            unordered_set<int> cur2;
+            for (int b : cur) {
+                cur2.insert(a | b);
+            }
+            cur2.insert(a);
+            swap(cur, cur2);
+            
+            for (int x : cur) {
+                res.insert(x);
+            }
+        }
+        
+        return res.size();
+    }
+};
+```
+
 
 
 

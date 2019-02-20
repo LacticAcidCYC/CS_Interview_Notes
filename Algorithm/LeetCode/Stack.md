@@ -606,9 +606,135 @@ public:
 
 
 
+## 10. LeetCode 946 [Validate Stack Sequences](https://leetcode.com/problems/validate-stack-sequences/)
+
+```c++
+class Solution {
+public:
+    bool validateStackSequences(vector<int>& pushed, vector<int>& popped) {
+        int n = pushed.size();
+        stack<int> st;
+        
+        int i = 0;
+        for (int &num : pushed) {
+            st.push(num);
+            while (!st.empty() && i < n && st.top() == popped[i]) {
+                st.pop();
+                i++;
+            }
+        }
+        
+        return i == n;
+    }
+};
+```
 
 
 
+## 11. LeetCode 921 [Minimum Add to Make Parentheses Valid](https://leetcode.com/problems/minimum-add-to-make-parentheses-valid/)
+
+### (1) O(N) + O(N)
+
+```c++
+class Solution {
+public:
+    int minAddToMakeValid(string S) {
+        int n = S.length();
+        stack<char> st;
+        
+        for (char c : S) {
+            if (c == '(') {
+                st.push(c);
+            } else {
+                if (st.empty()) st.push(c);
+                else {
+                    if (st.top() == '(') {
+                        st.pop();
+                    } else {
+                        st.push(c);
+                    }
+                }
+            }
+        }
+        
+        return st.size();
+    }
+};
+```
+
+
+
+### (2) O(N) + O(1)
+
+```c++
+class Solution {
+public:
+    int minAddToMakeValid(string S) {
+        int res = 0, bal = 0;
+        
+        for (int i=0; i<S.length(); ++i) {
+            bal += S[i] == '(' ? 1 : -1;
+            if (bal == -1) {
+                res++;
+                bal++;
+            }
+        }
+        
+        return res + bal;
+    }
+};
+```
+
+
+
+### (3) O(N) + O(1)
+
+```c++
+class Solution {
+public:
+    int minAddToMakeValid(string S) {
+        int left = 0, right = 0;
+        
+        for (char i : S) {
+            if (right == 0 && i == ')')
+                left++;
+            else
+                right += i == '(' ? 1 : -1;
+        }
+        return left + right;
+    }
+};
+```
+
+
+
+## 12. LeetCode 901 [Online Stock Span](https://leetcode.com/problems/online-stock-span/)
+
+```c++
+class StockSpanner {
+public:
+    StockSpanner() {}
+    
+    int next(int price) {
+        int res = 1;
+        while (!st.empty() && st.top().first <= price) {
+            res += st.top().second;
+            st.pop();
+        }
+        st.push({price, res});
+        return res;
+    }
+    
+private:
+    stack<pair<int, int>> st;
+};
+
+/**
+ * Your StockSpanner object will be instantiated and called as such:
+ * StockSpanner obj = new StockSpanner();
+ * int param_1 = obj.next(price);
+ */
+```
 
 
 

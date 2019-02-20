@@ -1448,7 +1448,127 @@ private:
 
 
 
+## 22. LeetCode 996 [Number of Squareful Arrays](https://leetcode.com/problems/number-of-squareful-arrays/)
 
+```c++
+// Time Complexity: O(N^N)
+// Space Complexity: O(N^2)
+
+class Solution {
+public:
+    int numSquarefulPerms(vector<int>& A) {
+        for (int &a : A) count[a]++;
+        for (auto &i : count) {
+            for (auto &j : count) {
+                int x = i.first, y = j.first, s = sqrt(x + y);
+                if (s * s == x + y)
+                    cand[x].insert(y);
+            }
+        }
+        
+        for (auto e : count)
+            dfs(e.first, A.size() - 1);
+        
+        return res;
+    }
+    
+private:
+    unordered_map<int, int> count;
+    unordered_map<int, unordered_set<int>> cand;
+    int res = 0;
+    
+    void dfs(int x, int left) {
+        count[x]--;
+        if (!left) res++;
+        for (int y : cand[x])
+            if (count[y] > 0)
+                dfs(y, left - 1);
+        count[x]++;
+    }
+};
+```
+
+
+
+## 23. LeetCode 886 
+
+### Similar to LeetCode 785
+
+### (1) DFS
+
+```c++
+// Time complexity: O(V+E)
+// Space complexity: O(V+E)
+
+class Solution {
+public:
+    bool possibleBipartition(int N, vector<vector<int>>& dislikes) {
+        g_ = vector<vector<int>>(N);
+        for (const auto& d : dislikes) {
+            g_[d[0] - 1].push_back(d[1] - 1);
+            g_[d[1] - 1].push_back(d[0] - 1);
+        }
+        
+        colors_ = vector<int>(N, 0);  // 0: unknown, 1: red, -1: blue
+        for (int i = 0; i < N; ++i)
+            if (colors_[i] == 0 && !dfs(i, 1)) return false;
+        return true;      
+    }
+    
+private:
+    vector<vector<int>> g_;
+    vector<int> colors_;
+    
+    bool dfs(int cur, int color) {
+        colors_[cur] = color;
+        for (int nxt : g_[cur]) {
+            if (colors_[nxt] == color) return false;      
+            if (colors_[nxt] == 0 && !dfs(nxt, -color)) return false;
+        }
+        return true;
+    }
+};
+```
+
+
+
+### (2) BFS
+
+```c++
+// Time complexity: O(V+E)
+// Space complexity: O(V+E)
+
+class Solution {
+public:
+    bool possibleBipartition(int N, vector<vector<int>>& dislikes) {
+        vector<vector<int>> g(N);
+        for (const auto& d : dislikes) {
+            g[d[0] - 1].push_back(d[1] - 1);
+            g[d[1] - 1].push_back(d[0] - 1);
+        }
+        
+        queue<int> q;
+        vector<int> colors(N, 0);  // 0: unknown, 1: red, -1: blue
+        for (int i = 0; i < N; ++i) {
+            if (colors[i] != 0) continue;
+            q.push(i);
+            colors[i] = 1;
+            while (!q.empty()) {
+                int cur = q.front(); 
+                q.pop();
+                
+                for (int nxt : g[cur]) {
+                    if (colors[nxt] == colors[cur]) return false;
+                    if (colors[nxt] != 0) continue;
+                    colors[nxt] = -colors[cur];
+                    q.push(nxt);
+                }
+            }
+        }    
+        return true;
+    }
+};
+```
 
 
 

@@ -602,9 +602,72 @@ public:
 
 
 
+## 13. LeetCode 881 [Boats to Save People](https://leetcode.com/problems/boats-to-save-people/)
+
+### Two Pointer
+
+```c++
+class Solution {
+public:
+    int numRescueBoats(vector<int>& people, int limit) {
+        sort(people.begin(), people.end());
+        
+        int i = 0, j = people.size()-1;
+        int res = 0;
+        
+        while (i <= j) {
+            res++;
+            if (people[i] + people[j] <= limit) {
+                i++;
+            }
+            j--;
+        }
+        
+        return res;
+    }
+};
+```
 
 
 
+## 14. LeetCode 861 [Score After Flipping Matrix](https://leetcode.com/problems/score-after-flipping-matrix/)
+
+Assume `A` is `M * N`.
+
+1. `A[i][0]` is worth `1 << (N - 1)` points, more than the sum of (`A[i][1] + .. + A[i][N-1]`).
+   We need to toggle all `A[i][0]` to `1`, here I toggle all lines for `A[i][0] = 0`.
+2. `A[i][j]` is worth `1 << (N - 1 - j)`
+   For every col, I count the current number of `1`s.
+   After step 1, `A[i][j]` becomes `1` if `A[i][j] == A[i][0]`.
+   if `M - cur > cur`, we can toggle this column to get more `1`s.
+   `max(M, M - cur)` will be the maximum number of `1`s that we can get.
+
+```c++
+// Time Complexity: O(MN)
+// Space Complexity: O(1)
+
+class Solution {
+public:
+    int matrixScore(vector<vector<int>>& A) {
+        if (A.empty() || A[0].empty()) return 0;
+        int M = A.size(), N = A[0].size();
+        int res = (1 << (N - 1)) * M;
+        
+        for (int j=1; j<N; j++) {
+            int cur = 0;
+            for (int i=0; i<M; i++) {
+                cur += A[i][j] == A[i][0];
+            }
+            
+            res += max(cur, M - cur) * (1 << (N - j - 1));
+        }
+        
+        return res;
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/score-after-flipping-matrix/discuss/143722/C%2B%2BJavaPython-Easy-and-Concise)
 
 
 

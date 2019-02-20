@@ -107,3 +107,35 @@ private:
 };
 ```
 
+
+
+## 6. LeetCode 869 [Reordered Power of 2](https://leetcode.com/problems/reordered-power-of-2/)
+
+```c++
+class Solution {
+public:
+    bool reorderedPowerOf2(int N) {
+        vector<int> A = count(N);
+        
+        for (int i=0; i<31; ++i) {
+            if (equal(A.begin(), A.end(), count(1 << i).begin())) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+private:
+    vector<int> count(int N) {
+        vector<int> res(10);
+        while (N > 0) {
+            res[N % 10]++;
+            N /= 10;
+        }
+        
+        return res;
+    }
+};
+```
+
