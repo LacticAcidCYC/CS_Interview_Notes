@@ -3116,13 +3116,108 @@ public:
 
 
 
+## 54. LeetCode 956 [Tallest Billboard](https://leetcode.com/problems/tallest-billboard/)
+
+### (1) Method 1
+
+ ```c++
+// N: number of rods S: largest sum of all rods
+// Time Complexity: O(NS)
+// Space Complexity: O(NS)
+
+class Solution {
+public:
+    int tallestBillboard(vector<int>& rods) {
+        unordered_map<int, int> dp;
+        dp[0] = 0;
+        for (int x : rods) {
+            unordered_map<int, int> cur(dp);
+            for (auto it: cur) {
+                int d = it.first;
+                dp[d + x] = max(dp[d + x],cur[d]);
+                dp[abs(d - x)] = max(dp[abs(d - x)], cur[d] + min(d, x));
+            }
+        }
+        return dp[0];
+    }
+};
+ ```
 
 
 
+### (2) Method 2
+
+```c++
+// N: number of rods S: largest sum of all rods
+// Time Complexity: O(NS)
+// Space Complexity: O(NS)
+
+class Solution {
+public:
+    int tallestBillboard(vector<int>& rods) {
+        int n = rods.size();
+        vector<vector<bool>> dp(n+1, vector<bool>(10001));
+        vector<vector<int>> mx(n+1, vector<int>(10001));
+        dp[0][5000] = true;
+        
+        for (int i=0; i<n; i++) {
+            for (int j=0; j<=10000; j++) {
+                if (j - rods[i] >= 0 && dp[i][j - rods[i]]) {
+                    dp[i+1][j] = true;
+                    mx[i+1][j] = max(mx[i+1][j], mx[i][j - rods[i]] + rods[i]);
+                }
+                
+                if (j + rods[i] <= 10000 && dp[i][j + rods[i]]) {
+                    dp[i+1][j] = true;
+                    mx[i+1][j] = max(mx[i+1][j], mx[i][j + rods[i]]);
+                }
+                
+                if (dp[i][j]) {
+                    dp[i+1][j] = true;
+                    mx[i+1][j] = max(mx[i+1][j], mx[i][j]);
+                }
+            }
+        }
+        
+        return mx[n][5000];
+    }
+};
+```
+
+[solution](https://leetcode.com/problems/tallest-billboard/discuss/203261/Java-knapsack-O(N*sum))
 
 
 
+## 55. LeetCode 903 [Valid Permutations for DI Sequence](https://leetcode.com/problems/valid-permutations-for-di-sequence/)
 
+```c++
+class Solution {
+public:
+    int numPermsDISequence(string S) {
+        int n = S.length();
+        const int MOD = 1e9 + 7;
+        vector<vector<int>> dp(n+1, vector<int>(n+1));
+        
+        for (int j=0; j<=n; j++) {
+            dp[0][j] = 1;
+        }
+        
+        for (int i=0; i<n; i++) {
+            if (S[i] == 'I') {
+                for (int j=0, cur=0; j<n-i; j++) {
+                    dp[i+1][j] = cur = (cur + dp[i][j]) % MOD;
+                }
+            } else {
+                for (int j=n-i-1, cur=0; j>=0; j--) {
+                    dp[i+1][j] = cur = (cur + dp[i][j+1]) % MOD;
+                }
+            }
+        }
+        
+        return dp[n][0];
+    }
+};
+```
 
 
 

@@ -760,7 +760,73 @@ private:
 
 
 
+## 11. LeetCode 924 [Minimize Malware Spread](https://leetcode.com/problems/minimize-malware-spread/)
 
+```c++
+class UnionFindSet {
+public:
+    UnionFindSet(int n) {
+        _parents.resize(n);
+        _ranks.resize(n);
+        
+        for (int i=0; i<n; i++) {
+            _parents[i] = i;
+        }
+    }
+    
+    bool Union(int x, int y) {
+        int rx = Find(x);
+        int ry = Find(y);
+        if (rx == ry) return false;
+        if (_ranks[rx] > _ranks[ry]) {
+            _parents[ry] = rx;
+        } else {
+            _parents[rx] = ry;
+            if (_ranks[rx] == _ranks[ry]) {
+                _ranks[ry]++;
+            }
+        }
+        return true;
+    }
+    
+    int Find(int x) {
+        if (_parents[x] != x) {
+            // path compression
+            _parents[x] = Find(_parents[x]);
+        }
+        return _parents[x];
+    }
+    
+private:
+    vector<int> _parents;
+    vector<int> _ranks;
+};
+
+class Solution {
+public:
+    int minMalwareSpread(vector<vector<int>>& graph, vector<int>& initial) {
+        int n = graph.size();
+        UnionFindSet ufs(n);
+        
+        for (int i=0; i<n; i++) {
+            for (int j=i+1; j<n; j++) {
+                if (graph[i][j]) {
+                    ufs.Union(i, j);
+                }
+            }
+        }
+        
+        vector<int> area(n, 0), malware(n, 0);
+        for (int i = 0; i < n; ++i) area[ufs.Find(i)]++;
+        for (int i : initial) malware[ufs.Find(i)]++;
+        vector<int> res = {1, 0};
+        
+        for (int i : initial)
+            res = min(res, {(malware[ufs.Find(i)] == 1 ) * (-area[ufs.Find(i)]), i});
+        return res[1];
+    }
+};
+```
 
 
 

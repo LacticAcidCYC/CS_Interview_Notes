@@ -4092,9 +4092,112 @@ public:
 
 
 
+## 56. LeetCode 865 [Smallest Subtree with all the Deepest Nodes](https://leetcode.com/problems/smallest-subtree-with-all-the-deepest-nodes/)
+
+### (1) Method 1
+
+```c++
+// Time Complexity: O(N)
+// Space Complexity: O(N)
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Result {
+public:
+    Result(TreeNode* node, int d) : node(node), dist(d) {}
+    
+    TreeNode* getNode() {
+        return node;
+    }
+    
+    int getDist() {
+        return dist;
+    }
+    
+private:
+    TreeNode* node;
+    int dist;
+};
+
+class Solution {
+public:
+    TreeNode* subtreeWithAllDeepest(TreeNode* root) {
+        return dfs(root)->getNode();
+    }
+    
+    Result* dfs(TreeNode* node) {
+        if (node == nullptr) return new Result(nullptr, 0);
+        Result* L = dfs(node->left);
+        Result* R = dfs(node->right);
+        
+        if (L->getDist() > R->getDist()) return new Result(L->getNode(), L->getDist() + 1);
+        if (L->getDist() < R->getDist()) return new Result(R->getNode(), R->getDist() + 1);
+        return new Result(node, L->getDist() + 1);
+    }
+};
+```
 
 
 
+### (2) Method 2
+
+```c++
+// Time Complexity: O(N)
+// Space Complexity: O(N)
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* subtreeWithAllDeepest(TreeNode* root) {
+        depth[nullptr] = -1;
+        dfs(root, nullptr);
+        max_depth = -1;
+        for (auto it : depth)
+            max_depth = max(max_depth, it.second);
+
+        return result(root);
+    }
+    
+private:
+    unordered_map<TreeNode*, int> depth;
+    int max_depth;
+    
+    void dfs(TreeNode* node, TreeNode* parent) {
+        if (node != nullptr) {
+            depth[node] = depth[parent] + 1;
+            dfs(node->left, node);
+            dfs(node->right, node);
+        }
+    }
+    
+    TreeNode* result(TreeNode* node) {
+        if (node == nullptr || depth[node] == max_depth) return node;
+        
+        TreeNode* L = result(node->left);
+        TreeNode* R = result(node->right);
+        
+        if (L != nullptr && R != nullptr) return node;
+        if (L != nullptr) return L;
+        if (R != nullptr) return R;
+        return nullptr;
+    }
+};
+```
 
 
 
