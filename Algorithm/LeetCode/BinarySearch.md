@@ -1567,9 +1567,132 @@ public:
 
 
 
+## 25. LeetCode 410 [Split Array Largest Sum](https://leetcode.com/problems/split-array-largest-sum/)
+
+### Binary Search on largest subarray sum
+
+### Similar Questions: 644, 719 , 786,  878
+
+```c++
+// Time Complexity: O(n∗log(sumofarray))
+// Space Complexity: O(1)
+
+class Solution {
+public:
+    int splitArray(vector<int>& nums, int m) {
+        long long left = 0, right = 0;
+        for (int num : nums) {
+            left = max(left, (long long)num);
+            right += num;
+        }
+        
+        while (left < right) {
+            long long mid = left + (right - left) / 2;
+            if (doable(nums, m - 1, mid)) right = mid;
+            else left = mid + 1;
+        }
+        return left;
+    }
+    
+private:
+    bool doable (const vector<int>& nums, int cuts, long long max) {
+        int acc = 0;
+        for (int num : nums) {
+            // This step is unnecessary for this problem. I didn't discard this line because I want doable function more generalized.
+            if (num > max) return false;
+            else if (acc + (long long)num <= max) acc += num;
+            else {
+                --cuts;
+                acc = num;
+                if (cuts < 0) return false;
+            }
+        }
+        return true;
+    }
+};
+```
 
 
 
+## 26. LeetCode 786 [K-th Smallest Prime Fraction](https://leetcode.com/problems/k-th-smallest-prime-fraction/)
+
+```c++
+class Solution {
+public:
+    vector<int> kthSmallestPrimeFraction(vector<int>& nums, int K) {
+        int n = nums.size();
+        
+        vector<int> ans = {0, 1};
+        double lo = 0;
+        double hi = 1;
+        
+        while (hi - lo > 1e-9) {
+            double mid = (lo + hi) / 2.0;
+            vector<int> res = helper(mid, nums);
+            int count = 0, left = 0;
+            
+            if (res[0] < K) {
+                lo = mid;
+            } else {
+                ans[0] = res[1];
+                ans[1] = res[2];
+                hi = mid;
+            }
+        }
+        
+        return ans;
+    }
+    
+private:
+    vector<int> helper(double x, vector<int> &nums) {
+        int left = 0, right = 1, count = 0, i = -1;
+        
+        for (int j = 1; j < nums.size(); ++j) {
+            while (nums[i+1] < nums[j] * x) ++i;
+
+            count += i+1;
+            if (i >= 0 && left * nums[j] < right * nums[i]) {
+                left = nums[i];
+                right = nums[j];
+            }
+        }
+        return {count, left, right};
+    }
+};
+```
+
+
+
+## 27. LeetCode 878 [Nth Magical Number](https://leetcode.com/problems/nth-magical-number/)
+
+```c++
+class Solution {
+public:
+    int nthMagicalNumber(int N, int A, int B) {
+        int MOD = 1000000007;
+        int L = A / gcd(A, B) * B;
+
+        long lo = 0;
+        long hi = (long) 1e15;
+        while (lo < hi) {
+            long mi = lo + (hi - lo) / 2;
+            // If there are not enough magic numbers below mi...
+            if (mi / A + mi / B - mi / L < N)
+                lo = mi + 1;
+            else
+                hi = mi;
+        }
+
+        return (int) (lo % MOD);
+    }
+    
+private:
+    int gcd(int x, int y) {
+        if (x == 0) return y;
+        return gcd(y % x, x);
+    }
+};
+```
 
 
 
