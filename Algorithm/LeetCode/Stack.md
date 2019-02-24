@@ -738,6 +738,33 @@ private:
 
 
 
+## 13. LeetCode 735 [Asteroid Collision](https://leetcode.com/problems/asteroid-collision/)
+
+```c++
+// Time Complexity: O(n)
+// Space Complexity: O(n)
+
+class Solution {
+public:
+    vector<int> asteroidCollision(vector<int>& asteroids) {
+        vector<int> st;
+        int n = asteroids.size();
+        
+        for (int i=0; i<n; i++) {
+            if (asteroids[i] > 0 || st.empty() || st.back() < 0) {
+                st.push_back(asteroids[i]);
+            }
+            else if (st.back() <= -asteroids[i]) {
+                if (st.back() < -asteroids[i]) i--;
+                st.pop_back();
+            }
+        }
+        
+        return st;
+    }
+};
+```
+
 
 
 

@@ -1971,6 +1971,37 @@ public:
 
 
 
+## 21. LeetCode 791 [Custom Sort String](https://leetcode.com/problems/custom-sort-string/)
+
+```c++
+// Time Complexity: O(S + T)
+// Space Complexity: O(T)
+
+class Solution {
+public:
+    string customSortString(string S, string T) {
+        vector<int> cnts(26);
+        
+        for (char c : T) {
+            cnts[c-'a']++;
+        }
+        
+        string res;
+        
+        for (char c : S) {
+            res += string(cnts[c-'a'], c);
+            cnts[c-'a'] = 0;
+        }
+        
+        for (char c='a'; c<= 'z'; ++c) {
+            res += string(cnts[c-'a'], c);
+        }
+        
+        return res;
+    }
+};
+```
+
 
 
 
