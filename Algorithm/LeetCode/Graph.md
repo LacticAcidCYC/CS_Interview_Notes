@@ -257,10 +257,63 @@ public:
 
 
 
-## 4. LeetCode 802
+## 4. LeetCode 802 [Find Eventual Safe States](https://leetcode.com/problems/find-eventual-safe-states/)
+
+### Reversed Edges
 
 ```c++
+// Time Complexity: O(E + V)
+// Space Complexity: O(V)
 
+class Solution {
+public:
+    vector<int> eventualSafeNodes(vector<vector<int>>& graph) {
+        int n = graph.size();
+        vector<bool> safe(n);
+        
+        vector<unordered_set<int>> _graph;
+        vector<unordered_set<int>> _rgraph;
+        
+        for (int i=0; i<n; ++i) {
+            _graph.push_back({});
+            _rgraph.push_back({});
+        }
+        
+        queue<int> q;
+        
+        for (int i=0; i<n; ++i) {
+            if (graph[i].empty()) {
+                q.push(i);
+            } 
+            
+            for (int j : graph[i]) {
+                _graph[i].insert(j);
+                _rgraph[j].insert(i);
+            }
+        }
+        
+        while (!q.empty()) {
+            int j = q.front();
+            q.pop();
+            safe[j] = true;
+            for (int i : _rgraph[j]) {
+                _graph[i].erase(j);
+                if (_graph[i].empty()) {
+                    q.push(i);
+                }
+            }
+        }
+        
+        vector<int> res;
+        for (int i=0; i<n; ++i) {
+            if (safe[i]) {
+                res.push_back(i);
+            }
+        }
+        
+        return res;
+    }
+};
 ```
 
 
