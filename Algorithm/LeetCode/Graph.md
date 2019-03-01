@@ -874,6 +874,39 @@ private:
 
 
 
+## 6. LeetCode 332 [Reconstruct Itinerary](https://leetcode.com/problems/reconstruct-itinerary/)
+
+```c++
+class Solution {
+public:
+    vector<string> findItinerary(vector<pair<string, string>> tickets) {
+        unordered_map<string, deque<string>> graph;
+        for (auto const &ticket : tickets) {
+            graph[ticket.first].push_back(ticket.second);
+        }
+        
+        for (auto &route : graph) {
+            sort(route.second.begin(), route.second.end());
+        }
+        
+        vector<string> res;
+        string from = "JFK";
+        dfs(graph, res, from);
+        return vector<string>(res.rbegin(), res.rend());
+    }
+    
+private:
+    void dfs(unordered_map<string, deque<string>> &graph, vector<string> &res, const string &from) {
+        while (!graph[from].empty()) {
+            string nxt = graph[from].front();
+            graph[from].pop_front();
+            dfs(graph, res, nxt);
+        }
+        res.push_back(from);
+    }
+};
+```
+
 
 
 
